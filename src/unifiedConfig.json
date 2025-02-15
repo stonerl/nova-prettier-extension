@@ -298,7 +298,7 @@
 				},
 				"configWorkspace": {
 					"default": "Global Setting",
-					"values": ["Global Setting", "strict", "ignore"]
+					"values": ["Global Setting", "css", "strict", "ignore"]
 				}
 			},
 			{
