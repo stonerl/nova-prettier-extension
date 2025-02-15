@@ -59,7 +59,7 @@
 				{
 					"key": "prettier.module.path",
 					"title": "Prettier Module",
-					"description": "Set a folder for the Prettier module. If not set, it defaults to the build-in Prettier or the module in the project.",
+					"description": "Set a folder for the Prettier module. If not set, it defaults to Prettier installed in the project, or the built-in Prettier",
 					"placeholder": "e.g. /opt/homebrew/lib/node_modules/prettier",
 					"type": "path",
 					"allowFiles": false,
@@ -265,19 +265,19 @@
 		},
 		{
 			"key": "prettier.format-on-save.section",
-			"title": "Format on Save Settings",
+			"title": "Format on Save",
 			"type": "section",
 			"children": [
 				{
 					"key": "prettier.format-on-save",
-					"title": "Format on Saved",
+					"title": "Format on Save",
 					"description": "Automatically format documents when they are saved.",
 					"type": "boolean",
 					"default": true
 				},
 				{
 					"key": "prettier.format-on-save.ignore-without-config",
-					"title": "Ignore Without Config",
+					"title": "Ignore Documents Without Config",
 					"description": "When enabled, documents without a Prettier configuration file will not be formatted on save",
 					"type": "boolean",
 					"default": false
@@ -626,7 +626,7 @@
 			"children": [
 				{
 					"key": "prettier.format-on-save",
-					"title": "Format on Saved",
+					"title": "Format on Save",
 					"description": "Automatically format documents when they are saved.",
 					"type": "enum",
 					"radio": false,
