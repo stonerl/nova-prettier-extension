@@ -1,7 +1,7 @@
 {
-	"identifier": "alexanderweiss.prettier",
+	"identifier": "nova.prettier.extension",
 	"name": "Prettier",
-	"organization": "Alexander Weiss",
+	"organization": "Toni Förster",
 	"description": "Integrates Prettier to enhance code formatting capabilities within Nova.",
 	"version": "3.1.0",
 	"categories": ["commands", "formatters"],
