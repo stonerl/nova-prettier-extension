@@ -1,5 +1,5 @@
 {
-	"identifier": "nova.prettier.extension",
+	"identifier": "stonerl.prettier",
 	"name": "Prettier+",
 	"organization": "Toni Förster",
 	"description": "Integrates Prettier to enhance code formatting capabilities within Nova.",
