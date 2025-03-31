@@ -3,7 +3,7 @@
 	"name": "Prettier+",
 	"organization": "Toni Förster",
 	"description": "Integrates Prettier to enhance code formatting capabilities within Nova.",
-	"version": "3.1.0",
+	"version": "3.1.1",
 	"categories": ["commands", "formatters"],
 	"repository": "https://github.com/stonerl/nova-prettier",
 	"bugs": "https://github.com/stonerl/nova-prettier/issues",
