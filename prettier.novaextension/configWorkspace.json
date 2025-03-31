@@ -674,7 +674,11 @@
 						"title": "CSS",
 						"type": "enum",
 						"radio": false,
-						"values": ["Global Setting", "Format on Save", "Ignored"],
+						"values": [
+							["Global Setting", "Global Setting"],
+							["Disable", "Format on Save"],
+							["Enable", "Ignore"]
+						],
 						"default": "Global Setting"
 					},
 					{
@@ -682,7 +686,11 @@
 						"title": "Flow",
 						"type": "enum",
 						"radio": false,
-						"values": ["Global Setting", "Format on Save", "Ignored"],
+						"values": [
+							["Global Setting", "Global Setting"],
+							["Disable", "Format on Save"],
+							["Enable", "Ignore"]
+						],
 						"default": "Global Setting"
 					},
 					{
@@ -690,7 +698,11 @@
 						"title": "graphql",
 						"type": "enum",
 						"radio": false,
-						"values": ["Global Setting", "Format on Save", "Ignored"],
+						"values": [
+							["Global Setting", "Global Setting"],
+							["Disable", "Format on Save"],
+							["Enable", "Ignore"]
+						],
 						"default": "Global Setting"
 					},
 					{
@@ -698,7 +710,11 @@
 						"title": "HTML",
 						"type": "enum",
 						"radio": false,
-						"values": ["Global Setting", "Format on Save", "Ignored"],
+						"values": [
+							["Global Setting", "Global Setting"],
+							["Disable", "Format on Save"],
+							["Enable", "Ignore"]
+						],
 						"default": "Global Setting"
 					},
 					{
@@ -706,7 +722,11 @@
 						"title": "JavaScript",
 						"type": "enum",
 						"radio": false,
-						"values": ["Global Setting", "Format on Save", "Ignored"],
+						"values": [
+							["Global Setting", "Global Setting"],
+							["Disable", "Format on Save"],
+							["Enable", "Ignore"]
+						],
 						"default": "Global Setting"
 					},
 					{
@@ -714,7 +734,11 @@
 						"title": "JSON",
 						"type": "enum",
 						"radio": false,
-						"values": ["Global Setting", "Format on Save", "Ignored"],
+						"values": [
+							["Global Setting", "Global Setting"],
+							["Disable", "Format on Save"],
+							["Enable", "Ignore"]
+						],
 						"default": "Global Setting"
 					},
 					{
@@ -722,7 +746,11 @@
 						"title": "JSX",
 						"type": "enum",
 						"radio": false,
-						"values": ["Global Setting", "Format on Save", "Ignored"],
+						"values": [
+							["Global Setting", "Global Setting"],
+							["Disable", "Format on Save"],
+							["Enable", "Ignore"]
+						],
 						"default": "Global Setting"
 					},
 					{
@@ -730,7 +758,11 @@
 						"title": "LESS",
 						"type": "enum",
 						"radio": false,
-						"values": ["Global Setting", "Format on Save", "Ignored"],
+						"values": [
+							["Global Setting", "Global Setting"],
+							["Disable", "Format on Save"],
+							["Enable", "Ignore"]
+						],
 						"default": "Global Setting"
 					},
 					{
@@ -738,7 +770,11 @@
 						"title": "Markdown",
 						"type": "enum",
 						"radio": false,
-						"values": ["Global Setting", "Format on Save", "Ignored"],
+						"values": [
+							["Global Setting", "Global Setting"],
+							["Disable", "Format on Save"],
+							["Enable", "Ignore"]
+						],
 						"default": "Global Setting"
 					},
 					{
@@ -746,7 +782,11 @@
 						"title": "PHP",
 						"type": "enum",
 						"radio": false,
-						"values": ["Global Setting", "Format on Save", "Ignored"],
+						"values": [
+							["Global Setting", "Global Setting"],
+							["Disable", "Format on Save"],
+							["Enable", "Ignore"]
+						],
 						"default": "Global Setting"
 					},
 					{
@@ -754,7 +794,11 @@
 						"title": "SCSS",
 						"type": "enum",
 						"radio": false,
-						"values": ["Global Setting", "Format on Save", "Ignored"],
+						"values": [
+							["Global Setting", "Global Setting"],
+							["Disable", "Format on Save"],
+							["Enable", "Ignore"]
+						],
 						"default": "Global Setting"
 					},
 					{
@@ -762,7 +806,11 @@
 						"title": "SQL",
 						"type": "enum",
 						"radio": false,
-						"values": ["Global Setting", "Format on Save", "Ignored"],
+						"values": [
+							["Global Setting", "Global Setting"],
+							["Disable", "Format on Save"],
+							["Enable", "Ignore"]
+						],
 						"default": "Global Setting"
 					},
 					{
@@ -770,7 +818,11 @@
 						"title": "TypeScript",
 						"type": "enum",
 						"radio": false,
-						"values": ["Global Setting", "Format on Save", "Ignored"],
+						"values": [
+							["Global Setting", "Global Setting"],
+							["Disable", "Format on Save"],
+							["Enable", "Ignore"]
+						],
 						"default": "Global Setting"
 					},
 					{
@@ -778,7 +830,11 @@
 						"title": "Vue",
 						"type": "enum",
 						"radio": false,
-						"values": ["Global Setting", "Format on Save", "Ignored"],
+						"values": [
+							["Global Setting", "Global Setting"],
+							["Disable", "Format on Save"],
+							["Enable", "Ignore"]
+						],
 						"default": "Global Setting"
 					},
 					{
@@ -786,7 +842,11 @@
 						"title": "XML",
 						"type": "enum",
 						"radio": false,
-						"values": ["Global Setting", "Format on Save", "Ignored"],
+						"values": [
+							["Global Setting", "Global Setting"],
+							["Disable", "Format on Save"],
+							["Enable", "Ignore"]
+						],
 						"default": "Global Setting"
 					},
 					{
@@ -794,7 +854,11 @@
 						"title": "YAML",
 						"type": "enum",
 						"radio": false,
-						"values": ["Global Setting", "Format on Save", "Ignored"],
+						"values": [
+							["Global Setting", "Global Setting"],
+							["Disable", "Format on Save"],
+							["Enable", "Ignore"]
+						],
 						"default": "Global Setting"
 					}
 				]

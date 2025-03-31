@@ -587,7 +587,7 @@
 		"children": [
 			{
 				"key": "prettier.format-on-save",
-				"title": "Format on Saved",
+				"title": "Format on Save",
 				"description": "Automatically format documents when they are saved.",
 				"type": "boolean",
 				"default": true
