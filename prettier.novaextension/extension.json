@@ -5,8 +5,8 @@
 	"description": "Integrates Prettier to enhance code formatting capabilities within Nova.",
 	"version": "3.1.0",
 	"categories": ["commands", "formatters"],
-	"repository": "https://github.com/alexanderweiss/nova-prettier",
-	"bugs": "https://github.com/alexanderweiss/nova-prettier/issues",
+	"repository": "https://github.com/stonerl/nova-prettier",
+	"bugs": "https://github.com/stonerl/nova-prettier/issues",
 	"entitlements": {
 		"clipboard": false,
 		"process": true,
