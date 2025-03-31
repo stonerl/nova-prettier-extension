@@ -1,8 +1,15 @@
+## 3.5.3 - 2025-03-31
+
+### Changed
+
+- Updated versioning scheme to reflect new format
+- Changed repository and issues URLs
+
 ## 3.1.1 - 2025-03-31
 
 This extension has been forked from the [original extension](https://extensions.panic.com/extensions/alexanderweiss/alexanderweiss.prettier/).
 
-### CHANGED
+### Changed
 
 - updated bundled Prettier module to 3.4.1
 - updated bundled node modules to their latest version
@@ -22,7 +29,7 @@ This extension has been forked from the [original extension](https://extensions.
 - bundled plugins are loaded dynamically
 - set proper extension category: commands, formatter & keybindings
 
-### ADDED
+### Added
 
 - @rollup/plugin-terser to minify the extensions JS
 - Prettier option singleAttributePerLine
@@ -33,15 +40,15 @@ This extension has been forked from the [original extension](https://extensions.
 - bundled plugins can be enabled/disabled individually
 - added SQL and XML to the ignored syntax
 
-### FIXED
+### Fixed
 
 - PHP Plugin was bundled but never used
 
-### DEPRECATED
+### Deprecated
 
 - JSX Brackets (will be removed in a future version)
 
-### KNOW ISSUES
+### Know Issues
 
 When adding params or paramsType to the sql-formatter option, the user must
 click outside the text filed for the changes to be applied. Will be fixed in a

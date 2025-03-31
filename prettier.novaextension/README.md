@@ -43,9 +43,9 @@ Most features are supported for remote files; however, [Prettier configuration](
 
 ## Versioning
 
-Prettier+ for Nova follows [Semantic Versioning](https://semver.org/), aligned with official Prettier releases. Versions are formatted as `a.b.c-d`, where:
+Prettier+ for Nova follows [Semantic Versioning](https://semver.org/), aligned with official Prettier releases. Versions are formatted as `a.b.c`, where:
 
-- `a.b.c` corresponds to the exact Prettier version bundled.
-- `d` is the build number of the Nova-specific extension (used for fixes or enhancements unrelated to the Prettier core).
+- `a.b` corresponds to the bundled Prettier version.
+- `c` is the extension’s specific build number (used for fixes or enhancements unrelated to the Prettier core).
 
-For example, `3.5.0-4` uses Prettier `v3.5.0` and is the fourth Nova extension build for that version.
+For example, `3.5.4` uses Prettier `v3.5.x` and is the fourth extension build.
