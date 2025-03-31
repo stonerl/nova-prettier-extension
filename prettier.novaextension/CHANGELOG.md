@@ -1,3 +1,52 @@
+## 3.1.1 - 2025-03-31
+
+This extension has been forked from the [original extension](https://extensions.panic.com/extensions/alexanderweiss/alexanderweiss.prettier/).
+
+### CHANGED
+
+- updated bundled Prettier module to 3.4.1
+- updated bundled node modules to their latest version
+- all Global Settings are now available in the Project settings
+  (including ignored Syntax)
+- renamed Global Default to Global Setting
+- renamed Enable/Disable to Enabled/Disabled
+- add placeholder values
+- ENUMS are displayed as dropdowns instead of radio buttons
+- all Titles are now in Title Case
+- updated the links for Prettier Options
+- updated descriptions
+- added named exports to rollup
+- JS files are now minified during extension build
+- log Prettier options to the console
+- don't log do extension console by default
+- bundled plugins are loaded dynamically
+- set proper extension category: commands, formatter & keybindings
+
+### ADDED
+
+- @rollup/plugin-terser to minify the extensions JS
+- Prettier option singleAttributePerLine
+- Prettier option embeddedLanguageFormatting
+- @prettier/plugin-xml for formatting XML files
+- added prettier-plugin-sql for formatting SQL files
+- plugins can be configured in the extension/project setting
+- bundled plugins can be enabled/disabled individually
+- added SQL and XML to the ignored syntax
+
+### FIXED
+
+- PHP Plugin was bundled but never used
+
+### DEPRECATED
+
+- JSX Brackets (will be removed in a future version)
+
+### KNOW ISSUES
+
+When adding params or paramsType to the sql-formatter option, the user must
+click outside the text filed for the changes to be applied. Will be fixed in a
+future release.
+
 ## 2.6.0 - 2023-05-01
 
 ### Added
