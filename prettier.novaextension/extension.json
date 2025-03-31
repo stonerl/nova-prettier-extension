@@ -1,6 +1,6 @@
 {
 	"identifier": "nova.prettier.extension",
-	"name": "Prettier",
+	"name": "Prettier+",
 	"organization": "Toni Förster",
 	"description": "Integrates Prettier to enhance code formatting capabilities within Nova.",
 	"version": "3.1.0",
