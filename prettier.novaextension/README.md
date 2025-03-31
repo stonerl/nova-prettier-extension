@@ -1,10 +1,10 @@
-# Prettier for Nova
+# Prettier+ for Nova
 
 Experience seamless code formatting with Prettier directly in Nova.
 
 - **Format on save:** Automatically format your code on save (this setting can be customized per project), or manually format using `Editor > Prettier > Format Document` (**⌥⇧F**).
 - **Language Support:** Includes all languages supported by Prettier, such as `Angular`, `CSS`, `Flow`, `GraphQL`, `HTML`, `JavaScript`, `JSON`, `JSX`, `Less`, `Markdown`, `PHP`, `SCSS`, `SQL`, `TypeScript`, `Vue`, `XML`, `YAML`, and additional plugins.
-- **Configuration Support:** Compatible with [standard Prettier configuration](https://prettier.io/docs/en/configuration.html), and [.prettierignore](https://prettier.io/docs/en/ignore.html) files.
+- **Configuration Support:** Compatible with [standard Prettier configuration](https://prettier.io/docs/configuration), and [.prettierignore](https://prettier.io/docs/ignore) files.
 - **Plugin Usage:** Utilizes Prettier and any plugins installed in your project, or defaults to the built-in Prettier and plugins if none are installed.
 
 ## Bundled plugins
@@ -25,7 +25,7 @@ To use external Prettier plugins, simply install them along with Prettier in you
 ## Ignoring files
 
 You can disable format on save for remote documents, documents without a Prettier configuration file, or specific syntaxes in the extension and project preferences.
-Additionally you can use Prettier's [built-in exclusion](https://prettier.io/docs/en/ignore.html#ignoring-files) feature by adding a `.prettierignore` file to the root of your project. _Note: adding it anywhere else won't work._
+Additionally you can use Prettier's [built-in exclusion](https://prettier.io/docs/ignore#ignoring-files-prettierignore) feature by adding a `.prettierignore` file to the root of your project. _Note: adding it anywhere else won't work._
 
 ## Using a different version of Prettier
 
@@ -40,3 +40,12 @@ You should be able to use any fork of Prettier that utilizes the same API, as we
 ## Working with remote files
 
 Most features are supported for remote files; however, [Prettier configuration](https://prettier.io/docs/en/configuration.html) and [.prettierignore](https://prettier.io/docs/en/ignore.html) files are not. The default configuration set in the extension or project preferences will be used instead.
+
+## Versioning
+
+Prettier+ for Nova follows [Semantic Versioning](https://semver.org/), aligned with official Prettier releases. Versions are formatted as `a.b.c-d`, where:
+
+- `a.b.c` corresponds to the exact Prettier version bundled.
+- `d` is the build number of the Nova-specific extension (used for fixes or enhancements unrelated to the Prettier core).
+
+For example, `3.5.0-4` uses Prettier `v3.5.0` and is the fourth Nova extension build for that version.
