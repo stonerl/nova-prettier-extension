@@ -31,7 +31,7 @@ Experience seamless code formatting with Prettier directly in Nova.
 
 ## Bundled plugins
 
-- ✅ **[@prettier/plugin-php](https://github.com/prettier/plugin-php")**
+- ✅ **[@prettier/plugin-php](https://github.com/prettier/plugin-php)**
 - ✅ **[@prettier/plugin-xml](https://github.com/prettier/plugin-xml)**
 - ✅ **[prettier-plugin-sql](https://github.com/un-ts/prettier/tree/master/packages/sql)**
 - ⚠️ **[prettier-plugin-nginx](https://github.com/jxddk/prettier-plugin-nginx)**
