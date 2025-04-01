@@ -91,6 +91,21 @@ aligned with official Prettier releases. Versions are formatted as `a.b.c`, wher
 
 For example, `3.5.4` uses Prettier `v3.5.x` and is the fourth extension build.
 
+## Contributing Translations
+
+[![Languages](https://hosted.weblate.org/widget/prettier-for-nova/strings/language-badge.svg)](https://hosted.weblate.org/projects/prettier-for-nova/)
+[![Translation Status](https://hosted.weblate.org/widget/prettier-for-nova/strings/svg-badge.svg)](https://hosted.weblate.org/projects/prettier-for-nova/)
+
+Help translate Prettier+ for Nova and make it accessible to more developers in
+your language!
+
+You can contribute translations directly via [Weblate](https://hosted.weblate.org/projects/prettier-for-nova/).
+
+No coding experience required — just a GitHub or Weblate account and a few
+minutes of your time.
+
+All contributions are greatly appreciated!
+
 ## Acknowledgments
 
 This extension builds upon the outstanding work of [Alexander Weiss](https://github.com/alexanderweiss),
