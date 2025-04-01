@@ -1,3 +1,13 @@
+## 3.5.5 - 2025-04-01
+
+### Added
+
+- added new Prettier option: `objectWrap`
+
+### Changed
+
+- build: generate config from unified source
+
 ## 3.5.4 - 2025-04-01
 
 ### Fixed
