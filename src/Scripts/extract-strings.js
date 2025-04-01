@@ -1,12 +1,19 @@
 const fs = require('fs')
 const path = require('path')
 
-const EXT_DIR = path.resolve(__dirname, '../../prettier.novaextension')
-const unifiedConfigPath = path.join(EXT_DIR, '../src/unifiedConfig.json')
-const extensionJsonPath = path.join(EXT_DIR, 'extension.json')
+// Project root directory
+const PROJECT_ROOT = path.resolve(__dirname, '../..')
+const TRANSLATIONS_DIR = path.join(PROJECT_ROOT, 'translations')
+
+const unifiedConfigPath = path.join(PROJECT_ROOT, 'src/unifiedConfig.json')
+const extensionJsonPath = path.join(
+	PROJECT_ROOT,
+	'prettier.novaextension/extension.json',
+)
+
 const languages = [
-	'en.lproj',
 	'de.lproj',
+	'en.lproj',
 	'fr.lproj',
 	'jp.lproj',
 	'zh-Hans.lproj',
@@ -25,14 +32,13 @@ function extractTranslatableValues(config, configWorkspace) {
 	)
 
 	for (const item of workspaceValues) {
-		// Handle both simple and tuple formats
 		const key = Array.isArray(item) ? item[0] : item
 		const label = Array.isArray(item) ? item[1] : item
 
 		if (!baseValues.has(key)) {
 			result[label] = label
 		} else {
-			console.log(`🔁 Skipping "${label}" (already in base config)`)
+			console.log(`🔁 Skipping "${label}"`)
 		}
 	}
 }
@@ -71,7 +77,6 @@ if (fs.existsSync(unifiedConfigPath)) {
 if (fs.existsSync(extensionJsonPath)) {
 	const ext = JSON.parse(fs.readFileSync(extensionJsonPath, 'utf8'))
 
-	// Commands
 	const commandSections = ext.commands || {}
 	for (const section of Object.values(commandSections)) {
 		for (const cmd of section) {
@@ -82,9 +87,9 @@ if (fs.existsSync(extensionJsonPath)) {
 }
 
 // ─────────────────────────────────────────
-// Write to each language's strings.json
+// Write to each language's strings.json in /translations
 languages.forEach((lang) => {
-	const langDir = path.join(EXT_DIR, lang)
+	const langDir = path.join(TRANSLATIONS_DIR, lang)
 	const outputPath = path.join(langDir, 'strings.json')
 
 	fs.mkdirSync(langDir, { recursive: true })
@@ -109,6 +114,6 @@ languages.forEach((lang) => {
 
 	fs.writeFileSync(outputPath, JSON.stringify(merged, null, 2))
 	console.log(
-		`✅ Wrote ${Object.keys(merged).length} strings to ${lang}/strings.json`,
+		`✅ Wrote ${Object.keys(merged).length} strings to translations/${lang}/strings.json`,
 	)
 })
