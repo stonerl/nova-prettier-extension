@@ -4,7 +4,8 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"build": "rollup -c"
+		"build": "rollup -c",
+		"extract-strings": "node src/scripts/extract-strings.js"
 	},
 	"repository": {
 		"type": "git",
