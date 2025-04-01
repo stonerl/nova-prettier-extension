@@ -93,8 +93,8 @@ For example, `3.5.4` uses Prettier `v3.5.x` and is the fourth extension build.
 
 ## Contributing Translations
 
-[![Languages](https://hosted.weblate.org/widget/prettier-for-nova/strings/language-badge.svg)](https://hosted.weblate.org/projects/prettier-for-nova/)
-[![Translation Status](https://hosted.weblate.org/widget/prettier-for-nova/strings/svg-badge.svg)](https://hosted.weblate.org/projects/prettier-for-nova/)
+[![Languages](https://hosted.weblate.org/widget/prettier-for-nova/language-badge.svg)](https://hosted.weblate.org/projects/prettier-for-nova/)
+[![Translation Status](https://hosted.weblate.org/widget/prettier-for-nova/svg-badge.svg)](https://hosted.weblate.org/projects/prettier-for-nova/)
 
 Help translate Prettier+ for Nova and make it accessible to more developers in
 your language!
