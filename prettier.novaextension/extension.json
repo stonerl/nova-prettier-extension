@@ -4,6 +4,7 @@
 	"organization": "Toni Förster",
 	"description": "Integrates Prettier to enhance code formatting capabilities within Nova.",
 	"version": "3.5.4",
+	"license": "MIT",
 	"categories": ["commands", "formatters"],
 	"repository": "https://github.com/stonerl/nova-prettier-extension",
 	"bugs": "https://github.com/stonerl/nova-prettier-extension/issues",
