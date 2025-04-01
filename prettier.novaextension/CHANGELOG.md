@@ -1,3 +1,13 @@
+## 3.5.4 - 2025-04-01
+
+### Fixed
+
+- Fix incorrect switch cases in getWorkspaceConfig()
+
+### Added
+
+- Added Acknowledgments to README.md
+
 ## 3.5.3 - 2025-03-31
 
 ### Changed
