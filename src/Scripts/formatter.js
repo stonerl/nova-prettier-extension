@@ -25,6 +25,7 @@ const PRETTIER_OPTIONS = [
 	'insertPragma',
 	'jsxBracketSameLine',
 	'jsxSingleQuote',
+	'objectWrap',
 	'printWidth',
 	'proseWrap',
 	'quoteProps',
