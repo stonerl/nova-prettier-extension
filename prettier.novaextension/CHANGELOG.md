@@ -18,7 +18,7 @@ This extension has been forked from the [original extension](https://extensions.
 - renamed Global Default to Global Setting
 - renamed Enable/Disable to Enabled/Disabled
 - add placeholder values
-- ENUMS are displayed as dropdowns instead of radio buttons
+- ENUMS are displayed as drop-downs instead of radio buttons
 - all Titles are now in Title Case
 - updated the links for Prettier Options
 - updated descriptions
@@ -31,11 +31,11 @@ This extension has been forked from the [original extension](https://extensions.
 
 ### Added
 
-- @rollup/plugin-terser to minify the extensions JS
-- Prettier option singleAttributePerLine
-- Prettier option embeddedLanguageFormatting
-- @prettier/plugin-xml for formatting XML files
-- added prettier-plugin-sql for formatting SQL files
+- `@rollup/plugin-terser` to minify the extensions JS
+- Prettier option `singleAttributePerLine`
+- Prettier option `embeddedLanguageFormatting`
+- `@prettier/plugin-xml` for formatting XML files
+- added `prettier-plugin-sql` for formatting SQL files
 - plugins can be configured in the extension/project setting
 - bundled plugins can be enabled/disabled individually
 - added SQL and XML to the ignored syntax
@@ -48,7 +48,7 @@ This extension has been forked from the [original extension](https://extensions.
 
 - JSX Brackets (will be removed in a future version)
 
-### Know Issues
+### Known Issues
 
 When adding params or paramsType to the sql-formatter option, the user must
 click outside the text filed for the changes to be applied. Will be fixed in a
@@ -58,7 +58,8 @@ future release.
 
 ### Added
 
-- Try formatting based on the syntax selected in Nova if Prettier can't determine the parser
+- Try formatting based on the syntax selected in Nova
+  if Prettier can't determine the parser
 - Add support for formatting unsaved TSX and HTML (ERB) files
 
 ## 2.5.1 - 2023-04-17
@@ -71,8 +72,10 @@ future release.
 
 ### Added
 
-- Added support for finding Prettier installed through yarn and pnpm, etc. (only if `node_modules` is used)
-- Look for Prettier installations in the project's parent folder before falling back to the bundled Prettier
+- Added support for finding Prettier installed through yarn and pnpm, etc.
+  (only if `node_modules` is used)
+- Look for Prettier installations in the project's parent folder before falling
+  back to the bundled Prettier
 
 ### Fixed
 
@@ -82,7 +85,8 @@ future release.
 
 ### Added
 
-- Changes to Prettier configuration in `.prettierrc` and `package.json` are now applied automatically
+- Changes to Prettier configuration in `.prettierrc` and `package.json` are now
+  applied automatically
 
 ### Changed
 
@@ -91,7 +95,8 @@ future release.
 
 ### Fixed
 
-- Fixes `Format with Prettier` following format on save `Ignore documents without Prettier configuration file` configuration value
+- Fixes `Format with Prettier` following format on save
+  `Ignore documents without Prettier configuration file` configuration value
 - Fixes a possible error when restarting the Prettier process
 
 ## 2.3.0 - 2021-05-19
@@ -103,7 +108,8 @@ future release.
 
 ### Changed
 
-- Errors occurring while loading the Prettier module will now be logged with message and stack trace
+- Errors occurring while loading the Prettier module will now be logged with
+  message and stack trace
 
 ## 2.2.2 - 2021-05-10
 
@@ -125,7 +131,8 @@ future release.
 
 ### Changed
 
-- Loading Prettier may be retried once after a small delay instead of immediately showing an error
+- Loading Prettier may be retried once after a small delay instead of immediately
+  showing an error
 - Updated bundled Prettier to 2.2.1
 - Updated bundled Prettier PHP plugin to 0.16.1
 
@@ -146,14 +153,16 @@ future release.
 
 - Added `Format selection` command
 - All selections/cursors are now maintained after formatting
-- A warning is now shown if a document uses an unsupported syntax when formatting manually
+- A warning is now shown if a document uses an unsupported syntax when
+  formatting manually
 
 ### Changed
 
 - **(Breaking)** Removed compatibility mode
 - Renamed `Format with Prettier` to `Format` and moved it into a submenu
 - Nova will now wait for formatting before saving instead of saving twice
-- Formatting a file while the extension is installing Prettier will be delayed instead of getting ignored entirely
+- Formatting a file while the extension is installing Prettier will be delayed
+  instead of getting ignored entirely
 - Disabling debug logging now also disables logging about finding Prettier
 
 ### Fixed
@@ -181,8 +190,10 @@ future release.
 ### Added
 
 - Added preferences to set default Prettier configuration globally and per-project.
-- Added preference (global and per-project) to ignore files for which no Prettier configuration file can be found when formatting on save.
-- Added preference (global and per-project) to ignore remote files when formatting on save.
+- Added preference (global and per-project) to ignore files for which no Prettier
+  configuration file can be found when formatting on save.
+- Added preference (global and per-project) to ignore remote files when
+  formatting on save.
 - Added preference to disable debug logging (errors are always logged).
 
 ### Changed
@@ -191,7 +202,8 @@ future release.
 
 ### Fixed
 
-- Fixes extension failing to parse NPM output and failing to start when no project Prettier is installed.
+- Fixes extension failing to parse NPM output and failing to start when no
+  project Prettier is installed.
 
 ## 1.7.1- 2020-10-09
 
@@ -224,10 +236,12 @@ future release.
 ### Changed
 
 - Plugin support is now enabled by default, but can be disabled when errors occur.
-- Selected text now remains selected after formatting (doesn't support multiple selections / cursors).
+- Selected text now remains selected after formatting
+  (doesn't support multiple selections / cursors).
 - Folded code will now remain folded unless formatting changes it.
 - Improved formatting speed.
-- The `Format with Prettier` command is now available for all syntaxes, so it works with plugins.
+- The `Format with Prettier` command is now available for all syntaxes,
+  so it works with plugins.
 - Show syntax errors from PHP plugin inline.
 - Don't show error when trying to format a file that has no parser available.
 
@@ -250,7 +264,8 @@ future release.
 
 ### Changed
 
-- When formatting on save, automatically save the file again if Nova thought formatting took too long and saved the unformatted version.
+- When formatting on save, automatically save the file again if Nova thought
+  formatting took too long and saved the unformatted version.
 
 ### Fixed
 
@@ -260,11 +275,13 @@ future release.
 
 ### Added
 
-- Support for Prettier plugins (requires enabling `Run Prettier in a separate process (experimental)`).
+- Support for Prettier plugins
+  (requires enabling `Run Prettier in a separate process (experimental)`).
 
 ### Changed
 
-- Improved performance when formatting large files (requires enabling `Run Prettier in a separate process (experimental)`).
+- Improved performance when formatting large files
+  (requires enabling `Run Prettier in a separate process (experimental)`).
 - Stop formatting PHP, unless the PHP plugin is used.
 
 ## 1.4.0 - 2020-09-25
@@ -277,7 +294,8 @@ future release.
 
 ### Changed
 
-- Fall back to bundled Prettier when loading the project's Prettier installation fails.
+- Fall back to bundled Prettier when loading the project's
+  Prettier installation fails.
 
 ### Fixed
 
@@ -289,7 +307,8 @@ future release.
 
 - Support formatting of files in non-project windows.
 - Support working on the Prettier repository.
-- Automatically update the bundled installation of Prettier if the extension includes a new version.
+- Automatically update the bundled installation of Prettier
+  if the extension includes a new version.
 
 ### Changed
 
@@ -318,15 +337,18 @@ future release.
 
 ### Added
 
-- Use Prettier installed in the project's node_modules. If none is available the extension falls back to the bundled Prettier.
+- Use Prettier installed in the project's node_modules. If none is available the
+  extension falls back to the bundled Prettier.
 - Automatically find and load parsers provided by Prettier.
 
 ## 1.0.0 - 2020-06-12
 
 ### Added
 
-- Use .prettierignore to determine which files to format (.prettierignore needs to be in the project root).
-- Added a warning when an error occurs while looking up the Prettier configuration for a file.
+- Use .`prettierignore` to determine which files to format
+  (`.prettierignore` needs to be in the project root).
+- Added a warning when an error occurs while looking up
+  the Prettier configuration for a file.
 
 ### Changed
 
