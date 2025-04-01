@@ -477,7 +477,7 @@
 					},
 					{
 						"key": "prettier.plugins.prettier-plugin-php.trailingCommaPHP",
-						"title": "Trailing Comma",
+						"title": "Trailing Commas",
 						"description": "If set to true, trailing commas will be added wherever possible. If set to false, no trailing commas are printed.",
 						"config": {
 							"type": "boolean",
