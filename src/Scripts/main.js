@@ -29,14 +29,12 @@ class PrettierExtension {
 	}
 
 	setupConfiguration() {
-		nova.config.remove('prettier.use-compatibility-mode')
-
 		observeConfigWithWorkspaceOverride(
-			'prettier.format-on-save',
+			'prettier.plus.format-on-save',
 			this.toggleFormatOnSave,
 		)
 		observeConfigWithWorkspaceOverride(
-			'prettier.module.path',
+			'prettier.plus.module.path',
 			this.modulePathDidChange,
 		)
 	}
@@ -74,20 +72,20 @@ class PrettierExtension {
 		}
 
 		nova.workspace.onDidAddTextEditor(this.didAddTextEditor)
-		nova.commands.register('prettier.format', this.didInvokeFormatCommand)
+		nova.commands.register('prettier.plus.format', this.didInvokeFormatCommand)
 		nova.commands.register(
-			'prettier.format-selection',
+			'prettier.plus.format-selection',
 			this.didInvokeFormatSelectionCommand,
 		)
 		nova.commands.register(
-			'prettier.save-without-formatting',
+			'prettier.plus.save-without-formatting',
 			this.didInvokeSaveWithoutFormattingCommand,
 		)
 	}
 
 	async startFormatter() {
 		const path =
-			getConfigWithWorkspaceOverride('prettier.module.path') ||
+			getConfigWithWorkspaceOverride('prettier.plus.module.path') ||
 			(await findPrettier())
 
 		log.info(`Loading prettier at ${path}`)
@@ -101,7 +99,9 @@ class PrettierExtension {
 	}
 
 	toggleFormatOnSave() {
-		this.enabled = getConfigWithWorkspaceOverride('prettier.format-on-save')
+		this.enabled = getConfigWithWorkspaceOverride(
+			'prettier.plus.format-on-save',
+		)
 
 		if (this.enabled) {
 			nova.workspace.textEditors.forEach(this.didAddTextEditor)

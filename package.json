@@ -1,5 +1,5 @@
 {
-	"name": "nova-prettier",
+	"name": "prettier-plus-extension",
 	"version": "3.5.6",
 	"description": "",
 	"main": "index.js",
@@ -9,14 +9,14 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/alexanderweiss/nova-prettier.git"
+		"url": "git+https://github.com/stonerl/nova-prettier-extension.git"
 	},
-	"author": "Alexander Weiss",
+	"author": "Toni Förster",
 	"license": "MIT",
 	"bugs": {
-		"url": "https://github.com/alexanderweiss/nova-prettier/issues"
+		"url": "https://github.com/stonerl/nova-prettier-extension/issues"
 	},
-	"homepage": "https://github.com/alexanderweiss/nova-prettier#readme",
+	"homepage": "https://github.com/stonerl/nova-prettier-extension#readme",
 	"dependencies": {
 		"fast-diff": "^1.2.0"
 	},

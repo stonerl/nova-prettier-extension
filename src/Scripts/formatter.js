@@ -92,7 +92,9 @@ class Formatter {
 		return Object.fromEntries(
 			PRETTIER_OPTIONS.map((option) => [
 				option,
-				getConfigWithWorkspaceOverride(`prettier.default-config.${option}`),
+				getConfigWithWorkspaceOverride(
+					`prettier.plus.default-config.${option}`,
+				),
 			]),
 		)
 	}
@@ -102,7 +104,7 @@ class Formatter {
 			PRETTIER_PHP_PLUGIN_OPTIONS.map((option) => [
 				option,
 				getConfigWithWorkspaceOverride(
-					`prettier.plugins.prettier-plugin-php.${option}`,
+					`prettier.plus.plugins.prettier-plugin-php.${option}`,
 				),
 			]),
 		)
@@ -113,7 +115,7 @@ class Formatter {
 			PRETTIER_XML_PLUGIN_OPTIONS.map((option) => [
 				option,
 				getConfigWithWorkspaceOverride(
-					`prettier.plugins.prettier-plugin-xml.${option}`,
+					`prettier.plus.plugins.prettier-plugin-xml.${option}`,
 				),
 			]),
 		)
@@ -124,7 +126,7 @@ class Formatter {
 			PRETTIER_SQL_PLUGIN_SQL_FORMATTER_OPTIONS.map((option) => [
 				option,
 				getConfigWithWorkspaceOverride(
-					`prettier.plugins.prettier-plugin-sql.sql-formatter.${option}`,
+					`prettier.plus.plugins.prettier-plugin-sql.sql-formatter.${option}`,
 				),
 			]),
 		)
@@ -135,7 +137,7 @@ class Formatter {
 			PRETTIER_NGINX_PLUGIN_OPTIONS.map((option) => [
 				option,
 				getConfigWithWorkspaceOverride(
-					`prettier.plugins.prettier-plugin-nginx.${option}`,
+					`prettier.plus.plugins.prettier-plugin-nginx.${option}`,
 				),
 			]),
 		)
@@ -146,7 +148,7 @@ class Formatter {
 			PRETTIER_SQL_PLUGIN_NODE_SQL_PARSER_OPTIONS.map((option) => [
 				option,
 				getConfigWithWorkspaceOverride(
-					`prettier.plugins.prettier-plugin-sql.sql-formatter.${option}`,
+					`prettier.plus.plugins.prettier-plugin-sql.sql-formatter.${option}`,
 				),
 			]),
 		)
@@ -309,21 +311,21 @@ class Formatter {
 
 		// Check if plugins are enabled
 		const phpPluginEnabled = getConfigWithWorkspaceOverride(
-			'prettier.plugins.prettier-plugin-php.enabled',
+			'prettier.plus.plugins.prettier-plugin-php.enabled',
 		)
 		const sqlPluginEnabled = getConfigWithWorkspaceOverride(
-			'prettier.plugins.prettier-plugin-sql.enabled',
+			'prettier.plus.plugins.prettier-plugin-sql.enabled',
 		)
 		const xmlPluginEnabled = getConfigWithWorkspaceOverride(
-			'prettier.plugins.prettier-plugin-xml.enabled',
+			'prettier.plus.plugins.prettier-plugin-xml.enabled',
 		)
 		const nginxPluginEnabled = getConfigWithWorkspaceOverride(
-			'prettier.plugins.prettier-plugin-nginx.enabled',
+			'prettier.plus.plugins.prettier-plugin-nginx.enabled',
 		)
 
 		/// Retrieve the configured SQL formatter type
 		const sqlFormatter = getConfigWithWorkspaceOverride(
-			'prettier.plugins.prettier-plugin-sql.formatter',
+			'prettier.plus.plugins.prettier-plugin-sql.formatter',
 		)
 
 		// Initialize plugins array and conditionally load plugins if enabled
@@ -460,7 +462,7 @@ class Formatter {
 		if (
 			saving &&
 			getConfigWithWorkspaceOverride(
-				`prettier.format-on-save.ignored-syntaxes.${document.syntax}`,
+				`prettier.plus.format-on-save.ignored-syntaxes.${document.syntax}`,
 			) === true
 		) {
 			log.info(
@@ -475,7 +477,9 @@ class Formatter {
 			// Don't format-on-save remote documents if they're ignored.
 			if (
 				saving &&
-				getConfigWithWorkspaceOverride('prettier.format-on-save.ignore-remote')
+				getConfigWithWorkspaceOverride(
+					'prettier.plus.format-on-save.ignore-remote',
+				)
 			) {
 				return null
 			}
@@ -489,7 +493,7 @@ class Formatter {
 				!hasConfig &&
 				saving &&
 				getConfigWithWorkspaceOverride(
-					'prettier.format-on-save.ignore-without-config',
+					'prettier.plus.format-on-save.ignore-without-config',
 				)
 			) {
 				return null

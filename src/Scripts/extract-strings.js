@@ -8,7 +8,7 @@ const TRANSLATIONS_DIR = path.join(PROJECT_ROOT, 'translations')
 const unifiedConfigPath = path.join(PROJECT_ROOT, 'src/unifiedConfig.json')
 const extensionJsonPath = path.join(
 	PROJECT_ROOT,
-	'prettier.novaextension/extension.json',
+	'prettier.plus.novaextension/extension.json',
 )
 
 const languages = [

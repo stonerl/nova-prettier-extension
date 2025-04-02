@@ -37,11 +37,11 @@ const workspaceConfig = extractConfig(unifiedConfig, 'configWorkspace')
 
 // Write the configurations to files
 fs.writeFileSync(
-	'./prettier.novaextension/config.json',
+	'./prettier.plus.novaextension/config.json',
 	JSON.stringify(globalConfig, null, 2),
 )
 fs.writeFileSync(
-	'./prettier.novaextension/configWorkspace.json',
+	'./prettier.plus.novaextension/configWorkspace.json',
 	JSON.stringify(workspaceConfig, null, 2),
 )
 
@@ -53,14 +53,14 @@ const minifyConfigFile = (filePath) => {
 }
 
 // Minify the output files
-minifyConfigFile('./prettier.novaextension/config.json')
-minifyConfigFile('./prettier.novaextension/configWorkspace.json')
+minifyConfigFile('./prettier.plus.novaextension/config.json')
+minifyConfigFile('./prettier.plus.novaextension/configWorkspace.json')
 
 export default [
 	{
 		input: './src/Scripts/main.js',
 		output: {
-			file: './prettier.novaextension/Scripts/main.js',
+			file: './prettier.plus.novaextension/Scripts/main.js',
 			format: 'cjs',
 			exports: 'named',
 		},
@@ -69,7 +69,7 @@ export default [
 	{
 		input: './src/Scripts/prettier-service/prettier-service.js',
 		output: {
-			file: './prettier.novaextension/Scripts/prettier-service/prettier-service.js',
+			file: './prettier.plus.novaextension/Scripts/prettier-service/prettier-service.js',
 			format: 'cjs',
 			exports: 'named',
 		},
@@ -78,7 +78,7 @@ export default [
 	{
 		input: './src/Scripts/prettier-service/json-rpc.js',
 		output: {
-			file: './prettier.novaextension/Scripts/prettier-service/json-rpc.js',
+			file: './prettier.plus.novaextension/Scripts/prettier-service/json-rpc.js',
 			format: 'cjs',
 			exports: 'named',
 		},

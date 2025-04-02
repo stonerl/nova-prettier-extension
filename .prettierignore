@@ -1,4 +1,4 @@
 package*.json
-prettier.novaextension/config.json
-prettier.novaextension/configWorkpace.json
-prettier.novaextension/Scripts/**
+prettier.plus.novaextension/config.json
+prettier.plus.novaextension/configWorkpace.json
+prettier.plus.novaextension/Scripts/**

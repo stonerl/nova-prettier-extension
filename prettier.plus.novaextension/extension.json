@@ -60,18 +60,18 @@
 		"editor": [
 			{
 				"title": "Format Document",
-				"command": "prettier.format",
+				"command": "prettier.plus.format",
 				"shortcut": "opt-shift-f"
 			},
 			{
 				"title": "Format Selection",
-				"command": "prettier.format-selection",
+				"command": "prettier.plus.format-selection",
 				"when": "editorHasSelection",
 				"shortcut": "ctrl-opt-shift-f"
 			},
 			{
 				"title": "Save Without Formatting",
-				"command": "prettier.save-without-formatting",
+				"command": "prettier.plus.save-without-formatting",
 				"shortcut": "cmd-ctrl-shift-s"
 			}
 		]

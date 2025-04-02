@@ -84,7 +84,7 @@ const log = Object.fromEntries(
 		(...args) => {
 			if (
 				!nova.inDevMode() &&
-				!getConfigWithWorkspaceOverride('prettier.debug.logging')
+				!getConfigWithWorkspaceOverride('prettier.plus.debug.logging')
 			) {
 				return
 			}
