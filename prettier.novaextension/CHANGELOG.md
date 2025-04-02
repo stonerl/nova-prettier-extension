@@ -1,9 +1,18 @@
+## 3.5.7 - 2025-04-02
+
+### Changed
+
+- Restores the internal enum keys (`Enable`, `Disable`, `Global Default`) while keeping the original
+  workspace config UI label values (`Enabled`, `Disabled`, `Global Setting`).
+  This ensures compatibility with the original extension, allowing Prettier+ to be used as a drop-in replacement.
+  _Note: If you previously used custom values in your workspace config, you may need to update them manually._
+
 ## 3.5.6 - 2025-04-02
 
 ### Added
 
 - activationEvents: Prettier+ now uses conditional activation. It won’t run
-  unless it finds a supported config file (like `.prettierrc) in the project
+  unless it finds a supported config file (like `.prettierrc`) in the project
   root.
 - Localization groundwork: Initial translation support has been implemented.
   Translations can be contributed via [Weblate](https://hosted.weblate.org/projects/prettier-for-nova/)
