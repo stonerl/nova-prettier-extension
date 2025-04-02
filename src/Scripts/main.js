@@ -44,9 +44,35 @@ class PrettierExtension {
 	start() {
 		this.setupConfiguration()
 		if (nova.workspace.path) {
-			nova.fs.watch('**/.prettierrc*', this.prettierConfigFileDidChange)
-			nova.fs.watch('**/package.json', this.prettierConfigFileDidChange)
+			const configFilesToWatch = [
+				'**/.prettierrc',
+				'**/.prettierrc.json',
+				'**/.prettierrc.json5',
+				'**/.prettierrc.yaml',
+				'**/.prettierrc.yml',
+				'**/.prettierrc.toml',
+				'**/.prettierrc.js',
+				'**/.prettierrc.cjs',
+				'**/.prettierrc.mjs',
+				'**/.prettierrc.ts',
+				'**/.prettierrc.cts',
+				'**/.prettierrc.mts',
+				'**/prettier.config.js',
+				'**/prettier.config.cjs',
+				'**/prettier.config.mjs',
+				'**/prettier.config.ts',
+				'**/prettier.config.cts',
+				'**/prettier.config.mts',
+				'**/package.json',
+				'**/package.yaml',
+				'**/.prettierignore',
+			]
+
+			for (const pattern of configFilesToWatch) {
+				nova.fs.watch(pattern, this.prettierConfigFileDidChange)
+			}
 		}
+
 		nova.workspace.onDidAddTextEditor(this.didAddTextEditor)
 		nova.commands.register('prettier.format', this.didInvokeFormatCommand)
 		nova.commands.register(
