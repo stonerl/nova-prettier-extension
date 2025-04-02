@@ -5,9 +5,9 @@
   ],
   "prettier.default-config.endOfLine" : "lf",
   "prettier.default-config.printWidth" : 80,
-  "prettier.default-config.semi" : "Disabled",
-  "prettier.default-config.singleQuote" : "Enabled",
-  "prettier.default-config.useTabs" : "Enabled",
+  "prettier.default-config.semi" : "Enable",
+  "prettier.default-config.singleQuote" : "Enable",
+  "prettier.default-config.useTabs" : "Enable",
   "workspace.art_style" : 1,
   "workspace.color" : 12,
   "workspace.name" : "Nova Prettier Extension"
