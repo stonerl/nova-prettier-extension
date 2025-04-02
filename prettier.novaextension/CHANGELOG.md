@@ -1,3 +1,18 @@
+## 3.5.6 - 2025-04-02
+
+### Added
+
+- activationEvents: Prettier+ now uses conditional activation. It won’t run
+  unless it finds a supported config file (like `.prettierrc) in the project
+  root.
+- Localization groundwork: Initial translation support has been implemented.
+  Translations can be contributed via [Weblate](https://hosted.weblate.org/projects/prettier-for-nova/)
+
+### Fixed
+
+- Plugin option mapping: NGINX and SQL plugin options (specifically for node-sql-parser)
+  were being mishandled—this has now been corrected.
+
 ## 3.5.5 - 2025-04-01
 
 ### Added
