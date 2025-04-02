@@ -51,11 +51,11 @@ function observeConfigWithWorkspaceOverride(name, fn) {
 function getWorkspaceConfig(name) {
 	const value = nova.workspace.config.get(name)
 	switch (value) {
-		case 'Enabled':
+		case 'Enable':
 			return true
-		case 'Disabled':
+		case 'Disable':
 			return false
-		case 'Global Setting':
+		case 'Global Default':
 			return null
 		default:
 			return value

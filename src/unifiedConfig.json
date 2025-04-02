@@ -31,8 +31,12 @@
 				"configWorkspace": {
 					"type": "enum",
 					"radio": false,
-					"values": ["Global Setting", "Enabled", "Disabled"],
-					"default": "Global Setting"
+					"values": [
+						["Global Default", "Global Setting"],
+						["Enable", "Enabled"],
+						["Disable", "Disabled"]
+					],
+					"default": "Global Default"
 				}
 			}
 		]
@@ -89,8 +93,12 @@
 				"configWorkspace": {
 					"type": "enum",
 					"radio": false,
-					"values": ["Global Setting", "Enabled", "Disabled"],
-					"default": "Global Setting"
+					"values": [
+						["Global Default", "Global Setting"],
+						["Enable", "Enabled"],
+						["Disable", "Disabled"]
+					],
+					"default": "Global Default"
 				}
 			},
 			{
@@ -105,8 +113,12 @@
 				"configWorkspace": {
 					"type": "enum",
 					"radio": false,
-					"values": ["Global Setting", "Enabled", "Disabled"],
-					"default": "Global Setting"
+					"values": [
+						["Global Default", "Global Setting"],
+						["Enable", "Enabled"],
+						["Disable", "Disabled"]
+					],
+					"default": "Global Default"
 				}
 			},
 			{
@@ -121,8 +133,12 @@
 				"configWorkspace": {
 					"type": "enum",
 					"radio": false,
-					"values": ["Global Setting", "Enabled", "Disabled"],
-					"default": "Global Setting"
+					"values": [
+						["Global Default", "Global Setting"],
+						["Enable", "Enabled"],
+						["Disable", "Disabled"]
+					],
+					"default": "Global Default"
 				}
 			},
 			{
@@ -137,8 +153,13 @@
 					"values": ["as-needed", "consistent", "preserve"]
 				},
 				"configWorkspace": {
-					"default": "Global Setting",
-					"values": ["Global Setting", "as-needed", "consistent", "preserve"]
+					"default": "Global Default",
+					"values": [
+						["Global Default", "Global Setting"],
+						["as-needed", "as-needed"],
+						["consistent", "consistent"],
+						["preserve", "preserve"]
+					]
 				}
 			},
 			{
@@ -153,8 +174,12 @@
 				"configWorkspace": {
 					"type": "enum",
 					"radio": false,
-					"values": ["Global Setting", "Enabled", "Disabled"],
-					"default": "Global Setting"
+					"values": [
+						["Global Default", "Global Setting"],
+						["Enable", "Enabled"],
+						["Disable", "Disabled"]
+					],
+					"default": "Global Default"
 				}
 			},
 			{
@@ -169,8 +194,13 @@
 					"values": ["all", "es5", "none"]
 				},
 				"configWorkspace": {
-					"default": "Global Setting",
-					"values": ["Global Setting", "all", "es5", "none"]
+					"default": "Global Default",
+					"values": [
+						["Global Default", "Global Setting"],
+						["all", "all"],
+						["es5", "es5"],
+						["none", "none"]
+					]
 				}
 			},
 			{
@@ -185,8 +215,12 @@
 				"configWorkspace": {
 					"type": "enum",
 					"radio": false,
-					"values": ["Global Setting", "Enabled", "Disabled"],
-					"default": "Global Setting"
+					"values": [
+						["Global Default", "Global Setting"],
+						["Enable", "Enabled"],
+						["Disable", "Disabled"]
+					],
+					"default": "Global Default"
 				}
 			},
 			{
@@ -201,8 +235,12 @@
 					"values": ["preserve", "collapse"]
 				},
 				"configWorkspace": {
-					"values": ["Global Setting", "preserve", "collapse"],
-					"default": "Global Setting"
+					"values": [
+						["Global Default", "Global Setting"],
+						["preserve", "preserve"],
+						["collapse", "collapse"]
+					],
+					"default": "Global Default"
 				}
 			},
 			{
@@ -217,8 +255,12 @@
 				"configWorkspace": {
 					"type": "enum",
 					"radio": false,
-					"values": ["Global Setting", "Enabled", "Disabled"],
-					"default": "Global Setting"
+					"values": [
+						["Global Default", "Global Setting"],
+						["Enable", "Enabled"],
+						["Disable", "Disabled"]
+					],
+					"default": "Global Default"
 				}
 			},
 			{
@@ -233,8 +275,12 @@
 				"configWorkspace": {
 					"type": "enum",
 					"radio": false,
-					"values": ["Global Setting", "Enabled", "Disabled"],
-					"default": "Global Setting"
+					"values": [
+						["Global Default", "Global Setting"],
+						["Enable", "Enabled"],
+						["Disable", "Disabled"]
+					],
+					"default": "Global Default"
 				}
 			},
 			{
@@ -249,8 +295,12 @@
 					"values": ["always", "avoid"]
 				},
 				"configWorkspace": {
-					"default": "Global Setting",
-					"values": ["Global Setting", "always", "avoid"]
+					"default": "Global Default",
+					"values": [
+						["Global Default", "Global Setting"],
+						["always", "always"],
+						["avoid", "avoid"]
+					]
 				}
 			},
 			{
@@ -265,7 +315,7 @@
 				"configWorkspace": {
 					"type": "enum",
 					"radio": false,
-					"default": "Global Setting",
+					"default": "Global Default",
 					"values": ["Global Setting", "Enabled", "Disabled"]
 				}
 			},
@@ -281,7 +331,7 @@
 				"configWorkspace": {
 					"type": "enum",
 					"radio": false,
-					"default": "Global Setting",
+					"default": "Global Default",
 					"values": ["Global Setting", "Enabled", "Disabled"]
 				}
 			},
@@ -297,8 +347,13 @@
 					"values": ["always", "never", "preserve"]
 				},
 				"configWorkspace": {
-					"default": "Global Setting",
-					"values": ["Global Setting", "always", "never", "preserve"]
+					"default": "Global Default",
+					"values": [
+						["Global Default", "Global Setting"],
+						["always", "always"],
+						["never", "never"],
+						["preserve", "preserve"]
+					]
 				}
 			},
 			{
@@ -313,8 +368,13 @@
 					"values": ["css", "strict", "ignore"]
 				},
 				"configWorkspace": {
-					"default": "Global Setting",
-					"values": ["Global Setting", "css", "strict", "ignore"]
+					"default": "Global Default",
+					"values": [
+						["Global Default", "Global Setting"],
+						["css", "css"],
+						["strict", "strict"],
+						["ignore", "ignore"]
+					]
 				}
 			},
 			{
@@ -329,8 +389,12 @@
 				"configWorkspace": {
 					"type": "enum",
 					"radio": false,
-					"values": ["Global Setting", "Enabled", "Disabled"],
-					"default": "Global Setting"
+					"values": [
+						["Global Default", "Global Setting"],
+						["Enable", "Enabled"],
+						["Disable", "Disabled"]
+					],
+					"default": "Global Default"
 				}
 			},
 			{
@@ -345,8 +409,14 @@
 					"values": ["lf", "crlf", "cr", "auto"]
 				},
 				"configWorkspace": {
-					"default": "Global Setting",
-					"values": ["Global Setting", "lf", "crlf", "cr", "auto"]
+					"default": "Global Default",
+					"values": [
+						["Global Default", "Global Setting"],
+						["lf", "lf"],
+						["crlf", "crlf"],
+						["cr", "cr"],
+						["auto", "auto"]
+					]
 				}
 			},
 			{
@@ -361,8 +431,12 @@
 					"values": ["auto", "off"]
 				},
 				"configWorkspace": {
-					"default": "Global Setting",
-					"values": ["Global Setting", "auto", "off"]
+					"default": "Global Default",
+					"values": [
+						["Global Default", "Global Setting"],
+						["auto", "auto"],
+						["off", "off"]
+					]
 				}
 			},
 			{
@@ -377,8 +451,12 @@
 				"configWorkspace": {
 					"type": "enum",
 					"radio": false,
-					"values": ["Global Setting", "Enabled", "Disabled"],
-					"default": "Global Setting"
+					"values": [
+						["Global Default", "Global Setting"],
+						["Enable", "Enabled"],
+						["Disable", "Disabled"]
+					],
+					"default": "Global Default"
 				}
 			}
 		]
@@ -408,8 +486,12 @@
 							"description": "Select whether to use global settings, enable, or disable the plugin.",
 							"type": "enum",
 							"radio": false,
-							"values": ["Global Setting", "Enabled", "Disabled"],
-							"default": "Global Setting"
+							"values": [
+								["Global Default", "Global Setting"],
+								["Enable", "Enabled"],
+								["Disable", "Disabled"]
+							],
+							"default": "Global Default"
 						}
 					},
 					{
@@ -439,24 +521,24 @@
 							]
 						},
 						"configWorkspace": {
-							"default": "Global Setting",
+							"default": "Global Default",
 							"values": [
-								"Global Setting",
-								"5.0",
-								"5.1",
-								"5.2",
-								"5.3",
-								"5.4",
-								"5.5",
-								"5.6",
-								"7.0",
-								"7.1",
-								"7.2",
-								"7.3",
-								"7.4",
-								"8.0",
-								"8.1",
-								"8.2"
+								["Global Default", "Global Setting"],
+								["5.0", "5.0"],
+								["5.1", "5.1"],
+								["5.2", "5.2"],
+								["5.3", "5.3"],
+								["5.4", "5.4"],
+								["5.5", "5.5"],
+								["5.6", "5.6"],
+								["7.0", "7.0"],
+								["7.1", "7.1"],
+								["7.2", "7.2"],
+								["7.3", "7.3"],
+								["7.4", "7.4"],
+								["8.0", "8.0"],
+								["8.1", "8.1"],
+								["8.2", "8.2"]
 							]
 						}
 					},
@@ -471,8 +553,12 @@
 						"configWorkspace": {
 							"type": "enum",
 							"radio": false,
-							"values": ["Global Setting", "Enabled", "Disabled"],
-							"default": "Global Setting"
+							"values": [
+								["Global Default", "Global Setting"],
+								["Enable", "Enabled"],
+								["Disable", "Disabled"]
+							],
+							"default": "Global Default"
 						}
 					},
 					{
@@ -486,8 +572,12 @@
 						"configWorkspace": {
 							"type": "enum",
 							"radio": false,
-							"values": ["Global Setting", "Enabled", "Disabled"],
-							"default": "Global Setting"
+							"values": [
+								["Global Default", "Global Setting"],
+								["Enable", "Enabled"],
+								["Disable", "Disabled"]
+							],
+							"default": "Global Default"
 						}
 					},
 					{
@@ -501,8 +591,12 @@
 							"values": ["per-cs", "1tbs"]
 						},
 						"configWorkspace": {
-							"default": "Global Setting",
-							"values": ["Global Setting", "per-cs", "1tbs"]
+							"default": "Global Default",
+							"values": [
+								["Global Default", "Global Setting"],
+								["per-cs", "per-cs"],
+								["1tbs", "1tbs"]
+							]
 						}
 					}
 				]
@@ -526,8 +620,12 @@
 							"description": "Select whether to use global settings, enable, or disable the plugin.",
 							"type": "enum",
 							"radio": false,
-							"values": ["Global Setting", "Enabled", "Disabled"],
-							"default": "Global Setting"
+							"values": [
+								["Global Default", "Global Setting"],
+								["Enable", "Enabled"],
+								["Disable", "Disabled"]
+							],
+							"default": "Global Default"
 						}
 					},
 					{
@@ -541,8 +639,13 @@
 							"values": ["preserve", "double", "single"]
 						},
 						"configWorkspace": {
-							"default": "Global Setting",
-							"values": ["Global Setting", "preserve", "double", "single"]
+							"default": "Global Default",
+							"values": [
+								["Global Default", "Global Setting"],
+								["preserve", "preserve"],
+								["double", "double"],
+								["single", "single"]
+							]
 						}
 					},
 					{
@@ -556,8 +659,12 @@
 						"configWorkspace": {
 							"type": "enum",
 							"radio": false,
-							"values": ["Global Setting", "Enabled", "Disabled"],
-							"default": "Global Setting"
+							"values": [
+								["Global Default", "Global Setting"],
+								["Enable", "Enabled"],
+								["Disable", "Disabled"]
+							],
+							"default": "Global Default"
 						}
 					},
 					{
@@ -571,8 +678,12 @@
 						"configWorkspace": {
 							"type": "enum",
 							"radio": false,
-							"values": ["Global Setting", "Enabled", "Disabled"],
-							"default": "Global Setting"
+							"values": [
+								["Global Default", "Global Setting"],
+								["Enable", "Enabled"],
+								["Disable", "Disabled"]
+							],
+							"default": "Global Default"
 						}
 					},
 					{
@@ -587,8 +698,13 @@
 							"values": ["strict", "preserve", "ignore"]
 						},
 						"configWorkspace": {
-							"default": "Global Setting",
-							"values": ["Global Setting", "strict", "preserve", "ignore"]
+							"default": "Global Default",
+							"values": [
+								["Global Default", "Global Setting"],
+								["strict", "strict"],
+								["preserve", "preserve"],
+								["ignore", "ignore"]
+							]
 						}
 					}
 				]
@@ -612,8 +728,12 @@
 							"description": "Select whether to use global settings, enable, or disable the plugin.",
 							"type": "enum",
 							"radio": false,
-							"values": ["Global Setting", "Enabled", "Disabled"],
-							"default": "Global Setting"
+							"values": [
+								["Global Default", "Global Setting"],
+								["Enable", "Enabled"],
+								["Disable", "Disabled"]
+							],
+							"default": "Global Default"
 						}
 					},
 					{
@@ -627,8 +747,12 @@
 							"values": ["sql-formatter", "node-sql-parser"]
 						},
 						"configWorkspace": {
-							"default": "Global Setting",
-							"values": ["Global Setting", "sql-formatter", "node-sql-parser"]
+							"default": "Global Default",
+							"values": [
+								["Global Default", "Global Setting"],
+								["sql-formatter", "sql-formatter"],
+								["node-sql-parser", "node-sql-parser"]
+							]
 						}
 					},
 					{
@@ -669,27 +793,27 @@
 									]
 								},
 								"configWorkspace": {
-									"default": "Global Setting",
+									"default": "Global Default",
 									"values": [
-										"Global Setting",
-										"bigquery",
-										"db2",
-										"db2i",
-										"hive",
-										"mariadb",
-										"mysql",
-										"n1ql",
-										"plsql",
-										"postgresql",
-										"redshift",
-										"singlestoredb",
-										"snowflake",
-										"spark",
-										"sql",
-										"sqlite",
-										"transactsql",
-										"trino",
-										"tsql"
+										["Global Default", "Global Setting"],
+										["bigquery", "bigquery"],
+										["db2", "db2"],
+										["db2i", "db2i"],
+										["hive", "hive"],
+										["mariadb", "mariadb"],
+										["mysql", "mysql"],
+										["n1ql", "n1ql"],
+										["plsql", "plsql"],
+										["postgresql", "postgresql"],
+										["redshift", "redshift"],
+										["singlestoredb", "singlestoredb"],
+										["snowflake", "snowflake"],
+										["spark", "spark"],
+										["sql", "sql"],
+										["sqlite", "sqlite"],
+										["transactsql", "transactsql"],
+										["trino", "trino"],
+										["tsql", "tsql"]
 									]
 								}
 							},
@@ -705,8 +829,13 @@
 									"values": ["preserve", "upper", "lower"]
 								},
 								"configWorkspace": {
-									"default": "Global Setting",
-									"values": ["Global Setting", "preserve", "upper", "lower"]
+									"default": "Global Default",
+									"values": [
+										["Global Default", "Global Setting"],
+										["preserve", "preserve"],
+										["upper", "upper"],
+										["lower", "lower"]
+									]
 								}
 							},
 							{
@@ -721,8 +850,13 @@
 									"values": ["preserve", "upper", "lower"]
 								},
 								"configWorkspace": {
-									"default": "Global Setting",
-									"values": ["Global Setting", "preserve", "upper", "lower"]
+									"default": "Global Default",
+									"values": [
+										["Global Default", "Global Setting"],
+										["preserve", "preserve"],
+										["upper", "upper"],
+										["lower", "lower"]
+									]
 								}
 							},
 							{
@@ -737,8 +871,13 @@
 									"values": ["preserve", "upper", "lower"]
 								},
 								"configWorkspace": {
-									"default": "Global Setting",
-									"values": ["Global Setting", "preserve", "upper", "lower"]
+									"default": "Global Default",
+									"values": [
+										["Global Default", "Global Setting"],
+										["preserve", "preserve"],
+										["upper", "upper"],
+										["lower", "lower"]
+									]
 								}
 							},
 							{
@@ -753,8 +892,13 @@
 									"values": ["preserve", "upper", "lower"]
 								},
 								"configWorkspace": {
-									"default": "Global Setting",
-									"values": ["Global Setting", "preserve", "upper", "lower"]
+									"default": "Global Default",
+									"values": [
+										["Global Default", "Global Setting"],
+										["preserve", "preserve"],
+										["upper", "upper"],
+										["lower", "lower"]
+									]
 								}
 							},
 							{
@@ -769,8 +913,12 @@
 									"values": ["before", "after"]
 								},
 								"configWorkspace": {
-									"default": "Global Setting",
-									"values": ["Global Setting", "before", "after"]
+									"default": "Global Default",
+									"values": [
+										["Global Default", "Global Setting"],
+										["before", "before"],
+										["after", "after"]
+									]
 								}
 							},
 							{
@@ -819,8 +967,12 @@
 								"configWorkspace": {
 									"type": "enum",
 									"radio": false,
-									"values": ["Global Setting", "Enabled", "Disabled"],
-									"default": "Global Setting"
+									"values": [
+										["Global Default", "Global Setting"],
+										["Enable", "Enabled"],
+										["Disable", "Disabled"]
+									],
+									"default": "Global Default"
 								}
 							},
 							{
@@ -835,8 +987,12 @@
 								"configWorkspace": {
 									"type": "enum",
 									"radio": false,
-									"values": ["Global Setting", "Enabled", "Disabled"],
-									"default": "Global Setting"
+									"values": [
+										["Global Default", "Global Setting"],
+										["Enable", "Enabled"],
+										["Disable", "Disabled"]
+									],
+									"default": "Global Default"
 								}
 							},
 							{
@@ -901,18 +1057,18 @@
 									]
 								},
 								"configWorkspace": {
-									"default": "Global Setting",
+									"default": "Global Default",
 									"values": [
-										"Global Setting",
-										"bigquery",
-										"db2",
-										"flinksql",
-										"hive",
-										"mariadb",
-										"mysql",
-										"postgresql",
-										"snowflake",
-										"transactsql"
+										["Global Default", "Global Setting"],
+										["bigquery", "bigquery"],
+										["db2", "db2"],
+										["flinksql", "flinksql"],
+										["hive", "hive"],
+										["mariadb", "mariadb"],
+										["mysql", "mysql"],
+										["postgresql", "postgresql"],
+										["snowflake", "snowflake"],
+										["transactsql", "transactsql"]
 									]
 								}
 							},
@@ -927,8 +1083,12 @@
 									"values": ["table", "column"]
 								},
 								"configWorkspace": {
-									"default": "Global Setting",
-									"values": ["Global Setting", "table", "column"]
+									"default": "Global Default",
+									"values": [
+										["Global Default", "Global Setting"],
+										["table", "table"],
+										["column", "column"]
+									]
 								}
 							}
 						]
@@ -953,8 +1113,12 @@
 							"title": "Plugin Status",
 							"type": "enum",
 							"radio": false,
-							"values": ["Global Setting", "Enabled", "Disabled"],
-							"default": "Global Setting"
+							"values": [
+								["Global Default", "Global Setting"],
+								["Enable", "Enabled"],
+								["Disable", "Disabled"]
+							],
+							"default": "Global Default"
 						}
 					},
 					{
@@ -968,8 +1132,12 @@
 						"configWorkspace": {
 							"type": "enum",
 							"radio": false,
-							"values": ["Global Setting", "Enabled", "Disabled"],
-							"default": "Global Setting"
+							"values": [
+								["Global Default", "Global Setting"],
+								["Enable", "Enabled"],
+								["Disable", "Disabled"]
+							],
+							"default": "Global Default"
 						}
 					},
 					{
@@ -983,8 +1151,12 @@
 						"configWorkspace": {
 							"type": "enum",
 							"radio": false,
-							"values": ["Global Setting", "Enabled", "Disabled"],
-							"default": "Global Setting"
+							"values": [
+								["Global Default", "Global Setting"],
+								["Enable", "Enabled"],
+								["Disable", "Disabled"]
+							],
+							"default": "Global Default"
 						}
 					},
 					{
@@ -998,8 +1170,12 @@
 						"configWorkspace": {
 							"type": "enum",
 							"radio": false,
-							"values": ["Global Setting", "Enabled", "Disabled"],
-							"default": "Global Setting"
+							"values": [
+								["Global Default", "Global Setting"],
+								["Enable", "Enabled"],
+								["Disable", "Disabled"]
+							],
+							"default": "Global Default"
 						}
 					},
 					{
@@ -1037,8 +1213,12 @@
 				"configWorkspace": {
 					"type": "enum",
 					"radio": false,
-					"values": ["Global Setting", "Enabled", "Disabled"],
-					"default": "Global Setting"
+					"values": [
+						["Global Default", "Global Setting"],
+						["Enable", "Enabled"],
+						["Disable", "Disabled"]
+					],
+					"default": "Global Default"
 				}
 			},
 			{
@@ -1052,8 +1232,12 @@
 				"configWorkspace": {
 					"type": "enum",
 					"radio": false,
-					"values": ["Global Setting", "Enabled", "Disabled"],
-					"default": "Global Setting"
+					"values": [
+						["Global Default", "Global Setting"],
+						["Enable", "Enabled"],
+						["Disable", "Disabled"]
+					],
+					"default": "Global Default"
 				}
 			},
 			{
@@ -1067,8 +1251,12 @@
 				"configWorkspace": {
 					"type": "enum",
 					"radio": false,
-					"values": ["Global Setting", "Enabled", "Disabled"],
-					"default": "Global Setting"
+					"values": [
+						["Global Default", "Global Setting"],
+						["Enable", "Enabled"],
+						["Disable", "Disabled"]
+					],
+					"default": "Global Default"
 				}
 			},
 			{
@@ -1088,11 +1276,11 @@
 							"type": "enum",
 							"radio": false,
 							"values": [
-								["Global Setting", "Global Setting"],
-								["Disabled", "Format on Save"],
-								["Enabled", "Ignore"]
+								["Global Default", "Global Setting"],
+								["Disable", "Format on Save"],
+								["Enable", "Ignore"]
 							],
-							"default": "Global Setting"
+							"default": "Global Default"
 						}
 					},
 					{
@@ -1106,11 +1294,11 @@
 							"type": "enum",
 							"radio": false,
 							"values": [
-								["Global Setting", "Global Setting"],
-								["Disabled", "Format on Save"],
-								["Enabled", "Ignore"]
+								["Global Default", "Global Setting"],
+								["Disable", "Format on Save"],
+								["Enable", "Ignore"]
 							],
-							"default": "Global Setting"
+							"default": "Global Default"
 						}
 					},
 					{
@@ -1124,11 +1312,11 @@
 							"type": "enum",
 							"radio": false,
 							"values": [
-								["Global Setting", "Global Setting"],
-								["Disabled", "Format on Save"],
-								["Enabled", "Ignore"]
+								["Global Default", "Global Setting"],
+								["Disable", "Format on Save"],
+								["Enable", "Ignore"]
 							],
-							"default": "Global Setting"
+							"default": "Global Default"
 						}
 					},
 					{
@@ -1142,11 +1330,11 @@
 							"type": "enum",
 							"radio": false,
 							"values": [
-								["Global Setting", "Global Setting"],
-								["Disabled", "Format on Save"],
-								["Enabled", "Ignore"]
+								["Global Default", "Global Setting"],
+								["Disable", "Format on Save"],
+								["Enable", "Ignore"]
 							],
-							"default": "Global Setting"
+							"default": "Global Default"
 						}
 					},
 					{
@@ -1160,11 +1348,11 @@
 							"type": "enum",
 							"radio": false,
 							"values": [
-								["Global Setting", "Global Setting"],
-								["Disabled", "Format on Save"],
-								["Enabled", "Ignore"]
+								["Global Default", "Global Setting"],
+								["Disable", "Format on Save"],
+								["Enable", "Ignore"]
 							],
-							"default": "Global Setting"
+							"default": "Global Default"
 						}
 					},
 					{
@@ -1178,11 +1366,11 @@
 							"type": "enum",
 							"radio": false,
 							"values": [
-								["Global Setting", "Global Setting"],
-								["Disabled", "Format on Save"],
-								["Enabled", "Ignore"]
+								["Global Default", "Global Setting"],
+								["Disable", "Format on Save"],
+								["Enable", "Ignore"]
 							],
-							"default": "Global Setting"
+							"default": "Global Default"
 						}
 					},
 					{
@@ -1196,11 +1384,11 @@
 							"type": "enum",
 							"radio": false,
 							"values": [
-								["Global Setting", "Global Setting"],
-								["Disabled", "Format on Save"],
-								["Enabled", "Ignore"]
+								["Global Default", "Global Setting"],
+								["Disable", "Format on Save"],
+								["Enable", "Ignore"]
 							],
-							"default": "Global Setting"
+							"default": "Global Default"
 						}
 					},
 					{
@@ -1214,11 +1402,11 @@
 							"type": "enum",
 							"radio": false,
 							"values": [
-								["Global Setting", "Global Setting"],
-								["Disabled", "Format on Save"],
-								["Enabled", "Ignore"]
+								["Global Default", "Global Setting"],
+								["Disable", "Format on Save"],
+								["Enable", "Ignore"]
 							],
-							"default": "Global Setting"
+							"default": "Global Default"
 						}
 					},
 					{
@@ -1232,11 +1420,11 @@
 							"type": "enum",
 							"radio": false,
 							"values": [
-								["Global Setting", "Global Setting"],
-								["Disabled", "Format on Save"],
-								["Enabled", "Ignore"]
+								["Global Default", "Global Setting"],
+								["Disable", "Format on Save"],
+								["Enable", "Ignore"]
 							],
-							"default": "Global Setting"
+							"default": "Global Default"
 						}
 					},
 					{
@@ -1250,11 +1438,11 @@
 							"type": "enum",
 							"radio": false,
 							"values": [
-								["Global Setting", "Global Setting"],
-								["Disabled", "Format on Save"],
-								["Enabled", "Ignore"]
+								["Global Default", "Global Setting"],
+								["Disable", "Format on Save"],
+								["Enable", "Ignore"]
 							],
-							"default": "Global Setting"
+							"default": "Global Default"
 						}
 					},
 					{
@@ -1268,11 +1456,11 @@
 							"type": "enum",
 							"radio": false,
 							"values": [
-								["Global Setting", "Global Setting"],
-								["Disabled", "Format on Save"],
-								["Enabled", "Ignore"]
+								["Global Default", "Global Setting"],
+								["Disable", "Format on Save"],
+								["Enable", "Ignore"]
 							],
-							"default": "Global Setting"
+							"default": "Global Default"
 						}
 					},
 					{
@@ -1286,11 +1474,11 @@
 							"type": "enum",
 							"radio": false,
 							"values": [
-								["Global Setting", "Global Setting"],
-								["Disabled", "Format on Save"],
-								["Enabled", "Ignore"]
+								["Global Default", "Global Setting"],
+								["Disable", "Format on Save"],
+								["Enable", "Ignore"]
 							],
-							"default": "Global Setting"
+							"default": "Global Default"
 						}
 					},
 					{
@@ -1304,11 +1492,11 @@
 							"type": "enum",
 							"radio": false,
 							"values": [
-								["Global Setting", "Global Setting"],
-								["Disabled", "Format on Save"],
-								["Enabled", "Ignore"]
+								["Global Default", "Global Setting"],
+								["Disable", "Format on Save"],
+								["Enable", "Ignore"]
 							],
-							"default": "Global Setting"
+							"default": "Global Default"
 						}
 					},
 					{
@@ -1322,11 +1510,11 @@
 							"type": "enum",
 							"radio": false,
 							"values": [
-								["Global Setting", "Global Setting"],
-								["Disabled", "Format on Save"],
-								["Enabled", "Ignore"]
+								["Global Default", "Global Setting"],
+								["Disable", "Format on Save"],
+								["Enable", "Ignore"]
 							],
-							"default": "Global Setting"
+							"default": "Global Default"
 						}
 					},
 					{
@@ -1340,11 +1528,11 @@
 							"type": "enum",
 							"radio": false,
 							"values": [
-								["Global Setting", "Global Setting"],
-								["Disabled", "Format on Save"],
-								["Enabled", "Ignore"]
+								["Global Default", "Global Setting"],
+								["Disable", "Format on Save"],
+								["Enable", "Ignore"]
 							],
-							"default": "Global Setting"
+							"default": "Global Default"
 						}
 					},
 					{
@@ -1358,11 +1546,11 @@
 							"type": "enum",
 							"radio": false,
 							"values": [
-								["Global Setting", "Global Setting"],
-								["Disabled", "Format on Save"],
-								["Enabled", "Ignore"]
+								["Global Default", "Global Setting"],
+								["Disable", "Format on Save"],
+								["Enable", "Ignore"]
 							],
-							"default": "Global Setting"
+							"default": "Global Default"
 						}
 					},
 					{
@@ -1376,11 +1564,11 @@
 							"type": "enum",
 							"radio": false,
 							"values": [
-								["Global Setting", "Global Setting"],
-								["Disabled", "Format on Save"],
-								["Enabled", "Ignore"]
+								["Global Default", "Global Setting"],
+								["Disable", "Format on Save"],
+								["Enable", "Ignore"]
 							],
-							"default": "Global Setting"
+							"default": "Global Default"
 						}
 					}
 				]
