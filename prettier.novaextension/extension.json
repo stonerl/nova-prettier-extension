@@ -1,81 +1,81 @@
 {
-	"identifier": "stonerl.prettier",
-	"name": "Prettier+",
-	"organization": "Toni Förster",
-	"description": "Integrates Prettier to enhance code formatting capabilities within Nova.",
-	"version": "3.5.7",
-	"license": "MIT",
-	"funding": "https://github.com/sponsors/stonerl",
-	"categories": ["commands", "formatters"],
-	"repository": "https://github.com/stonerl/nova-prettier-extension",
-	"bugs": "https://github.com/stonerl/nova-prettier-extension/issues",
-	"entitlements": {
-		"clipboard": false,
-		"process": true,
-		"requests": false,
-		"filesystem": "readonly"
-	},
-	"main": "main.js",
-	"activationEvents": [
-		"onLanguage:css",
-		"onLanguage:flow",
-		"onLanguage:graphql",
-		"onLanguage:html",
-		"onLanguage:javascript",
-		"onLanguage:json",
-		"onLanguage:jsx",
-		"onLanguage:less",
-		"onLanguage:markdown",
-		"onLanguage:nginx",
-		"onLanguage:php",
-		"onLanguage:scss",
-		"onLanguage:sql",
-		"onLanguage:typescript",
-		"onLanguage:vue",
-		"onLanguage:xml",
-		"onLanguage:yaml",
-		"onWorkspaceContains:package.json",
-		"onWorkspaceContains:package.yaml",
-		"onWorkspaceContains:.prettierrc",
-		"onWorkspaceContains:.prettierrc.json",
-		"onWorkspaceContains:.prettierrc.json5",
-		"onWorkspaceContains:.prettierrc.yaml",
-		"onWorkspaceContains:.prettierrc.yml",
-		"onWorkspaceContains:.prettierrc.toml",
-		"onWorkspaceContains:.prettierrc.js",
-		"onWorkspaceContains:prettier.config.js",
-		"onWorkspaceContains:.prettierrc.ts",
-		"onWorkspaceContains:prettier.config.ts",
-		"onWorkspaceContains:.prettierrc.mjs",
-		"onWorkspaceContains:prettier.config.mjs",
-		"onWorkspaceContains:.prettierrc.mts",
-		"onWorkspaceContains:prettier.config.mts",
-		"onWorkspaceContains:.prettierrc.cjs",
-		"onWorkspaceContains:prettier.config.cjs",
-		"onWorkspaceContains:.prettierrc.cts",
-		"onWorkspaceContains:prettier.config.cts",
-		"onWorkspaceContains:.prettierignore"
-	],
-	"commands": {
-		"editor": [
-			{
-				"title": "Format Document",
-				"command": "prettier.format",
-				"shortcut": "opt-shift-f"
-			},
-			{
-				"title": "Format Selection",
-				"command": "prettier.format-selection",
-				"when": "editorHasSelection",
-				"shortcut": "ctrl-opt-shift-f"
-			},
-			{
-				"title": "Save Without Formatting",
-				"command": "prettier.save-without-formatting",
-				"shortcut": "cmd-ctrl-shift-s"
-			}
-		]
-	},
-	"config": "./config.json",
-	"configWorkspace": "./configWorkspace.json"
+  "identifier": "stonerl.prettier",
+  "name": "Prettier+",
+  "organization": "Toni Förster",
+  "description": "Integrates Prettier to enhance code formatting capabilities within Nova.",
+  "version": "3.5.7",
+  "license": "MIT",
+  "funding": "https://github.com/sponsors/stonerl",
+  "categories": ["commands", "formatters"],
+  "repository": "https://github.com/stonerl/nova-prettier-extension",
+  "bugs": "https://github.com/stonerl/nova-prettier-extension/issues",
+  "entitlements": {
+    "clipboard": false,
+    "process": true,
+    "requests": false,
+    "filesystem": "readonly"
+  },
+  "main": "main.js",
+  "activationEvents": [
+    "onLanguage:css",
+    "onLanguage:flow",
+    "onLanguage:graphql",
+    "onLanguage:html",
+    "onLanguage:javascript",
+    "onLanguage:json",
+    "onLanguage:jsx",
+    "onLanguage:less",
+    "onLanguage:markdown",
+    "onLanguage:nginx",
+    "onLanguage:php",
+    "onLanguage:scss",
+    "onLanguage:sql",
+    "onLanguage:typescript",
+    "onLanguage:vue",
+    "onLanguage:xml",
+    "onLanguage:yaml",
+    "onWorkspaceContains:package.json",
+    "onWorkspaceContains:package.yaml",
+    "onWorkspaceContains:.prettierrc",
+    "onWorkspaceContains:.prettierrc.json",
+    "onWorkspaceContains:.prettierrc.json5",
+    "onWorkspaceContains:.prettierrc.yaml",
+    "onWorkspaceContains:.prettierrc.yml",
+    "onWorkspaceContains:.prettierrc.toml",
+    "onWorkspaceContains:.prettierrc.js",
+    "onWorkspaceContains:prettier.config.js",
+    "onWorkspaceContains:.prettierrc.ts",
+    "onWorkspaceContains:prettier.config.ts",
+    "onWorkspaceContains:.prettierrc.mjs",
+    "onWorkspaceContains:prettier.config.mjs",
+    "onWorkspaceContains:.prettierrc.mts",
+    "onWorkspaceContains:prettier.config.mts",
+    "onWorkspaceContains:.prettierrc.cjs",
+    "onWorkspaceContains:prettier.config.cjs",
+    "onWorkspaceContains:.prettierrc.cts",
+    "onWorkspaceContains:prettier.config.cts",
+    "onWorkspaceContains:.prettierignore"
+  ],
+  "commands": {
+    "editor": [
+      {
+        "title": "Format Document",
+        "command": "prettier.format",
+        "shortcut": "opt-shift-f"
+      },
+      {
+        "title": "Format Selection",
+        "command": "prettier.format-selection",
+        "when": "editorHasSelection",
+        "shortcut": "ctrl-opt-shift-f"
+      },
+      {
+        "title": "Save Without Formatting",
+        "command": "prettier.save-without-formatting",
+        "shortcut": "cmd-ctrl-shift-s"
+      }
+    ]
+  },
+  "config": "./config.json",
+  "configWorkspace": "./configWorkspace.json"
 }
