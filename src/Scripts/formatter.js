@@ -135,7 +135,7 @@ class Formatter {
 			PRETTIER_NGINX_PLUGIN_OPTIONS.map((option) => [
 				option,
 				getConfigWithWorkspaceOverride(
-					`prettier.plugins.prettier-plugin-sql.sql-formatter.${option}`,
+					`prettier.plugins.prettier-plugin-nginx.${option}`,
 				),
 			]),
 		)
@@ -146,7 +146,7 @@ class Formatter {
 			PRETTIER_SQL_PLUGIN_NODE_SQL_PARSER_OPTIONS.map((option) => [
 				option,
 				getConfigWithWorkspaceOverride(
-					`prettier.plugins.prettier-plugin-nginx.${option}`,
+					`prettier.plugins.prettier-plugin-sql.sql-formatter.${option}`,
 				),
 			]),
 		)
