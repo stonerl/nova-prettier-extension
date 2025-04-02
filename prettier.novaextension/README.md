@@ -29,6 +29,9 @@ Experience seamless code formatting with Prettier directly in Nova.
 - **Plugin Usage:** Utilizes Prettier and any plugins installed in your project,
   or defaults to the built-in Prettier and plugins if none are installed.
 
+This extension can be used as a drop-in replacement for the original [Prettier Extension](https://extensions.panic.com/extensions/alexanderweiss/alexanderweiss.prettier/).
+You can freely switch between both; just make sure that you only have one enabled at a time.
+
 ## Bundled plugins
 
 - ✅ **[@prettier/plugin-php](https://github.com/prettier/plugin-php)**
