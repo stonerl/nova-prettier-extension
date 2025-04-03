@@ -1,3 +1,9 @@
+## 3.5.8 - 2025-04-03
+
+### Changed
+
+- Updated README and LICENSE
+
 ## 3.5.7 - 2025-04-02
 
 ### Changed
