@@ -1,13 +1,12 @@
 {
-  "editor.default_syntax" : "javascript",
-  "index.ignored_file_patterns" : [
-    "prettier.novaextension\/Scripts\/*"
+  "editor.default_syntax": "javascript",
+  "index.ignored_file_patterns": [
+    "prettier.novaextension/Scripts/*"
   ],
-  "prettier.default-config.endOfLine" : "lf",
-  "prettier.default-config.printWidth" : 80,
-  "prettier.default-config.semi" : "Enable",
-  "prettier.default-config.singleQuote" : "Enable",
-  "workspace.art_style" : 1,
-  "workspace.color" : 12,
-  "workspace.name" : "Nova Prettier Extension"
+  "prettier.default-config.endOfLine": "lf",
+  "prettier.default-config.semi": false,
+  "prettier.default-config.singleQuote": true,
+  "workspace.art_style": 1,
+  "workspace.color": 12,
+  "workspace.name": "Nova Prettier Extension"
 }

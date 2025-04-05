@@ -4,6 +4,7 @@ const {
   getConfigWithWorkspaceOverride,
   observeConfigWithWorkspaceOverride,
   log,
+  sanitizePrettierConfig,
 } = require('./helpers.js')
 const { Formatter } = require('./formatter.js')
 
@@ -30,6 +31,7 @@ class PrettierExtension {
 
   setupConfiguration() {
     nova.config.remove('prettier.use-compatibility-mode')
+    sanitizePrettierConfig()
 
     observeConfigWithWorkspaceOverride(
       'prettier.format-on-save',
