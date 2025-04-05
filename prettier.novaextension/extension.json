@@ -13,7 +13,7 @@
     "clipboard": false,
     "process": true,
     "requests": false,
-    "filesystem": "readonly"
+    "filesystem": "readwrite"
   },
   "main": "main.js",
   "activationEvents": [
