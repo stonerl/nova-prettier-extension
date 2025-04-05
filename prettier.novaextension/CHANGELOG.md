@@ -1,3 +1,19 @@
+## 3.5.9 - 2025-04-05
+
+### Changed
+
+- `workspaceConfig` keys now use boolean values instead of enums:
+  - `Enable` → `true`
+  - `Disable` → `false`
+  - `Global Default` → key removed to fall back to global settings
+- Compatibility with the original enum-based behavior is preserved
+- Extension permission for filesystem access has been updated from `readonly` to `readwrite` to enable migration of project configuration files
+
+### Added
+
+- Existing project configs (`.nova/Configuration.json`) are now automatically migrated to the new boolean format on startup
+- A notification is shown if any project config values were changed during migration
+
 ## 3.5.8 - 2025-04-03
 
 ### Changed
