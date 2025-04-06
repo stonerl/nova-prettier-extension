@@ -70,6 +70,8 @@ const PRETTIER_SQL_PLUGIN_SQL_FORMATTER_OPTIONS = [
 
 const PRETTIER_SQL_PLUGIN_NODE_SQL_PARSER_OPTIONS = ['database', 'type']
 
+const PRETTIER_PROPERTIES_PLUGIN_OPTIONS = ['escapeNonLatin1', 'keySeparator']
+
 const PRETTIER_NGINX_PLUGIN_OPTIONS = [
   'alignDirectives',
   'alignUniversally',
@@ -125,6 +127,17 @@ class Formatter {
         option,
         getConfigWithWorkspaceOverride(
           `prettier.plugins.prettier-plugin-sql.sql-formatter.${option}`,
+        ),
+      ]),
+    )
+  }
+
+  get propertiesConfig() {
+    return Object.fromEntries(
+      PRETTIER_PROPERTIES_PLUGIN_OPTIONS.map((option) => [
+        option,
+        getConfigWithWorkspaceOverride(
+          `prettier.plugins.prettier-plugin-properties.${option}`,
         ),
       ]),
     )
@@ -323,6 +336,9 @@ class Formatter {
     const javaPluginEnabled = getConfigWithWorkspaceOverride(
       'prettier.plugins.prettier-plugin-java.enabled',
     )
+    const propertiesPluginEnabled = getConfigWithWorkspaceOverride(
+      'prettier.plugins.prettier-plugin-properties.enabled',
+    )
 
     /// Retrieve the configured SQL formatter type
     const sqlFormatter = getConfigWithWorkspaceOverride(
@@ -389,6 +405,16 @@ class Formatter {
           ),
         )
       }
+      if (document.syntax === 'java-properties' && propertiesPluginEnabled) {
+        plugins.push(
+          nova.path.join(
+            nova.extension.path,
+            'node_modules',
+            'prettier-plugin-properties',
+            'index.js',
+          ),
+        )
+      }
     }
 
     const options = {
@@ -421,6 +447,11 @@ class Formatter {
       } else if (sqlFormatter === 'node-sql-parser') {
         Object.assign(options, this.nodeSqlParserConfig)
       }
+    }
+
+    // Add PROPERTIES plugin options if the document is JAVA-PROPERTIES
+    if (document.syntax === 'java-properties') {
+      Object.assign(options, this.propertiesConfig)
     }
 
     // Add NGINX plugin options if the document is NGINX
@@ -529,6 +560,8 @@ class Formatter {
         return 'babel-flow'
       case 'html+erb':
         return 'erb'
+      case 'java-properties':
+        return 'dot-properties'
       default:
         return syntax
     }
