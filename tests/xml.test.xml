@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Root element with namespaces and attributes -->
+<root xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0">
+  <!-- Nested elements with attributes -->
+  <user id="123" active="true">
+    <name>John Doe</name>
+    <email>john.doe@example.com</email>
+    <roles>
+      <role>admin</role>
+      <role>editor</role>
+    </roles>
+  </user>
+
+  <!-- Self-closing and empty tags -->
+  <meta />
+  <config value="" />
+
+  <!-- Text content and CDATA -->
+  <description>
+    This is a description with
+    newlines and extra spaces.
+  </description>
+  <raw><![CDATA[
+    <script>alert("xss")</script>
+  ]]></raw>
+
+  <!-- Mixed content and comments -->
+  <note>
+    <to>Toni</to>
+    <from>Bot</from>
+    <message>
+      <!-- Multiline comment -->
+      Hello, this is a
+      <b>bold</b>
+      message.
+    </message>
+  </note>
+
+  <!-- Complex nesting -->
+  <settings>
+    <group name="display">
+      <option key="theme">dark</option>
+      <option key="contrast" />
+    </group>
+    <group name="network">
+      <proxy enabled="true">
+        <host>proxy.example.com</host>
+        <port>8080</port>
+      </proxy>
+    </group>
+  </settings>
+</root>

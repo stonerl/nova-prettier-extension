@@ -1,0 +1,62 @@
+# Basic query with arguments and aliases
+query getUserInfo($id: ID!, $verbose: Boolean = false) {
+  user: userById(id: $id) {
+    id
+    name
+    email
+    profilePicture(size: 100)
+    address {
+      street
+      city
+      zip
+    }
+    friends(first: 10) {
+      edges {
+        node {
+          id
+          name
+        }
+      }
+    }
+    ...UserDetails
+  }
+}
+
+# Fragment with nested fields
+fragment UserDetails on User {
+  bio
+  joinedDate
+  posts(limit: 5) {
+    title
+    published
+    tags
+  }
+}
+
+# Mutation example
+mutation updateUser($input: UpdateUserInput!) {
+  updateUser(input: $input) {
+    user {
+      id
+      name
+      email
+    }
+    success
+    error {
+      message
+      code
+    }
+  }
+}
+
+# Subscription example
+subscription onNewMessage {
+  messageSent {
+    id
+    content
+    sender {
+      id
+      username
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "name": "PrettierTest",
+  "version": "1.0.0",
+  "description": "A test file with bad formatting",
+  "scripts": {
+    "start": "node index.js",
+    "test": "jest --coverage"
+  },
+  "dependencies": {
+    "react": "^17.0.2",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "eslint": "^7.32.0",
+    "prettier": "^2.8.8"
+  },
+  "keywords": ["formatter", "prettier", "test"],
+  "author": "Jane Doe",
+  "license": "MIT",
+  "config": {
+    "settingA": true,
+    "settingB": false,
+    "nested": {
+      "level1": {
+        "level2": {
+          "level3": {
+            "value": [1, 2, 3, { "deep": true }]
+          }
+        }
+      }
+    }
+  },
+  "nullValue": null,
+  "numberList": [5, 10, 15, 20, 25],
+  "bools": {
+    "on": true,
+    "off": false
+  }
+}
