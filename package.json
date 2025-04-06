@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "rollup -c",
-    "extract-strings": "node src/scripts/extract-strings.js",
+    "extract-strings": "node scripts/extract-strings.js",
     "prepare:testfiles": "node scripts/scramble-testfiles.js"
   },
   "repository": {
