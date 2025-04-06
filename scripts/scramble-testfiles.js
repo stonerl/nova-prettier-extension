@@ -345,9 +345,11 @@ function simulateLessMistakes(content) {
 }
 
 function simulateVueMistakes(content) {
-  const templateMatch = content.match(/<template>([\s\S]*?)<\/template>/)
-  const scriptMatch = content.match(/<script[\s\S]*?<\/script>/)
-  const styleMatch = content.match(/<style[\s\S]*?<\/style>/)
+  const templateMatch = content.match(
+    /<template\b[^>]*>([\s\S]*?)<\/template\s*>/i,
+  )
+  const scriptMatch = content.match(/<script\b[^>]*>([\s\S]*?)<\/script[^>]*>/i)
+  const styleMatch = content.match(/<style\b[^>]*>([\s\S]*?)<\/style\s*>/i)
 
   let scrambledTemplate = ''
   let scrambledScript = ''
@@ -361,11 +363,11 @@ function simulateVueMistakes(content) {
         const trimmed = line.trim()
 
         return line
-          .replace(/:\s+(\w+)/g, ':$1') // tighten :placeholder
-          .replace(/@\s+(\w+)/g, '@$1') // tighten @click
-          .replace(/"\s+(:|@)/g, '" $1') // preserve spacing between attributes
-          .replace(/\s{2,}/g, ' ') // collapse extra spaces
-          .replace(/^\s+/g, '') // remove indent
+          .replace(/:\s+(\w+)/g, ':$1')
+          .replace(/@\s+(\w+)/g, '@$1')
+          .replace(/"\s+(:|@)/g, '" $1')
+          .replace(/\s{2,}/g, ' ')
+          .replace(/^\s+/g, '')
       })
       .join('\n')
   }
