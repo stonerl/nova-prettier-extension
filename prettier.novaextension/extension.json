@@ -21,6 +21,7 @@
     "onLanguage:flow",
     "onLanguage:graphql",
     "onLanguage:html",
+    "onLanguage:java",
     "onLanguage:javascript",
     "onLanguage:json",
     "onLanguage:jsx",

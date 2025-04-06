@@ -1104,6 +1104,34 @@
         ]
       },
       {
+        "key": "prettier.plugins.prettier-plugin-java.section",
+        "title": "prettier-plugin-java",
+        "description": "An opinionated Java code formatter",
+        "link": "https://www.jhipster.tech/prettier-java/",
+        "type": "section",
+        "children": [
+          {
+            "key": "prettier.plugins.prettier-plugin-java.enabled",
+            "config": {
+              "title": "Plugin Enabled",
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "title": "Plugin Status",
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          }
+        ]
+      },
+      {
         "key": "prettier.plugins.prettier-plugin-nginx.section",
         "title": "prettier-plugin-nginx",
         "description": "Plugin for Prettier that beautifies NGINX configuration files.",

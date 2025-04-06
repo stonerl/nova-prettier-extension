@@ -320,6 +320,9 @@ class Formatter {
     const nginxPluginEnabled = getConfigWithWorkspaceOverride(
       'prettier.plugins.prettier-plugin-nginx.enabled',
     )
+    const javaPluginEnabled = getConfigWithWorkspaceOverride(
+      'prettier.plugins.prettier-plugin-java.enabled',
+    )
 
     /// Retrieve the configured SQL formatter type
     const sqlFormatter = getConfigWithWorkspaceOverride(
@@ -370,6 +373,17 @@ class Formatter {
             nova.extension.path,
             'node_modules',
             'prettier-plugin-nginx',
+            'dist',
+            'index.js',
+          ),
+        )
+      }
+      if (document.syntax === 'java' && javaPluginEnabled) {
+        plugins.push(
+          nova.path.join(
+            nova.extension.path,
+            'node_modules',
+            'prettier-plugin-java',
             'dist',
             'index.js',
           ),
