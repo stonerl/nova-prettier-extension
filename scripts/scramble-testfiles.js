@@ -20,6 +20,7 @@ const mistakeInjectors = {
   '.yaml': simulateYamlMistakes,
   '.sql': simulateSqlMistakes,
   '.conf': simulateNginxMistakes,
+  '.java': simulateJavaMistakes,
 }
 
 fs.readdirSync(TESTS_DIR).forEach((file) => {
@@ -530,6 +531,44 @@ function simulateNginxMistakes(content) {
       scrambled = scrambled.replace(/\s*}\s*/g, ' } ')
 
       return scrambled
+    })
+    .join('\n')
+}
+
+function simulateJavaMistakes(content) {
+  return content
+    .split('\n')
+    .map((line) => {
+      const trimmed = line.trim()
+
+      // Don't touch comments or annotations
+      if (
+        trimmed === '' ||
+        trimmed.startsWith('//') ||
+        trimmed.startsWith('/*') ||
+        trimmed.startsWith('*') ||
+        trimmed.startsWith('@')
+      ) {
+        return line
+      }
+
+      let modified = line
+
+      // Add safe extra spaces between identifiers (but not operators)
+      modified = modified.replace(
+        /\b([a-zA-Z_][a-zA-Z0-9_]*)\b(?=\s+\b[a-zA-Z_][a-zA-Z0-9_]*\b)/g,
+        (match) => match + ' '.repeat(Math.random() < 0.5 ? 0 : 1),
+      )
+
+      // Slightly mess with spacing after control keywords
+      modified = modified.replace(
+        /\b(public|private|protected|if|else|while|for|return|static|final|class)\b\s+/g,
+        (match, keyword) =>
+          keyword + ' '.repeat(1 + Math.floor(Math.random() * 2)),
+      )
+
+      // Avoid touching operators or structural punctuation
+      return modified
     })
     .join('\n')
 }
