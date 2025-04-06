@@ -1,0 +1,77 @@
+// Variables
+$primary-color: #3498db;
+$padding: 10px 20px;
+$font-stack: 'Helvetica Neue', Arial, sans-serif;
+
+// Mixins
+@mixin button-style($bg, $fg: #fff) {
+  background-color: $bg;
+  color: $fg;
+  padding: $padding;
+  border: none;
+  border-radius: 4px;
+  &:hover {
+    background-color: darken($bg, 10%);
+  }
+}
+
+// Functions
+@function spacing($factor) {
+  @return $factor * 8px;
+}
+
+// Nested selectors and media queries
+.container {
+  font-family: $font-stack;
+  padding: spacing(2);
+
+  h1,
+  h2 {
+    color: $primary-color;
+    margin-bottom: spacing(1);
+  }
+
+  .button {
+    @include button-style($primary-color);
+    font-weight: bold;
+    margin-top: 16px;
+
+    &.disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    padding: spacing(1);
+
+    .button {
+      width: 100%;
+    }
+  }
+}
+
+// Placeholder selectors and inheritance
+%card {
+  border: 1px solid #ccc;
+  padding: spacing(2);
+  background: #fff;
+}
+
+.card {
+  @extend %card;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+// List + map usage
+$colors: (
+  primary: #3498db,
+  danger: #e74c3c,
+  success: #2ecc71,
+);
+
+@each $name, $color in $colors {
+  .text-#{$name} {
+    color: $color;
+  }
+}

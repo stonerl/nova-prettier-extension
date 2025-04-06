@@ -1,0 +1,51 @@
+// Variables
+@primary-color: #4a90e2;
+@padding: 10px 15px;
+@font-stack: 'Helvetica Neue', Arial, sans-serif;
+
+// Mixins
+.rounded(@radius: 4px) {
+  border-radius: @radius;
+  -webkit-border-radius: @radius;
+}
+
+// Nesting and selectors
+.container {
+  padding: @padding;
+  background: @primary-color;
+  font-family: @font-stack;
+
+  .header,
+  .footer {
+    color: white;
+    .rounded(6px);
+  }
+
+  &:hover {
+    background: darken(@primary-color, 10%);
+  }
+
+  @media (max-width: 768px) {
+    padding: 5px;
+    .header {
+      font-size: 12px;
+    }
+  }
+}
+
+// Operations
+.column {
+  width: (100% / 3);
+  margin-left: (20px / 2);
+}
+
+// Escaping
+.icon-@{name} {
+  background-image: url('/icons/@{name}.png');
+}
+
+// Functions
+.banner {
+  background-color: lighten(@primary-color, 20%);
+  border: 1px solid fade(@primary-color, 50%);
+}
