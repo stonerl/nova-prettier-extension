@@ -2,7 +2,7 @@ const fs = require('fs')
 const path = require('path')
 
 // Project root directory
-const PROJECT_ROOT = path.resolve(__dirname, '../..')
+const PROJECT_ROOT = path.resolve(__dirname, '..')
 const TRANSLATIONS_DIR = path.join(PROJECT_ROOT, 'translations')
 
 const unifiedConfigPath = path.join(PROJECT_ROOT, 'src/unifiedConfig.json')
