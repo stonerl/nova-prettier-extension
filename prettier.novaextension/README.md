@@ -11,6 +11,7 @@ Experience seamless code formatting with Prettier directly in Nova.
   `Flow`,
   `GraphQL`,
   `HTML`,
+  `Java`,
   `JavaScript`,
   `JSON`,
   `JSX`,
@@ -37,12 +38,19 @@ You can freely switch between both; just make sure that you only have one enable
 - ✅ **[@prettier/plugin-php](https://github.com/prettier/plugin-php)**
 - ✅ **[@prettier/plugin-xml](https://github.com/prettier/plugin-xml)**
 - ✅ **[prettier-plugin-sql](https://github.com/un-ts/prettier/tree/master/packages/sql)**
+- ⚠️ **[prettier-plugin-java](https://www.jhipster.tech/prettier-java/)**
+- ⚠️ **[prettier-plugin-properties](https://github.com/eemeli/prettier-plugin-properties)**
 - ⚠️ **[prettier-plugin-nginx](https://github.com/jxddk/prettier-plugin-nginx)**
 
 ✅ Enabled by default
 
-⚠️ Please install the [NGINX for Nova](https://extensions.panic.com/extensions/joncoole/joncoole.nginx)
-extension before enabling this plugin.
+⚠️ **Note:** Before enabling any of the following plugins, make sure the corresponding Nova language extensions are installed:
+
+- `prettier-plugin-java` and `prettier-plugin-properties`
+  ➤ Requires the [Java Language Definition](https://extensions.panic.com/extensions/me.frmr/me.frmr.JavaLanguage/) extension
+
+- `prettier-plugin-nginx`
+  ➤ Requires the [NGINX for Nova](https://extensions.panic.com/extensions/joncoole/joncoole.nginx) extension
 
 ## Using external plugins in your project
 

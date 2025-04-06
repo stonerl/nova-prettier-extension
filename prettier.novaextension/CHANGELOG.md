@@ -1,3 +1,13 @@
+## 3.5.10 - 2025-05-06
+
+### Added
+
+- Added support for formatting Java and `.properties` files
+- Included `prettier-plugin-java` for Java source formatting
+- Included `prettier-plugin-properties` for Java-style `.properties` configuration files
+
+See the README for usage details.
+
 ## 3.5.9 - 2025-04-05
 
 ### Changed
