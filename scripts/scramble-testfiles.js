@@ -21,6 +21,7 @@ const mistakeInjectors = {
   '.sql': simulateSqlMistakes,
   '.conf': simulateNginxMistakes,
   '.java': simulateJavaMistakes,
+  '.properties': simulatePropertiesMistake,
 }
 
 fs.readdirSync(TESTS_DIR).forEach((file) => {
@@ -569,6 +570,46 @@ function simulateJavaMistakes(content) {
 
       // Avoid touching operators or structural punctuation
       return modified
+    })
+    .join('\n')
+}
+
+function simulatePropertiesMistake(content) {
+  return content
+    .split('\n')
+    .map((line) => {
+      const trimmed = line.trim()
+
+      // Leave comments and blank lines alone
+      if (trimmed === '' || trimmed.startsWith('#')) return line
+
+      // Continuation or multi-line: keep indent and continuation slashes
+      if (line.match(/\\\s*$/)) return line
+
+      // Match key-value pairs with either = or :
+      const match = line.match(/^(\s*)([^:=]+?)(\s*)([:=])(\s*)(.*)$/)
+      if (!match) return line
+
+      const [, indent, key, preSepSpace, sep, postSepSpace, value] = match
+
+      let newLine = indent
+
+      // Some lines lose spacing around separators
+      const random = Math.random()
+      if (random < 0.3) {
+        newLine += key + sep + value
+      } else if (random < 0.6) {
+        newLine += key + sep + ' ' + value
+      } else {
+        newLine += key + ' ' + sep + '  ' + value
+      }
+
+      // Occasionally indent the line
+      if (Math.random() < 0.1) {
+        newLine = '  ' + newLine
+      }
+
+      return newLine
     })
     .join('\n')
 }
