@@ -1104,6 +1104,115 @@
         ]
       },
       {
+        "key": "prettier.plugins.prettier-plugin-java.section",
+        "title": "prettier-plugin-java",
+        "description": "An opinionated Java code formatter",
+        "link": "https://www.jhipster.tech/prettier-java/",
+        "type": "section",
+        "children": [
+          {
+            "key": "prettier.plugins.prettier-plugin-java.enabled",
+            "config": {
+              "title": "Plugin Enabled",
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "title": "Plugin Status",
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          }
+        ]
+      },
+      {
+        "key": "prettier.plugins.prettier-plugin-properties.section",
+        "title": "prettier-plugin-properties",
+        "description": "Prettier plugin for .properties files",
+        "link": "https://github.com/eemeli/prettier-plugin-properties",
+        "type": "section",
+        "children": [
+          {
+            "key": "prettier.plugins.prettier-plugin-properties.enabled",
+            "config": {
+              "title": "Plugin Enabled",
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "title": "Plugin Status",
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-properties.escapeNonLatin1",
+            "title": "Escape Non-Latin-1 Characters",
+            "description": "Escape with \\u all non-Latin-1 characters, to allow safely encoding output as ISO-8859-1.",
+            "link": "https://github.com/eemeli/prettier-plugin-properties#escape-non-latin-1-characters",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-properties.keySeparator",
+            "title": "Key Separator",
+            "description": "Set the separator to use between a property key and its value.",
+            "link": "https://github.com/eemeli/prettier-plugin-properties?tab=readme-ov-file#key-separator",
+            "type": "enum",
+            "radio": false,
+            "config": {
+              "values": [
+                [" ", "\" \""],
+                [":", "\":\""],
+                ["=", "\"=\""],
+                [": ", "\": \""],
+                ["= ", "\"= \""],
+                [" : ", "\" : \""],
+                [" = ", "\" = \""]
+              ],
+              "default": " = "
+            },
+            "configWorkspace": {
+              "values": [
+                [null, "Global Setting"],
+                [" ", "\" \""],
+                [":", "\":\""],
+                ["=", "\"=\""],
+                [": ", "\": \""],
+                ["= ", "\"= \""],
+                [" : ", "\" : \""],
+                [" = ", "\" = \""]
+              ],
+              "default": null
+            }
+          }
+        ]
+      },
+      {
         "key": "prettier.plugins.prettier-plugin-nginx.section",
         "title": "prettier-plugin-nginx",
         "description": "Plugin for Prettier that beautifies NGINX configuration files.",

@@ -20,6 +20,8 @@ const mistakeInjectors = {
   '.yaml': simulateYamlMistakes,
   '.sql': simulateSqlMistakes,
   '.conf': simulateNginxMistakes,
+  '.java': simulateJavaMistakes,
+  '.properties': simulatePropertiesMistake,
 }
 
 fs.readdirSync(TESTS_DIR).forEach((file) => {
@@ -530,6 +532,84 @@ function simulateNginxMistakes(content) {
       scrambled = scrambled.replace(/\s*}\s*/g, ' } ')
 
       return scrambled
+    })
+    .join('\n')
+}
+
+function simulateJavaMistakes(content) {
+  return content
+    .split('\n')
+    .map((line) => {
+      const trimmed = line.trim()
+
+      // Don't touch comments or annotations
+      if (
+        trimmed === '' ||
+        trimmed.startsWith('//') ||
+        trimmed.startsWith('/*') ||
+        trimmed.startsWith('*') ||
+        trimmed.startsWith('@')
+      ) {
+        return line
+      }
+
+      let modified = line
+
+      // Add safe extra spaces between identifiers (but not operators)
+      modified = modified.replace(
+        /\b([a-zA-Z_][a-zA-Z0-9_]*)\b(?=\s+\b[a-zA-Z_][a-zA-Z0-9_]*\b)/g,
+        (match) => match + ' '.repeat(Math.random() < 0.5 ? 0 : 1),
+      )
+
+      // Slightly mess with spacing after control keywords
+      modified = modified.replace(
+        /\b(public|private|protected|if|else|while|for|return|static|final|class)\b\s+/g,
+        (match, keyword) =>
+          keyword + ' '.repeat(1 + Math.floor(Math.random() * 2)),
+      )
+
+      // Avoid touching operators or structural punctuation
+      return modified
+    })
+    .join('\n')
+}
+
+function simulatePropertiesMistake(content) {
+  return content
+    .split('\n')
+    .map((line) => {
+      const trimmed = line.trim()
+
+      // Leave comments and blank lines alone
+      if (trimmed === '' || trimmed.startsWith('#')) return line
+
+      // Continuation or multi-line: keep indent and continuation slashes
+      if (line.match(/\\\s*$/)) return line
+
+      // Match key-value pairs with either = or :
+      const match = line.match(/^(\s*)([^:=]+?)(\s*)([:=])(\s*)(.*)$/)
+      if (!match) return line
+
+      const [, indent, key, preSepSpace, sep, postSepSpace, value] = match
+
+      let newLine = indent
+
+      // Some lines lose spacing around separators
+      const random = Math.random()
+      if (random < 0.3) {
+        newLine += key + sep + value
+      } else if (random < 0.6) {
+        newLine += key + sep + ' ' + value
+      } else {
+        newLine += key + ' ' + sep + '  ' + value
+      }
+
+      // Occasionally indent the line
+      if (Math.random() < 0.1) {
+        newLine = '  ' + newLine
+      }
+
+      return newLine
     })
     .join('\n')
 }
