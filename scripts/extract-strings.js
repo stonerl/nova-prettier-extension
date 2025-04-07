@@ -104,12 +104,10 @@ languages.forEach((lang) => {
   }
 
   const merged = Object.fromEntries(
-    Object.keys(result)
-      .sort()
-      .map((key) => [
-        key,
-        existing[key] ?? (lang === 'en.lproj' ? result[key] : ''),
-      ]),
+    Object.keys(result).map((key) => [
+      key,
+      existing[key] ?? (lang === 'en.lproj' ? result[key] : ''),
+    ]),
   )
 
   fs.writeFileSync(outputPath, JSON.stringify(merged, null, 2))
