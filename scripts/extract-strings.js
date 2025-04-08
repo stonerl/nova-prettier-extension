@@ -71,6 +71,25 @@ if (fs.existsSync(unifiedConfigPath)) {
 
       extractTranslatableValues(node.config, node.configWorkspace)
 
+      // Extract second element from any tuple in "values" array in config
+      if (node.config?.values && Array.isArray(node.config.values)) {
+        for (const tuple of node.config.values) {
+          if (Array.isArray(tuple) && tuple.length > 1 && tuple[1])
+            result[tuple[1]] = tuple[1]
+        }
+      }
+
+      // Extract second element from any tuple in "values" array in configWorkspace
+      if (
+        node.configWorkspace?.values &&
+        Array.isArray(node.configWorkspace.values)
+      ) {
+        for (const tuple of node.configWorkspace.values) {
+          if (Array.isArray(tuple) && tuple.length > 1 && tuple[1])
+            result[tuple[1]] = tuple[1]
+        }
+      }
+
       if (Array.isArray(node.children)) extractFromUnified(node.children)
     }
   }
