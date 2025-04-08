@@ -52,16 +52,22 @@ if (fs.existsSync(unifiedConfigPath)) {
     for (const node of nodes) {
       if (node.title) result[node.title] = node.title
       if (node.description) result[node.description] = node.description
+      if (node.placeholder) result[node.placeholder] = node.placeholder
 
       if (node.config?.title) result[node.config.title] = node.config.title
       if (node.config?.description)
         result[node.config.description] = node.config.description
+      if (node.config?.placeholder)
+        result[node.config.placeholder] = node.config.placeholder
 
       if (node.configWorkspace?.title)
         result[node.configWorkspace.title] = node.configWorkspace.title
       if (node.configWorkspace?.description)
         result[node.configWorkspace.description] =
           node.configWorkspace.description
+      if (node.configWorkspace?.placeholder)
+        result[node.configWorkspace.placeholder] =
+          node.configWorkspace.placeholder
 
       extractTranslatableValues(node.config, node.configWorkspace)
 
