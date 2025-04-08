@@ -52,18 +52,43 @@ if (fs.existsSync(unifiedConfigPath)) {
     for (const node of nodes) {
       if (node.title) result[node.title] = node.title
       if (node.description) result[node.description] = node.description
+      if (node.placeholder) result[node.placeholder] = node.placeholder
 
       if (node.config?.title) result[node.config.title] = node.config.title
       if (node.config?.description)
         result[node.config.description] = node.config.description
+      if (node.config?.placeholder)
+        result[node.config.placeholder] = node.config.placeholder
 
       if (node.configWorkspace?.title)
         result[node.configWorkspace.title] = node.configWorkspace.title
       if (node.configWorkspace?.description)
         result[node.configWorkspace.description] =
           node.configWorkspace.description
+      if (node.configWorkspace?.placeholder)
+        result[node.configWorkspace.placeholder] =
+          node.configWorkspace.placeholder
 
       extractTranslatableValues(node.config, node.configWorkspace)
+
+      // Extract second element from any tuple in "values" array in config
+      if (node.config?.values && Array.isArray(node.config.values)) {
+        for (const tuple of node.config.values) {
+          if (Array.isArray(tuple) && tuple.length > 1 && tuple[1])
+            result[tuple[1]] = tuple[1]
+        }
+      }
+
+      // Extract second element from any tuple in "values" array in configWorkspace
+      if (
+        node.configWorkspace?.values &&
+        Array.isArray(node.configWorkspace.values)
+      ) {
+        for (const tuple of node.configWorkspace.values) {
+          if (Array.isArray(tuple) && tuple.length > 1 && tuple[1])
+            result[tuple[1]] = tuple[1]
+        }
+      }
 
       if (Array.isArray(node.children)) extractFromUnified(node.children)
     }
@@ -76,6 +101,9 @@ if (fs.existsSync(unifiedConfigPath)) {
 // Parse extension.json
 if (fs.existsSync(extensionJsonPath)) {
   const ext = JSON.parse(fs.readFileSync(extensionJsonPath, 'utf8'))
+
+  // Extract root-level keys
+  if (ext.description) result[ext.description] = ext.description
 
   const commandSections = ext.commands || {}
   for (const section of Object.values(commandSections)) {
