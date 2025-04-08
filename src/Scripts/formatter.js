@@ -41,7 +41,6 @@ const PRETTIER_OPTIONS = [
 
 const PRETTIER_PHP_PLUGIN_OPTIONS = [
   'phpVersion',
-  'singleQuote',
   'trailingCommaPHP',
   'braceStyle',
 ]
