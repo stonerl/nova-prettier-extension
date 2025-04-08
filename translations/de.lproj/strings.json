@@ -227,7 +227,7 @@
   "Vue": "Vue",
   "XML": "XML",
   "YAML": "YAML",
-  "Prettier integration for Nova – format JavaScript, TypeScript, JSON, CSS, HTML, Markdown, and more, with built-in support for Java, PHP, SQL, and XML – no extra setup required.": "",
+  "Prettier integration for Nova – format JavaScript, TypeScript, JSON, CSS, HTML, Markdown, and more, with built-in support for Java, PHP, SQL, and XML – no extra setup required.": "Prettier-Integration für Nova – Formatiert JavaScript, TypeScript, JSON, CSS, HTML, Markdown und mehr, mit integrierter Unterstützung für Java, PHP, SQL und XML – keine zusätzliche Einrichtung erforderlich.",
   "Format Document": "Dokument formatieren",
   "Format Selection": "Auswahl formatieren",
   "Save Without Formatting": "Speichern ohne Formatierung"
