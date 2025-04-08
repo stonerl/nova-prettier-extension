@@ -1,0 +1,65 @@
+name: Pull Translations from Weblate
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 8 * * *'  # Every day at 08:00 UTC
+
+jobs:
+  pull-weblate:
+    runs-on: ubuntu-latest
+
+    env:
+      WEBLATE_REPO: "https://hosted.weblate.org/git/prettier-for-nova/"
+      WEBLATE_USER: ${{ secrets.WEBLATE_USERNAME }}
+      WEBLATE_TOKEN: ${{ secrets.WEBLATE_TOKEN }}
+
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Git
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+      - name: Clone Weblate repo
+        run: |
+          git clone https://${WEBLATE_USER}:${WEBLATE_TOKEN}@hosted.weblate.org/git/prettier-for-nova/ weblate
+
+      - name: Copy translation files
+        run: |
+          BRANCH="auto/weblate-sync-$(date +%Y%m%d)"
+          echo "BRANCH=$BRANCH" >> $GITHUB_ENV
+          git checkout -b "$BRANCH"
+
+          # Copy relevant files (adjust pattern if needed)
+          rsync -av --delete --include='*/' --include='*.json' --exclude='*' \
+            weblate/ ./localizations/
+
+      - name: Commit and push if changed
+        id: commit
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git add .
+            git commit -m "Update translations from Weblate"
+            git push -u origin "$BRANCH"
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "No translation changes."
+            git checkout main
+            git branch -D "$BRANCH"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create PR
+        if: steps.commit.outputs.has_changes == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: "Sync translations from Weblate"
+          body: "This PR includes the latest translations synced from Weblate."
+          base: main
+          branch: ${{ env.BRANCH }}
