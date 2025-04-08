@@ -408,7 +408,7 @@
       {
         "key": "prettier.default-config.endOfLine",
         "title": "End of Line",
-        "description": "Newline control character",
+        "description": "Specifies the newline control character.",
         "link": "https://prettier.io/docs/options#end-of-line",
         "type": "enum",
         "radio": false,
@@ -548,25 +548,6 @@
                 ["8.1", "8.1"],
                 ["8.2", "8.2"]
               ]
-            }
-          },
-          {
-            "key": "prettier.plugins.prettier-plugin-php.singleQuote",
-            "title": "Single Quote",
-            "description": "If set to true, strings that use double quotes but do not rely on the features they add, will be reformatted.",
-            "config": {
-              "type": "boolean",
-              "default": false
-            },
-            "configWorkspace": {
-              "type": "enum",
-              "radio": false,
-              "values": [
-                [null, "Global Setting"],
-                [true, "Enabled"],
-                [false, "Disabled"]
-              ],
-              "default": null
             }
           },
           {
@@ -720,7 +701,7 @@
       {
         "key": "prettier.plugins.prettier-plugin-sql.section",
         "title": "prettier-plugin-sql",
-        "description": "An opinionated sql formatter plugin for Prettier",
+        "description": "SQL formatter plugin for Prettier",
         "link": "https://github.com/un-ts/prettier/tree/master/packages/sql",
         "type": "section",
         "children": [
@@ -766,7 +747,7 @@
           {
             "key": "prettier.plugins.prettier-plugin-sql.sql-formatter.section",
             "title": "sql-formatter",
-            "description": "Options for sql-formatter.",
+            "description": "Options for sql-formatter",
             "link": "https://github.com/sql-formatter-org/sql-formatter?tab=readme-ov-file#configuration-options",
             "type": "section",
             "children": [
@@ -912,7 +893,7 @@
               {
                 "key": "prettier.plugins.prettier-plugin-sql.sql-formatter.logicalOperatorNewline",
                 "title": "Logical Operator Newline",
-                "description": "Newline before or after boolean operator (AND, OR, XOR)",
+                "description": "Newline before or after boolean operator (AND, OR, XOR).",
                 "link": "https://github.com/sql-formatter-org/sql-formatter/blob/master/docs/logicalOperatorNewline.md",
                 "type": "enum",
                 "radio": false,
@@ -1106,7 +1087,7 @@
       {
         "key": "prettier.plugins.prettier-plugin-java.section",
         "title": "prettier-plugin-java",
-        "description": "An opinionated Java code formatter",
+        "description": "Java formatter plugin for Prettier",
         "link": "https://www.jhipster.tech/prettier-java/",
         "type": "section",
         "children": [
@@ -1215,7 +1196,7 @@
       {
         "key": "prettier.plugins.prettier-plugin-nginx.section",
         "title": "prettier-plugin-nginx",
-        "description": "Plugin for Prettier that beautifies NGINX configuration files.",
+        "description": "NGINX configuration files formatter plugin for Prettier",
         "link": "https://github.com/jxddk/prettier-plugin-nginx",
         "type": "section",
         "children": [
@@ -1341,7 +1322,7 @@
       {
         "key": "prettier.format-on-save.ignore-without-config",
         "title": "Ignore Without Config",
-        "description": "When enabled, documents without a Prettier configuration file will not be formatted on save",
+        "description": "When enabled, documents without a Prettier configuration file will not be formatted on save.",
         "config": {
           "type": "boolean",
           "default": false
