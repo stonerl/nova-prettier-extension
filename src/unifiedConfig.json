@@ -150,7 +150,11 @@
         "radio": false,
         "config": {
           "default": "as-needed",
-          "values": ["as-needed", "consistent", "preserve"]
+          "values": [
+            ["as-needed", "as-needed"],
+            ["consistent", "consistent"],
+            ["preserve", "preserve"]
+          ]
         },
         "configWorkspace": {
           "default": null,
@@ -191,7 +195,11 @@
         "radio": false,
         "config": {
           "default": "all",
-          "values": ["all", "es5", "none"]
+          "values": [
+            ["all", "all"],
+            ["es5", "es5"],
+            ["none", "none"]
+          ]
         },
         "configWorkspace": {
           "default": null,
@@ -232,7 +240,10 @@
         "radio": false,
         "config": {
           "default": "preserve",
-          "values": ["preserve", "collapse"]
+          "values": [
+            ["preserve", "preserve"],
+            ["collapse", "collapse"]
+          ]
         },
         "configWorkspace": {
           "values": [
@@ -292,7 +303,10 @@
         "radio": false,
         "config": {
           "default": "always",
-          "values": ["always", "avoid"]
+          "values": [
+            ["always", "always"],
+            ["avoid", "avoid"]
+          ]
         },
         "configWorkspace": {
           "default": null,
@@ -352,7 +366,11 @@
         "radio": false,
         "config": {
           "default": "preserve",
-          "values": ["always", "never", "preserve"]
+          "values": [
+            ["always", "always"],
+            ["never", "never"],
+            ["preserve", "preserve"]
+          ]
         },
         "configWorkspace": {
           "default": null,
@@ -373,7 +391,11 @@
         "radio": false,
         "config": {
           "default": "css",
-          "values": ["css", "strict", "ignore"]
+          "values": [
+            ["css", "css"],
+            ["strict", "strict"],
+            ["ignore", "ignore"]
+          ]
         },
         "configWorkspace": {
           "default": null,
@@ -414,7 +436,12 @@
         "radio": false,
         "config": {
           "default": "lf",
-          "values": ["lf", "crlf", "cr", "auto"]
+          "values": [
+            ["lf", "lf"],
+            ["crlf", "crlf"],
+            ["cr", "cr"],
+            ["auto", "auto"]
+          ]
         },
         "configWorkspace": {
           "default": null,
@@ -436,7 +463,10 @@
         "radio": false,
         "config": {
           "default": "auto",
-          "values": ["auto", "off"]
+          "values": [
+            ["auto", "auto"],
+            ["off", "off"]
+          ]
         },
         "configWorkspace": {
           "default": null,
@@ -511,21 +541,21 @@
             "config": {
               "default": "7.0",
               "values": [
-                "5.0",
-                "5.1",
-                "5.2",
-                "5.3",
-                "5.4",
-                "5.5",
-                "5.6",
-                "7.0",
-                "7.1",
-                "7.2",
-                "7.3",
-                "7.4",
-                "8.0",
-                "8.1",
-                "8.2"
+                ["5.0", "5.0"],
+                ["5.1", "5.1"],
+                ["5.2", "5.2"],
+                ["5.3", "5.3"],
+                ["5.4", "5.4"],
+                ["5.5", "5.5"],
+                ["5.6", "5.6"],
+                ["7.0", "7.0"],
+                ["7.1", "7.1"],
+                ["7.2", "7.2"],
+                ["7.3", "7.3"],
+                ["7.4", "7.4"],
+                ["8.0", "8.0"],
+                ["8.1", "8.1"],
+                ["8.2", "8.2"]
               ]
             },
             "configWorkspace": {
@@ -577,7 +607,10 @@
             "radio": false,
             "config": {
               "default": "per-cs",
-              "values": ["per-cs", "1tbs"]
+              "values": [
+                ["per-cs", "per-cs"],
+                ["1tbs", "1tbs"]
+              ]
             },
             "configWorkspace": {
               "default": null,
@@ -625,7 +658,11 @@
             "radio": false,
             "config": {
               "default": "preserve",
-              "values": ["preserve", "double", "single"]
+              "values": [
+                ["preserve", "preserve"],
+                ["double", "double"],
+                ["single", "single"]
+              ]
             },
             "configWorkspace": {
               "default": null,
@@ -684,7 +721,11 @@
             "radio": false,
             "config": {
               "default": "strict",
-              "values": ["strict", "preserve", "ignore"]
+              "values": [
+                ["strict", "strict"],
+                ["preserve", "preserve"],
+                ["ignore", "ignore"]
+              ]
             },
             "configWorkspace": {
               "default": null,
@@ -733,7 +774,10 @@
             "radio": false,
             "config": {
               "default": "sql-formatter",
-              "values": ["sql-formatter", "node-sql-parser"]
+              "values": [
+                ["sql-formatter", "sql-formatter"],
+                ["node-sql-parser", "node-sql-parser"]
+              ]
             },
             "configWorkspace": {
               "default": null,
@@ -761,48 +805,48 @@
                 "config": {
                   "default": "sql",
                   "values": [
-                    "bigquery",
-                    "db2",
-                    "db2i",
-                    "hive",
-                    "mariadb",
-                    "mysql",
-                    "n1ql",
-                    "plsql",
-                    "postgresql",
-                    "redshift",
-                    "singlestoredb",
-                    "snowflake",
-                    "spark",
-                    "sql",
-                    "sqlite",
-                    "transactsql",
-                    "trino",
-                    "tsql"
+                    ["bigquery", "BigQuery"],
+                    ["db2", "DB2"],
+                    ["db2i", "DB2i"],
+                    ["hive", "Hive"],
+                    ["mariadb", "MariaDB"],
+                    ["mysql", "MySQL"],
+                    ["n1ql", "N1QL"],
+                    ["plsql", "PL/SQL"],
+                    ["postgresql", "PostgreSQL"],
+                    ["redshift", "Redshift"],
+                    ["singlestoredb", "SingleStoreDB"],
+                    ["snowflake", "Snowflake"],
+                    ["spark", "Spark"],
+                    ["sql", "SQL"],
+                    ["sqlite", "SQLite"],
+                    ["transactsql", "Transact-SQL"],
+                    ["trino", "Trino"],
+                    ["tsql", "T-SQL"]
                   ]
                 },
                 "configWorkspace": {
                   "default": null,
                   "values": [
                     [null, "Global Setting"],
-                    ["bigquery", "bigquery"],
-                    ["db2", "db2"],
-                    ["db2i", "db2i"],
-                    ["hive", "hive"],
-                    ["mariadb", "mariadb"],
-                    ["mysql", "mysql"],
-                    ["n1ql", "n1ql"],
-                    ["plsql", "plsql"],
-                    ["postgresql", "postgresql"],
-                    ["redshift", "redshift"],
-                    ["singlestoredb", "singlestoredb"],
-                    ["snowflake", "snowflake"],
-                    ["spark", "spark"],
-                    ["sql", "sql"],
-                    ["sqlite", "sqlite"],
-                    ["transactsql", "transactsql"],
-                    ["trino", "trino"],
-                    ["tsql", "tsql"]
+                    ["bigquery", "BigQuery"],
+                    ["db2", "DB2"],
+                    ["db2i", "DB2i"],
+                    ["hive", "Hive"],
+                    ["mariadb", "MariaDB"],
+                    ["mysql", "MySQL"],
+                    ["n1ql", "N1QL"],
+                    ["plsql", "PL/SQL"],
+                    ["postgresql", "PostgreSQL"],
+                    ["redshift", "Redshift"],
+                    ["singlestoredb", "SingleStoreDB"],
+                    ["snowflake", "Snowflake"],
+                    ["spark", "Spark"],
+                    ["sql", "SQL"],
+                    ["sqlite", "SQLite"],
+                    ["transactsql", "Transact-SQL"],
+                    ["trino", "Trino"],
+                    ["tsql", "T-SQL"]
                   ]
                 }
               },
@@ -815,7 +859,11 @@
                 "radio": false,
                 "config": {
                   "default": "preserve",
-                  "values": ["preserve", "upper", "lower"]
+                  "values": [
+                    ["preserve", "preserve"],
+                    ["upper", "upper"],
+                    ["lower", "lower"]
+                  ]
                 },
                 "configWorkspace": {
                   "default": null,
@@ -836,7 +884,11 @@
                 "radio": false,
                 "config": {
                   "default": "preserve",
-                  "values": ["preserve", "upper", "lower"]
+                  "values": [
+                    ["preserve", "preserve"],
+                    ["upper", "upper"],
+                    ["lower", "lower"]
+                  ]
                 },
                 "configWorkspace": {
                   "default": null,
@@ -857,7 +909,11 @@
                 "radio": false,
                 "config": {
                   "default": "preserve",
-                  "values": ["preserve", "upper", "lower"]
+                  "values": [
+                    ["preserve", "preserve"],
+                    ["upper", "upper"],
+                    ["lower", "lower"]
+                  ]
                 },
                 "configWorkspace": {
                   "default": null,
@@ -878,7 +934,11 @@
                 "radio": false,
                 "config": {
                   "default": "preserve",
-                  "values": ["preserve", "upper", "lower"]
+                  "values": [
+                    ["preserve", "preserve"],
+                    ["upper", "upper"],
+                    ["lower", "lower"]
+                  ]
                 },
                 "configWorkspace": {
                   "default": null,
@@ -899,7 +959,10 @@
                 "radio": false,
                 "config": {
                   "default": "before",
-                  "values": ["before", "after"]
+                  "values": [
+                    ["before", "before"],
+                    ["after", "after"]
+                  ]
                 },
                 "configWorkspace": {
                   "default": null,
@@ -1034,30 +1097,30 @@
                 "config": {
                   "default": "mysql",
                   "values": [
-                    "bigquery",
-                    "db2",
-                    "flinksql",
-                    "hive",
-                    "mariadb",
-                    "mysql",
-                    "postgresql",
-                    "snowflake",
-                    "transactsql"
+                    ["bigquery", "BigQuery"],
+                    ["db2", "DB2"],
+                    ["flinksql", "FlinkSQL"],
+                    ["hive", "Hive"],
+                    ["mariadb", "MariaDB"],
+                    ["mysql", "MySQL"],
+                    ["postgresql", "PostgreSQL"],
+                    ["snowflake", "Snowflake"],
+                    ["transactsql", "Transact-SQL"]
                   ]
                 },
                 "configWorkspace": {
                   "default": null,
                   "values": [
                     [null, "Global Setting"],
-                    ["bigquery", "bigquery"],
-                    ["db2", "db2"],
-                    ["flinksql", "flinksql"],
-                    ["hive", "hive"],
-                    ["mariadb", "mariadb"],
-                    ["mysql", "mysql"],
-                    ["postgresql", "postgresql"],
-                    ["snowflake", "snowflake"],
-                    ["transactsql", "transactsql"]
+                    ["bigquery", "BigQuery"],
+                    ["db2", "DB2"],
+                    ["flinksql", "FlinkSQL"],
+                    ["hive", "Hive"],
+                    ["mariadb", "MariaDB"],
+                    ["mysql", "MySQL"],
+                    ["postgresql", "PostgreSQL"],
+                    ["snowflake", "Snowflake"],
+                    ["transactsql", "Transact-SQL"]
                   ]
                 }
               },
@@ -1069,7 +1132,10 @@
                 "radio": false,
                 "config": {
                   "default": "table",
-                  "values": ["table", "column"]
+                  "values": [
+                    ["table", "table"],
+                    ["column", "column"]
+                  ]
                 },
                 "configWorkspace": {
                   "default": null,
