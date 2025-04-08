@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "build": "rollup -c",
-    "extract-strings": "node scripts/extract-strings.js",
-    "prepare:testfiles": "node scripts/scramble-testfiles.js"
+    "prepare:testfiles": "node scripts/scramble-testfiles.js",
+    "strings:copy-translations": "node scripts/copy-translated-strings.js",
+    "strings:extract": "node scripts/extract-strings.js"
   },
   "repository": {
     "type": "git",
