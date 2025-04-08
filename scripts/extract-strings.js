@@ -77,6 +77,9 @@ if (fs.existsSync(unifiedConfigPath)) {
 if (fs.existsSync(extensionJsonPath)) {
   const ext = JSON.parse(fs.readFileSync(extensionJsonPath, 'utf8'))
 
+  // Extract root-level keys
+  if (ext.description) result[ext.description] = ext.description
+
   const commandSections = ext.commands || {}
   for (const section of Object.values(commandSections)) {
     for (const cmd of section) {
