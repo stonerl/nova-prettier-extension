@@ -1,3 +1,21 @@
+## 3.5.11 - 2025-05-08
+
+### Added
+
+- Full German translation of the UI
+
+### Changed
+
+- Removed the config key `prettier.plugins.prettier-plugin-php.singleQuote`
+  (it duplicated `prettier.default-config.singleQuote`)
+- Cleaned up descriptions for several options
+- Database language names now follow official spelling
+
+All UI elements have been translated into German. If you spot anything awkward or off,
+head over to [Weblate](https://hosted.weblate.org/projects/prettier-for-nova/) and suggest improvements.
+
+Chinese, French, and Japanese translations still need contributors — feel free to jump in! 😄
+
 ## 3.5.10 - 2025-05-06
 
 ### Added
