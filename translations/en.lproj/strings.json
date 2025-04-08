@@ -227,7 +227,7 @@
   "Vue": "Vue",
   "XML": "XML",
   "YAML": "YAML",
-  "Prettier integration for Nova—instantly formats JavaScript, TypeScript, JSON, CSS, HTML, Markdown, and more, with built-in support for Java, PHP, SQL, and XML—no extra setup required.": "Prettier integration for Nova—instantly formats JavaScript, TypeScript, JSON, CSS, HTML, Markdown, and more, with built-in support for Java, PHP, SQL, and XML—no extra setup required.",
+  "Prettier integration for Nova – format JavaScript, TypeScript, JSON, CSS, HTML, Markdown, and more, with built-in support for Java, PHP, SQL, and XML – no extra setup required.": "Prettier integration for Nova – format JavaScript, TypeScript, JSON, CSS, HTML, Markdown, and more, with built-in support for Java, PHP, SQL, and XML – no extra setup required.",
   "Format Document": "Format Document",
   "Format Selection": "Format Selection",
   "Save Without Formatting": "Save Without Formatting"
