@@ -55,6 +55,8 @@ const minifyConfigFile = (filePath) => {
 // Minify the output files
 minifyConfigFile('./prettier.novaextension/config.json')
 minifyConfigFile('./prettier.novaextension/configWorkspace.json')
+minifyConfigFile('./prettier.novaextension/de.lproj/strings.json')
+minifyConfigFile('./prettier.novaextension/en.lproj/strings.json')
 
 export default [
   {
