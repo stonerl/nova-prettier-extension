@@ -31,6 +31,7 @@ class PrettierExtension {
 
   setupConfiguration() {
     nova.config.remove('prettier.use-compatibility-mode')
+    nova.config.remove('prettier.plugins.prettier-plugin-php.singleQuote')
     sanitizePrettierConfig()
 
     observeConfigWithWorkspaceOverride(
