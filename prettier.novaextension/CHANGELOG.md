@@ -1,10 +1,13 @@
-## 3.5.13 - 2025-04-09
+## 3.5.14 - 2025-04-09
+
+> Note: This version supersedes 3.5.13, which was briefly published and then withdrawn due to a forgotten code update.
 
 ### Changed
 
 - Switched to Prettier’s native `formatWithCursor` for cursor preservation during formatting.
 - Removed the custom diff-based cursor logic and `fast-diff` dependency.
 - Cursor handling is now handled by Prettier directly, making the code simpler and more reliable.
+- Editor now automatically scrolls to the restored cursor position after formatting.
 
 ### Performance
 
