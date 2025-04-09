@@ -1,3 +1,16 @@
+## 3.5.13 - 2025-04-09
+
+### Changed
+
+- Switched to Prettier’s native `formatWithCursor` for cursor preservation during formatting.
+- Removed the custom diff-based cursor logic and `fast-diff` dependency.
+- Cursor handling is now handled by Prettier directly, making the code simpler and more reliable.
+
+### Performance
+
+- Formatting is now **dramatically faster**.
+- A 49,395-character JSON file that previously took **30 seconds** to format now completes in just **20 milliseconds**.
+
 ## 3.5.12 - 2025-04-09
 
 ### Fixed
