@@ -35,6 +35,13 @@ function getConfigWithWorkspaceOverride(name) {
   return workspaceConfig === null ? extensionConfig : workspaceConfig
 }
 
+function pluginEnabled(syntax) {
+  const key = `prettier.plugins.prettier-plugin-${
+    syntax === 'java-properties' ? 'properties' : syntax
+  }.enabled`
+  return getConfigWithWorkspaceOverride(key)
+}
+
 function observeConfigWithWorkspaceOverride(name, fn) {
   let ignored = false
   function wrapped(...args) {
@@ -158,4 +165,5 @@ module.exports = {
   ProcessError,
   handleProcessResult,
   sanitizePrettierConfig,
+  pluginEnabled,
 }
