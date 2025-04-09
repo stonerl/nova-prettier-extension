@@ -576,10 +576,11 @@ class Formatter {
       e.replace(documentRange, formatted)
     })
 
-    // New cursor position comes from the formatter, fallback to end-of-range
     const cursorOffset =
       this._cursorOffset != null ? this._cursorOffset : editor.selectedRange.end
+
     editor.selectedRanges = [new Range(cursorOffset, cursorOffset)]
+    editor.scrollToPosition(cursorOffset)
   }
 
   async replace(editor, formatted) {
