@@ -1,4 +1,11 @@
-## 3.5.11 - 2025-05-08
+## 3.5.12 - 2025-04-09
+
+### Fixed
+
+- Corrected option handling for `node-sql-parser`: the extension previously used the wrong configuration key,
+  which caused it to parse options for `sql-formatter` instead.
+
+## 3.5.11 - 2025-04-08
 
 ### Added
 
@@ -16,7 +23,7 @@ head over to [Weblate](https://hosted.weblate.org/projects/prettier-for-nova/) a
 
 Chinese, French, and Japanese translations still need contributors — feel free to jump in! 😄
 
-## 3.5.10 - 2025-05-06
+## 3.5.10 - 2025-04-06
 
 ### Added
 
