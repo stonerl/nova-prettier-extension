@@ -36,7 +36,7 @@ class PrettierService extends FormattingService {
     this.prettier = prettier
   }
 
-  async format({ original, pathForConfig, ignorePath, options }) {
+  async format({ original, pathForConfig, ignorePath, options, withCursor }) {
     const { ignored, config } = await this.getConfig({
       pathForConfig,
       ignorePath,
@@ -47,10 +47,15 @@ class PrettierService extends FormattingService {
     if (!config.parser) return { missingParser: true }
 
     try {
-      return { formatted: await this.prettier.format(original, config) }
+      // If withCursor flag is true and a cursor offset was provided, use formatWithCursor
+      if (withCursor && typeof config.cursorOffset === 'number') {
+        // formatWithCursor returns an object with both formatted code and new cursorOffset
+        return await this.prettier.formatWithCursor(original, config)
+      } else {
+        // Otherwise fall back to the regular format method
+        return { formatted: await this.prettier.format(original, config) }
+      }
     } catch (err) {
-      // When the parser is selected based on Nova's document syntax, it
-      // might not be installed. So we have to deal with this error.
       if (err.message.includes(`Couldn't resolve parser`)) {
         return { missingParser: true }
       }

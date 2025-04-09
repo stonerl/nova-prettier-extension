@@ -19,9 +19,6 @@
     "url": "https://github.com/stonerl/nova-prettier-extension/issues"
   },
   "homepage": "https://github.com/stonerl/nova-prettier-extension#readme",
-  "dependencies": {
-    "fast-diff": "^1.2.0"
-  },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^24.0.1",
     "@rollup/plugin-node-resolve": "^15.0.1",
