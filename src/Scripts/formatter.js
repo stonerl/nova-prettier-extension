@@ -1,19 +1,9 @@
-const diff = require('fast-diff')
 const {
   showError,
   showActionableError,
   log,
   getConfigWithWorkspaceOverride,
 } = require('./helpers.js')
-
-const POSSIBLE_CURSORS = String.fromCharCode(
-  0xfffd,
-  0xffff,
-  0x1f094,
-  0x1f08d,
-  0xe004,
-  0x1f08d,
-).split('')
 
 const PRETTIER_OPTIONS = [
   'arrowParens',
@@ -465,10 +455,21 @@ class Formatter {
       original,
       pathForConfig,
       ignorePath: saving && this.getIgnorePath(pathForConfig),
-      options,
+      options: {
+        ...options,
+        cursorOffset: editor.selectedRange.start, // send cursor position
+      },
+      withCursor: true, // signal that we want formatWithCursor
     })
 
-    const { formatted, error, ignored, missingParser } = result
+    const {
+      formatted,
+      error,
+      ignored,
+      missingParser,
+      cursorOffset: newCursor,
+    } = result
+    this._cursorOffset = newCursor
 
     if (error) {
       return this.issuesFromPrettierError(error)
@@ -569,95 +570,16 @@ class Formatter {
   async applyResult(editor, original, formatted) {
     log.info(`Applying formatted changes to ${editor.document.path}`)
 
-    const [cursor, edits] = this.diff(
-      original,
-      formatted,
-      editor.selectedRanges,
-    )
+    const documentRange = new Range(0, editor.document.length)
 
-    if (
-      original !== editor.getTextInRange(new Range(0, editor.document.length))
-    ) {
-      log.info(`Document ${editor.document.path} was changed while formatting`)
-      return
-    }
-
-    if (edits) {
-      return this.applyDiff(editor, cursor, edits)
-    }
-
-    return this.replace(editor, formatted)
-  }
-
-  diff(original, formatted, selectedRanges) {
-    // Find a cursor that does not occur in this document
-    const cursor = POSSIBLE_CURSORS.find(
-      (cursor) => !original.includes(cursor) && !formatted.includes(cursor),
-    )
-    // Fall back to not knowing the cursor position.
-    if (!cursor) return null
-
-    let originalWithCursors = ''
-    let lastEnd = 0
-
-    for (const selection of selectedRanges) {
-      originalWithCursors +=
-        original.slice(lastEnd, selection.start) +
-        cursor +
-        original.slice(selection.start, selection.end) +
-        cursor
-      lastEnd = selection.end
-    }
-
-    originalWithCursors += original.slice(lastEnd)
-
-    // Diff
-    return [cursor, diff(originalWithCursors, formatted)]
-  }
-
-  async applyDiff(editor, cursor, edits) {
-    const selections = []
     await editor.edit((e) => {
-      let offset = 0
-      let toRemove = 0
-
-      // Add an extra empty edit so any trailing delete is actually run.
-      edits.push([diff.EQUAL, ''])
-
-      for (const [edit, str] of edits) {
-        if (edit === diff.DELETE) {
-          toRemove += str.length
-
-          // Check if the cursors are in here
-          let cursorIndex = -1
-          while (true) {
-            cursorIndex = str.indexOf(cursor, cursorIndex + 1)
-            if (cursorIndex === -1) break
-
-            const lastSelection = selections[selections.length - 1]
-            if (!lastSelection || lastSelection[1]) {
-              selections[selections.length] = [offset]
-            } else {
-              lastSelection[1] = offset
-            }
-            toRemove -= cursor.length
-          }
-
-          continue
-        }
-
-        if (edit === diff.EQUAL && toRemove) {
-          e.replace(new Range(offset, offset + toRemove), '')
-        } else if (edit === diff.INSERT) {
-          e.replace(new Range(offset, offset + toRemove), str)
-        }
-
-        toRemove = 0
-        offset += str.length
-      }
+      e.replace(documentRange, formatted)
     })
 
-    editor.selectedRanges = selections.map((s) => new Range(s[0], s[1]))
+    // New cursor position comes from the formatter, fallback to end-of-range
+    const cursorOffset =
+      this._cursorOffset != null ? this._cursorOffset : editor.selectedRange.end
+    editor.selectedRanges = [new Range(cursorOffset, cursorOffset)]
   }
 
   async replace(editor, formatted) {
