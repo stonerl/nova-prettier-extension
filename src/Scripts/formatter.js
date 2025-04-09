@@ -158,7 +158,7 @@ class Formatter {
       PRETTIER_SQL_PLUGIN_NODE_SQL_PARSER_OPTIONS.map((option) => [
         option,
         getConfigWithWorkspaceOverride(
-          `prettier.plugins.prettier-plugin-sql.sql-formatter.${option}`,
+          `prettier.plugins.prettier-plugin-sql.node-sql-parser.${option}`,
         ),
       ]),
     )
