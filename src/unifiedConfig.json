@@ -43,7 +43,7 @@
   },
   {
     "key": "prettier.default-config.section",
-    "title": "Prettier Configuration",
+    "title": "Prettier",
     "description": "Applied to remote files or when no Prettier configuration file exists.",
     "type": "section",
     "children": [
@@ -1363,7 +1363,7 @@
   },
   {
     "key": "prettier.format-on-save.section",
-    "title": "Format on Save Settings",
+    "title": "Format on Save",
     "type": "section",
     "children": [
       {

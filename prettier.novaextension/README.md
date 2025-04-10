@@ -4,8 +4,8 @@ Experience seamless code formatting with Prettier directly in Nova.
 
 - **Format on save:** Automatically format your code on save
   (this setting can be customized per project), or manually format using
-  `Editor > Prettier > Format Document` (**⌥⇧F**).
-- **Language Support:** Includes all languages supported by Prettier, such as
+  `Editor > Prettier+ > Format Document` (**⌥⇧F**).
+- **Language Support:** Supports all Prettier-supported languages, including
   `Angular`,
   `CSS`,
   `Flow`,
@@ -17,14 +17,15 @@ Experience seamless code formatting with Prettier directly in Nova.
   `JSX`,
   `Less`,
   `Markdown`,
-  `PHP`,
   `SCSS`,
-  `SQL`,
   `TypeScript`,
-  `Vue`,
-  `XML`,
-  `YAML`,
-  and additional plugins.
+  `Vue`, and
+  `YAML` —
+  plus additional ones via bundled plugins, such as
+  `PHP`,
+  `SQL`, and
+  `XML`.
+
 - **Configuration Support:** Compatible with [standard Prettier configuration](https://prettier.io/docs/configuration),
   and [.prettierignore](https://prettier.io/docs/ignore) files.
 - **Plugin Usage:** Utilizes Prettier and any plugins installed in your project,
@@ -59,7 +60,7 @@ your project.
 
 ## Ignoring files
 
-You can disable format on save for remote documents, documents without a Prettier
+You can disable `Format on Save` for remote documents, documents without a Prettier
 configuration file, or specific syntaxes in the extension and project preferences.
 Additionally you can use Prettier's [built-in exclusion](https://prettier.io/docs/ignore#ignoring-files-prettierignore)
 feature by adding a `.prettierignore` file to the root of your project.
@@ -68,10 +69,10 @@ _Note: adding it anywhere else won't work._
 
 ## Using a different version of Prettier
 
-Simply install the desired version of Prettier (1.15.0 or higher) in the root
-folder of your project. If you already have the project open in Nova,
-you'll need to reopen it after installing or updating Prettier for the extension
-to recognize and start using the new version.
+Simply install the desired version of Prettier (2.0 or higher, although the latest
+version is always recommended) in the root folder of your project. If you already
+have the project open in Nova, you'll need to reopen it after installing or updating
+Prettier for the extension to recognize and start using the new version.
 
 You can also explicitly select an installation of Prettier
 (or [`prettier-eslint`](https://github.com/prettier/prettier-eslint))
@@ -79,9 +80,9 @@ by setting the `Prettier module` path in the extension or project settings.
 
 ## Using Prettier forks or prettier-eslint
 
-You should be able to use any fork of Prettier that utilizes the same API,
+You can use any Prettier fork that adheres to the same API,
 as well as [`prettier-eslint`](https://github.com/prettier/prettier-eslint),
-by explicitly setting the `Prettier module` path in the extension or project settings.
+by explicitly specifying the `Prettier module` path in the extension or project settings.
 
 ## Working with remote files
 
