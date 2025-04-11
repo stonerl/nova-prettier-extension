@@ -3,7 +3,48 @@ const {
   showActionableError,
   log,
   getConfigWithWorkspaceOverride,
+  pluginEnabled,
 } = require('./helpers.js')
+
+const PLUGIN_PATHS = {
+  php: ['@prettier', 'plugin-php', 'src', 'index.mjs'],
+  sql: ['prettier-plugin-sql', 'lib', 'index.cjs'],
+  xml: ['@prettier', 'plugin-xml', 'src', 'plugin.js'],
+  nginx: ['prettier-plugin-nginx', 'dist', 'index.js'],
+  java: ['prettier-plugin-java', 'dist', 'index.js'],
+  'java-properties': ['prettier-plugin-properties', 'index.js'],
+}
+
+const CONFIG_MAPPINGS = {
+  default: {
+    prefix: 'prettier.default-config',
+    options: PRETTIER_OPTIONS,
+  },
+  php: {
+    prefix: 'prettier.plugins.prettier-plugin-php',
+    options: PRETTIER_PHP_PLUGIN_OPTIONS,
+  },
+  xml: {
+    prefix: 'prettier.plugins.prettier-plugin-xml',
+    options: PRETTIER_XML_PLUGIN_OPTIONS,
+  },
+  sqlFormatter: {
+    prefix: 'prettier.plugins.prettier-plugin-sql.sql-formatter',
+    options: PRETTIER_SQL_PLUGIN_SQL_FORMATTER_OPTIONS,
+  },
+  nodeSqlParser: {
+    prefix: 'prettier.plugins.prettier-plugin-sql.node-sql-parser',
+    options: PRETTIER_SQL_PLUGIN_NODE_SQL_PARSER_OPTIONS,
+  },
+  properties: {
+    prefix: 'prettier.plugins.prettier-plugin-properties',
+    options: PRETTIER_PROPERTIES_PLUGIN_OPTIONS,
+  },
+  nginx: {
+    prefix: 'prettier.plugins.prettier-plugin-nginx',
+    options: PRETTIER_NGINX_PLUGIN_OPTIONS,
+  },
+}
 
 const PRETTIER_OPTIONS = [
   'arrowParens',
@@ -75,83 +116,17 @@ class Formatter {
       this.prettierServiceStartDidFail.bind(this)
 
     this.emitter = new Emitter()
-
+    this._defineConfigGetters()
     this.setupIsReadyPromise()
   }
 
-  get defaultConfig() {
-    return Object.fromEntries(
-      PRETTIER_OPTIONS.map((option) => [
-        option,
-        getConfigWithWorkspaceOverride(`prettier.default-config.${option}`),
-      ]),
-    )
-  }
-
-  get phpConfig() {
-    return Object.fromEntries(
-      PRETTIER_PHP_PLUGIN_OPTIONS.map((option) => [
-        option,
-        getConfigWithWorkspaceOverride(
-          `prettier.plugins.prettier-plugin-php.${option}`,
-        ),
-      ]),
-    )
-  }
-
-  get xmlConfig() {
-    return Object.fromEntries(
-      PRETTIER_XML_PLUGIN_OPTIONS.map((option) => [
-        option,
-        getConfigWithWorkspaceOverride(
-          `prettier.plugins.prettier-plugin-xml.${option}`,
-        ),
-      ]),
-    )
-  }
-
-  get sqlFormatterConfig() {
-    return Object.fromEntries(
-      PRETTIER_SQL_PLUGIN_SQL_FORMATTER_OPTIONS.map((option) => [
-        option,
-        getConfigWithWorkspaceOverride(
-          `prettier.plugins.prettier-plugin-sql.sql-formatter.${option}`,
-        ),
-      ]),
-    )
-  }
-
-  get propertiesConfig() {
-    return Object.fromEntries(
-      PRETTIER_PROPERTIES_PLUGIN_OPTIONS.map((option) => [
-        option,
-        getConfigWithWorkspaceOverride(
-          `prettier.plugins.prettier-plugin-properties.${option}`,
-        ),
-      ]),
-    )
-  }
-
-  get nginxConfig() {
-    return Object.fromEntries(
-      PRETTIER_NGINX_PLUGIN_OPTIONS.map((option) => [
-        option,
-        getConfigWithWorkspaceOverride(
-          `prettier.plugins.prettier-plugin-nginx.${option}`,
-        ),
-      ]),
-    )
-  }
-
-  get nodeSqlParserConfig() {
-    return Object.fromEntries(
-      PRETTIER_SQL_PLUGIN_NODE_SQL_PARSER_OPTIONS.map((option) => [
-        option,
-        getConfigWithWorkspaceOverride(
-          `prettier.plugins.prettier-plugin-sql.node-sql-parser.${option}`,
-        ),
-      ]),
-    )
+  _defineConfigGetters() {
+    for (const [key, { prefix, options }] of Object.entries(CONFIG_MAPPINGS)) {
+      Object.defineProperty(this, `${key}Config`, {
+        get: () => this._getConfig(prefix, options),
+        enumerable: true,
+      })
+    }
   }
 
   get isReady() {
@@ -309,26 +284,6 @@ class Formatter {
     const documentRange = new Range(0, document.length)
     const original = editor.getTextInRange(documentRange)
 
-    // Check if plugins are enabled
-    const phpPluginEnabled = getConfigWithWorkspaceOverride(
-      'prettier.plugins.prettier-plugin-php.enabled',
-    )
-    const sqlPluginEnabled = getConfigWithWorkspaceOverride(
-      'prettier.plugins.prettier-plugin-sql.enabled',
-    )
-    const xmlPluginEnabled = getConfigWithWorkspaceOverride(
-      'prettier.plugins.prettier-plugin-xml.enabled',
-    )
-    const nginxPluginEnabled = getConfigWithWorkspaceOverride(
-      'prettier.plugins.prettier-plugin-nginx.enabled',
-    )
-    const javaPluginEnabled = getConfigWithWorkspaceOverride(
-      'prettier.plugins.prettier-plugin-java.enabled',
-    )
-    const propertiesPluginEnabled = getConfigWithWorkspaceOverride(
-      'prettier.plugins.prettier-plugin-properties.enabled',
-    )
-
     /// Retrieve the configured SQL formatter type
     const sqlFormatter = getConfigWithWorkspaceOverride(
       'prettier.plugins.prettier-plugin-sql.formatter',
@@ -336,73 +291,14 @@ class Formatter {
 
     // Initialize plugins array and conditionally load plugins if enabled
     let plugins = []
+
     if (this.modulePath.includes(nova.extension.path)) {
-      if (document.syntax === 'php' && phpPluginEnabled) {
-        plugins.push(
-          nova.path.join(
-            nova.extension.path,
-            'node_modules',
-            '@prettier',
-            'plugin-php',
-            'src',
-            'index.mjs',
-          ),
-        )
-      }
-      if (document.syntax === 'sql' && sqlPluginEnabled) {
-        plugins.push(
-          nova.path.join(
-            nova.extension.path,
-            'node_modules',
-            'prettier-plugin-sql',
-            'lib',
-            'index.cjs',
-          ),
-        )
-      }
-      if (document.syntax === 'xml' && xmlPluginEnabled) {
-        plugins.push(
-          nova.path.join(
-            nova.extension.path,
-            'node_modules',
-            '@prettier',
-            'plugin-xml',
-            'src',
-            'plugin.js',
-          ),
-        )
-      }
-      if (document.syntax === 'nginx' && nginxPluginEnabled) {
-        plugins.push(
-          nova.path.join(
-            nova.extension.path,
-            'node_modules',
-            'prettier-plugin-nginx',
-            'dist',
-            'index.js',
-          ),
-        )
-      }
-      if (document.syntax === 'java' && javaPluginEnabled) {
-        plugins.push(
-          nova.path.join(
-            nova.extension.path,
-            'node_modules',
-            'prettier-plugin-java',
-            'dist',
-            'index.js',
-          ),
-        )
-      }
-      if (document.syntax === 'java-properties' && propertiesPluginEnabled) {
-        plugins.push(
-          nova.path.join(
-            nova.extension.path,
-            'node_modules',
-            'prettier-plugin-properties',
-            'index.js',
-          ),
-        )
+      for (const [syntax, pathParts] of Object.entries(PLUGIN_PATHS)) {
+        if (document.syntax === syntax && pluginEnabled(syntax)) {
+          plugins.push(
+            nova.path.join(nova.extension.path, 'node_modules', ...pathParts),
+          )
+        }
       }
     }
 
