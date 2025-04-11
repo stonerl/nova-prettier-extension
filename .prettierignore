@@ -1,3 +1,4 @@
+.nova/
 package*.json
 prettier.novaextension/config.json
 prettier.novaextension/configWorkspace.json
