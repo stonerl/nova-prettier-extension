@@ -18,7 +18,6 @@ Experience seamless code formatting with Prettier directly in Nova.
   `Flow`,
   `GraphQL`,
   `HTML`,
-  `Java`,
   `JavaScript`,
   `JSON`,
   `JSX`,
@@ -29,6 +28,7 @@ Experience seamless code formatting with Prettier directly in Nova.
   `Vue`, and
   `YAML` —
   plus additional ones via bundled plugins, such as
+  `Java`,
   `PHP`,
   `SQL`, and
   `XML`.
