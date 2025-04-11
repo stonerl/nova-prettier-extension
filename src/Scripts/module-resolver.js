@@ -56,7 +56,15 @@ async function findModuleWithNPM(directory, module) {
   })
 
   const process = new Process('/usr/bin/env', {
-    args: ['npm', 'ls', module, '--parseable', '--long', '--depth', '0'],
+    args: [
+      'npm',
+      'ls',
+      String(module),
+      '--parseable',
+      '--long',
+      '--depth',
+      '0',
+    ],
     cwd: directory,
   })
 
@@ -137,19 +145,76 @@ module.exports = async function () {
     }
   }
 
-  // Install / update bundled version
+  // Install/update bundled modules
   try {
-    const path = nova.path.join(nova.extension.path, 'node_modules', 'prettier')
+    const prettierPath = nova.path.join(
+      nova.extension.path,
+      'node_modules',
+      'prettier',
+    )
+    const nodeModulesExists = !!nova.fs.stat(
+      nova.path.join(nova.extension.path, 'node_modules'),
+    )
+    const lockfileExists = !!nova.fs.stat(
+      nova.path.join(nova.extension.path, 'package-lock.json'),
+    )
 
-    const resolved = await findModuleWithNPM(nova.extension.path, 'prettier')
+    let installReason = null
 
-    if (!resolved || !resolved.correctVersion) {
-      log.info(`Installing / updating bundled Prettier at ${path}`)
+    if (!nodeModulesExists || !lockfileExists) {
+      installReason = 'missing dependencies'
+    }
+
+    let declaredPackages = {}
+
+    try {
+      const packageJsonPath = nova.path.join(
+        nova.extension.path,
+        'package.json',
+      )
+
+      try {
+        const file = nova.fs.open(packageJsonPath, 'r') // Open the file for reading
+        const packageJsonContent = file.read() // Read the content into a string
+
+        const json = JSON.parse(packageJsonContent) // Parse the JSON string
+
+        declaredPackages = {
+          ...(json.dependencies || {}),
+          ...(json.optionalDependencies || {}),
+        }
+      } catch (err) {
+        log.warn('Could not read or parse package.json', err)
+      }
+    } catch (err) {
+      log.warn('Could not read or parse package.json', err)
+    }
+
+    const brokenPackages = []
+
+    for (const pkg of Object.keys(declaredPackages)) {
+      try {
+        const resolved = await findModuleWithNPM(nova.extension.path, pkg)
+        if (!resolved || !resolved.correctVersion) {
+          brokenPackages.push(pkg)
+        }
+      } catch (err) {
+        log.warn(`Failed to verify package "${pkg}":`, err)
+        brokenPackages.push(pkg)
+      }
+    }
+
+    if (brokenPackages.length > 0) {
+      installReason = `invalid or outdated packages: ${brokenPackages.join(', ')}`
+    }
+
+    if (installReason) {
+      log.info(`Running npm install due to: ${installReason}`)
       await installPackages(nova.extension.path)
     }
 
-    log.info(`Loading bundled prettier at ${path}`)
-    return path
+    log.info(`Loading bundled prettier from ${prettierPath}`)
+    return prettierPath
   } catch (err) {
     if (err.status === 127) throw err
     log.warn('Error trying to find or install bundled Prettier', err)
