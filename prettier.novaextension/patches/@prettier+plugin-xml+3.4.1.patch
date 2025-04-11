@@ -1,0 +1,23 @@
+diff --git a/node_modules/@prettier/plugin-xml/src/parser.js b/node_modules/@prettier/plugin-xml/src/parser.js
+index 6845471..a815b75 100644
+--- a/node_modules/@prettier/plugin-xml/src/parser.js
++++ b/node_modules/@prettier/plugin-xml/src/parser.js
+@@ -204,9 +204,18 @@ const parser = {
+   },
+   astFormat: "xml",
+   locStart(node) {
++    if (typeof node?.location?.startOffset !== "number") {
++      console.warn("locStart fallback triggered:", node);
++      return 0;
++    }
+     return node.location.startOffset;
+   },
++
+   locEnd(node) {
++    if (typeof node?.location?.endOffset !== "number") {
++      console.warn("locEnd fallback triggered:", node);
++      return 0;
++    }
+     return node.location.endOffset;
+   }
+ };
