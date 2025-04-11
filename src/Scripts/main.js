@@ -86,6 +86,14 @@ class PrettierExtension {
       'prettier.save-without-formatting',
       this.didInvokeSaveWithoutFormattingCommand,
     )
+    nova.commands.register('prettier.reset-suppressed-message', () => {
+      nova.config.remove('prettier.selection-unsupported.dismissed')
+      nova.workspace.showInformativeMessage(
+        nova.localize(
+          'Prettier+ notification restored. Unsupported syntax warnings for ‘Format Selection’ will reappear.',
+        ),
+      )
+    })
   }
 
   async startFormatter() {
@@ -158,6 +166,42 @@ class PrettierExtension {
   }
 
   async didInvokeFormatSelectionCommand(editor) {
+    const supported = new Set([
+      'javascript',
+      'javascriptreact',
+      'typescript',
+      'typescriptreact',
+      'graphql',
+      'handlebars',
+    ])
+
+    const syntax = editor.document.syntax
+
+    if (!supported.has(syntax)) {
+      const suppressionKey = 'prettier.selection-unsupported.dismissed'
+      const dismissed = nova.config.get(suppressionKey)
+      if (dismissed === true) return
+
+      let req = new NotificationRequest('prettier-selection-unsupported')
+      req.title = nova.localize('Unsupported Syntax')
+      req.body = nova.localize(
+        '“Format Selection” isn’t available for this file type. Supported syntaxes: JavaScript, TypeScript, GraphQL, and Handlebars.',
+      )
+      req.actions = [nova.localize('OK'), nova.localize("Don't Show Again")]
+
+      nova.notifications
+        .add(req)
+        .then((response) => {
+          if (response.actionIdx === 1) {
+            nova.config.set(suppressionKey, true)
+          }
+        })
+        .catch((err) => {
+          log.error('Notification error:', err)
+        })
+      return
+    }
+
     await this.formatEditor(editor, false, true)
   }
 
