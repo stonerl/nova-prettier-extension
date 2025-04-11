@@ -76,6 +76,12 @@
         "command": "prettier.save-without-formatting",
         "shortcut": "cmd-ctrl-shift-s"
       }
+    ],
+    "extensions": [
+      {
+        "title": "Reset Syntax Warnings for Prettier+",
+        "command": "prettier.reset-suppressed-message"
+      }
     ]
   },
   "config": "./config.json",
