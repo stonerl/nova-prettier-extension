@@ -1,5 +1,7 @@
+.github/
 .nova/
 package*.json
 prettier.novaextension/config.json
 prettier.novaextension/configWorkspace.json
-prettier.novaextension/Scripts/**
+prettier.novaextension/*.lproj/
+prettier.novaextension/Scripts/

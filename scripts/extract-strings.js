@@ -138,7 +138,7 @@ languages.forEach((lang) => {
     ]),
   )
 
-  fs.writeFileSync(outputPath, JSON.stringify(merged, null, 2))
+  fs.writeFileSync(outputPath, JSON.stringify(merged, null, 2) + '\n')
   console.log(
     `✅ Wrote ${Object.keys(merged).length} strings to translations/${lang}/strings.json`,
   )
