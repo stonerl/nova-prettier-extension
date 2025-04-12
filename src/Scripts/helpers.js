@@ -1,3 +1,13 @@
+/**
+ * helpers.js — Utility functions for Prettier+ for Nova
+ *
+ * @license MIT
+ * @author Alexander Weiss, Toni Förster
+ * @copyright © 2023 Alexander Weiss, © 2025 Toni Förster
+ *
+ * Contains shared functions for config observation, logging, error handling, and config sanitation.
+ */
+
 class ProcessError extends Error {
   constructor(status, message) {
     super(message)

@@ -1,3 +1,14 @@
+/**
+ * scramble-testfiles.js — Deliberately mangles formatting in test files
+ *
+ * @license MIT
+ * @author Toni Förster
+ * @copyright © 2025 Toni Förster
+ *
+ * Applies language-specific formatting mistakes to test files to simulate real-world
+ * input and validate the robustness of the formatter across languages.
+ */
+
 const fs = require('fs')
 const path = require('path')
 

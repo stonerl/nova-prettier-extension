@@ -1,3 +1,13 @@
+/**
+ * prettier-service.js — Prettier subprocess for format requests
+ *
+ * @license MIT
+ * @author Alexander Weiss, Toni Förster
+ * @copyright © 2023 Alexander Weiss, © 2025 Toni Förster
+ *
+ * Loads Prettier (or prettier-eslint) in a separate Node.js process and handles JSON-RPC requests for formatting and config resolution.
+ */
+
 const JsonRpcService = require('./json-rpc.js')
 
 class FormattingService {

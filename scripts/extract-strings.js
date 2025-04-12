@@ -1,3 +1,14 @@
+/**
+ * extract-strings.js — Extracts translatable strings from config and extension metadata
+ *
+ * @license MIT
+ * @author Toni Förster
+ * @copyright © 2025 Toni Förster
+ *
+ * Scans unified configuration and extension metadata to collect all user-visible
+ * strings for translation. Merges with existing entries per language.
+ */
+
 const fs = require('fs')
 const path = require('path')
 

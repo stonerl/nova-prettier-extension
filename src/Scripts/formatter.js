@@ -1,3 +1,13 @@
+/**
+ * formatter.js — Prettier+ formatter engine for Nova
+ *
+ * @license MIT
+ * @author Alexander Weiss, Toni Förster
+ * @copyright © 2023 Alexander Weiss, © 2025 Toni Förster
+ *
+ * Provides the core formatting logic and manages communication with the background Prettier service.
+ */
+
 const {
   showError,
   showActionableError,

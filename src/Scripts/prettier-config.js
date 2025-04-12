@@ -1,4 +1,13 @@
-// prettier-config.js
+/**
+ * prettier-config.js — Dynamic config loader for Prettier plugins
+ *
+ * @license MIT
+ * @author Toni Förster
+ * @copyright © 2025 Toni Förster
+ *
+ * Retrieves plugin-specific configuration options from Nova's settings system.
+ */
+
 const { getConfigWithWorkspaceOverride } = require('./helpers.js')
 const {
   PRETTIER_OPTIONS,

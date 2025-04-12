@@ -1,4 +1,13 @@
-// plugins.js
+/**
+ * prettier-plugins.js — Plugin path registry for Prettier+
+ *
+ * @license MIT
+ * @author Toni Förster
+ * @copyright © 2025 Toni Förster
+ *
+ * Maps plugin identifiers to absolute paths for runtime injection into Prettier.
+ */
+
 module.exports = {
   xml: nova.path.join(
     nova.extension.path,

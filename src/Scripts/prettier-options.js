@@ -1,4 +1,13 @@
-// prettier-options.js
+/**
+ * prettier-options.js — Prettier+ supported config option declarations
+ *
+ * @license MIT
+ * @author Toni Förster
+ * @copyright © 2025 Toni Förster
+ *
+ * Defines which Prettier and plugin options are exposed and configurable in Nova.
+ */
+
 module.exports = {
   PRETTIER_OPTIONS: [
     'arrowParens',
