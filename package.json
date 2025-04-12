@@ -1,24 +1,23 @@
 {
-  "name": "nova-prettier",
+  "name": "nova-prettier-extension",
   "version": "3.5.15",
-  "description": "",
-  "main": "index.js",
+  "author": "Toni Förster",
+  "license": "MIT",
+  "description": "Prettier integration for Nova – format JavaScript, TypeScript, JSON, CSS, HTML, Markdown, and more, with built-in support for Java, PHP, SQL, and XML – no extra setup required.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stonerl/nova-prettier-extension.git"
+  },
+  "bugs": {
+    "url": "https://github.com/stonerl/nova-prettier-extension/issues"
+  },
+  "homepage": "https://github.com/stonerl/nova-prettier-extension#readme",
   "scripts": {
     "build": "rollup -c",
     "prepare:testfiles": "node scripts/scramble-testfiles.js",
     "strings:copy-translations": "node scripts/copy-translated-strings.js",
     "strings:extract": "node scripts/extract-strings.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/stonerl/nova-prettier-extension.git"
-  },
-  "author": "Toni Förster",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/stonerl/nova-prettier-extension/issues"
-  },
-  "homepage": "https://github.com/stonerl/nova-prettier-extension#readme",
   "devDependencies": {
     "@rollup/plugin-commonjs": "^24.0.1",
     "@rollup/plugin-node-resolve": "^15.0.1",
