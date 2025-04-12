@@ -14,6 +14,8 @@
   "homepage": "https://github.com/stonerl/nova-prettier-extension#readme",
   "scripts": {
     "build": "npm run strings:copy-translations && rollup -c",
+    "clean": "rm -f prettier.novaextension/config.json prettier.novaextension/configWorkspace.json && rm -rf prettier.novaextension/de.lproj prettier.novaextension/en.lproj prettier.novaextension/node_modules prettier.novaextension/Scripts",
+    "prepare:submission": "npm run build && rm -rf prettier.novaextension/node_modules",
     "prepare:testfiles": "node scripts/scramble-testfiles.js",
     "strings:copy-translations": "node scripts/copy-translated-strings.js",
     "strings:extract": "node scripts/extract-strings.js"
