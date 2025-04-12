@@ -13,7 +13,7 @@
   "Send debug information to the Extension Console.": "Debug-Informationen an die Erweiterungskonsole senden.",
   "Enabled": "Aktiviert",
   "Disabled": "Deaktiviert",
-  "Prettier": "",
+  "Prettier": "Prettier",
   "Applied to remote files or when no Prettier configuration file exists.": "Wird auf Remote-Dateien angewendet oder wenn keine Prettier-Konfigurationsdatei vorhanden ist.",
   "Print Width": "Zeilenlänge",
   "Specify the line length that the printer will wrap on.": "Gibt die Zeilenlänge an, bei welcher der Code umgebrochen wird.",
@@ -230,5 +230,5 @@
   "Format Document": "Dokument formatieren",
   "Format Selection": "Auswahl formatieren",
   "Save Without Formatting": "Speichern ohne Formatierung",
-  "Reset Syntax Warnings for Prettier+": ""
+  "Reset Syntax Warnings for Prettier+": "Syntax-Warnungen für Prettier+ zurücksetzen"
 }
