@@ -1,3 +1,28 @@
+## 3.5.15 - 2025-04-12
+
+### Added
+
+- **Automatic package and patch management**
+
+  - Implemented a module resolver to validate all dependencies declared in `package.json`
+  - Automatically runs `npm install` for any missing or outdated packages
+  - Applies patches using `patch-package` after every install
+  - Ensures patches are reapplied even when no packages are updated
+
+- **Syntax restriction for "Format Selection"**
+  - Limited "Format Selection" to syntaxes supported by Prettier’s `formatWithCursor`:
+    JavaScript, TypeScript, GraphQL, and Handlebars
+  - This restriction is due to upstream limitations in Prettier's cursor handling logic
+  - Displays a dismissible warning when attempting to format unsupported syntaxes
+  - Added command: **Reset Syntax Warnings for Prettier+** to restore suppressed messages
+
+### Fixed
+
+- **Prevent crash in `locStart` / `locEnd`**
+  - Added null-safe checks and fallback handling to avoid crashes when a node lacks location data
+  - This issue occurred in the XML plugin and previously prevented XML files from being formatted
+  - Prevents `formatWithCursor` from throwing TypeErrors on malformed AST nodes
+
 ## 3.5.14 - 2025-04-09
 
 > Note: This version supersedes 3.5.13, which was briefly published and then withdrawn due to a forgotten code update.
