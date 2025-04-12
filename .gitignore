@@ -1,8 +1,8 @@
 .DS_Store
 node_modules
 
-# prettier.novaextension/config.json
-# prettier.novaextension/configWorkspace.json
-# prettier.novaextension/de.lproj/
-# prettier.novaextension/en.lproj/
-# prettier.novaextension/Scripts/
+prettier.novaextension/config.json
+prettier.novaextension/configWorkspace.json
+prettier.novaextension/de.lproj/
+prettier.novaextension/en.lproj/
+prettier.novaextension/Scripts/
