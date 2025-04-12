@@ -1,3 +1,13 @@
+/**
+ * json-rpc.js — JSON-RPC 2.0 server implementation for Prettier service
+ *
+ * @license MIT
+ * @author Alexander Weiss, Toni Förster
+ * @copyright © 2023 Alexander Weiss, © 2025 Toni Förster
+ *
+ * Implements a low-level buffer-based JSON-RPC communication layer between the Nova extension and the Prettier subprocess.
+ */
+
 const EventEmitter = require('events')
 
 const DEFAULT_BUFFER_SIZE = 8192

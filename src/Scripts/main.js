@@ -1,3 +1,13 @@
+/**
+ * main.js — Nova extension entry point for Prettier+
+ *
+ * @license MIT
+ * @author Alexander Weiss, Toni Förster
+ * @copyright © 2023 Alexander Weiss, © 2025 Toni Förster
+ *
+ * Initializes and manages the Prettier+ extension, including commands, event hooks, and workspace observers.
+ */
+
 const findPrettier = require('./module-resolver.js')
 const {
   showError,

@@ -1,3 +1,13 @@
+/**
+ * module-resolver.js — Module resolution logic for Prettier+
+ *
+ * @license MIT
+ * @author Alexander Weiss, Toni Förster
+ * @copyright © 2023 Alexander Weiss, © 2025 Toni Förster
+ *
+ * Detects Prettier installations via filesystem and npm, falling back to bundled modules when necessary.
+ */
+
 const { handleProcessResult, log } = require('./helpers.js')
 
 function findPathRecursively(directory, subPath, callback) {

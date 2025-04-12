@@ -1,3 +1,14 @@
+/**
+ * rollup.config.js — Build script for Prettier+ Nova extension
+ *
+ * @license MIT
+ * @author Alexander Weiss, Toni Förster
+ * @copyright © 2023 Alexander Weiss, © 2025 Toni Förster
+ *
+ * Bundles and minifies extension scripts and configuration files,
+ * transforming unified configuration into platform-specific formats.
+ */
+
 import commonjs from '@rollup/plugin-commonjs'
 import resolve from '@rollup/plugin-node-resolve'
 import terser from '@rollup/plugin-terser'

@@ -1,3 +1,14 @@
+/**
+ * copy-translated-strings.js — Copies filtered translations into the extension
+ *
+ * @license MIT
+ * @author Toni Förster
+ * @copyright © 2025 Toni Förster
+ *
+ * Copies only valid, non-empty translation entries from the source language folders
+ * into the extension’s `.lproj` directories for use at runtime.
+ */
+
 const fs = require('fs')
 const path = require('path')
 
