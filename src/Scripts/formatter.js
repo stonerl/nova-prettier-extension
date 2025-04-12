@@ -17,6 +17,16 @@ const {
   PRETTIER_NGINX_PLUGIN_OPTIONS,
 } = require('./prettier-options.js')
 
+const {
+  getDefaultConfig,
+  getPhpConfig,
+  getXmlConfig,
+  getSqlFormatterConfig,
+  getNodeSqlParserConfig,
+  getPropertiesConfig,
+  getNginxConfig,
+} = require('./prettier-config.js')
+
 class Formatter {
   constructor() {
     this.prettierServiceDidExit = this.prettierServiceDidExit.bind(this)
@@ -29,78 +39,31 @@ class Formatter {
   }
 
   get defaultConfig() {
-    return Object.fromEntries(
-      PRETTIER_OPTIONS.map((option) => [
-        option,
-        getConfigWithWorkspaceOverride(`prettier.default-config.${option}`),
-      ]),
-    )
+    return getDefaultConfig()
   }
 
   get phpConfig() {
-    return Object.fromEntries(
-      PRETTIER_PHP_PLUGIN_OPTIONS.map((option) => [
-        option,
-        getConfigWithWorkspaceOverride(
-          `prettier.plugins.prettier-plugin-php.${option}`,
-        ),
-      ]),
-    )
+    return getPhpConfig()
   }
 
   get xmlConfig() {
-    return Object.fromEntries(
-      PRETTIER_XML_PLUGIN_OPTIONS.map((option) => [
-        option,
-        getConfigWithWorkspaceOverride(
-          `prettier.plugins.prettier-plugin-xml.${option}`,
-        ),
-      ]),
-    )
+    return getXmlConfig()
   }
 
   get sqlFormatterConfig() {
-    return Object.fromEntries(
-      PRETTIER_SQL_PLUGIN_SQL_FORMATTER_OPTIONS.map((option) => [
-        option,
-        getConfigWithWorkspaceOverride(
-          `prettier.plugins.prettier-plugin-sql.sql-formatter.${option}`,
-        ),
-      ]),
-    )
+    return getSqlFormatterConfig()
   }
 
   get propertiesConfig() {
-    return Object.fromEntries(
-      PRETTIER_PROPERTIES_PLUGIN_OPTIONS.map((option) => [
-        option,
-        getConfigWithWorkspaceOverride(
-          `prettier.plugins.prettier-plugin-properties.${option}`,
-        ),
-      ]),
-    )
+    return getPropertiesConfig()
   }
 
   get nginxConfig() {
-    return Object.fromEntries(
-      PRETTIER_NGINX_PLUGIN_OPTIONS.map((option) => [
-        option,
-        getConfigWithWorkspaceOverride(
-          `prettier.plugins.prettier-plugin-nginx.${option}`,
-        ),
-      ]),
-    )
+    return getNginxConfig()
   }
 
   get nodeSqlParserConfig() {
-    return Object.fromEntries(
-      PRETTIER_SQL_PLUGIN_NODE_SQL_PARSER_OPTIONS.map((option) => [
-        option,
-        getConfigWithWorkspaceOverride(
-          `prettier.plugins.prettier-plugin-sql.node-sql-parser.${option}`,
-        ),
-      ]),
-    )
+    return getNodeSqlParserConfig()
   }
 
   get isReady() {
