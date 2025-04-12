@@ -289,22 +289,23 @@ class Formatter {
     )
   }
 
-  async formatEditor(editor, saving, selectionOnly) {
-    const { document } = editor
+  async formatEditorForced(editor) {
+    return this.formatEditor(editor, false, false, { force: true })
+  }
 
+  async formatEditor(editor, saving, selectionOnly, flags = {}) {
+    const { document } = editor
     nova.notifications.cancel('prettier-unsupported-syntax')
 
     const pathForConfig = document.path || nova.workspace.path
-
     const shouldApplyDefaultConfig = await this.shouldApplyDefaultConfig(
       document,
       saving,
       pathForConfig,
     )
+    if (shouldApplyDefaultConfig === null && !flags.force) return []
 
-    if (shouldApplyDefaultConfig === null) return []
-
-    log.info(`Formatting ${document.path}`)
+    log.info(`[Forced=${flags.force}] Formatting ${document.path}`)
 
     const documentRange = new Range(0, document.length)
     const original = editor.getTextInRange(documentRange)
@@ -454,7 +455,7 @@ class Formatter {
     const result = await this.prettierService.request('format', {
       original,
       pathForConfig,
-      ignorePath: saving && this.getIgnorePath(pathForConfig),
+      ignorePath: flags.force ? null : this.getIgnorePath(pathForConfig),
       options: {
         ...options,
         cursorOffset: editor.selectedRange.start, // send cursor position

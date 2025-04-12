@@ -229,6 +229,7 @@
   "Prettier integration for Nova – format JavaScript, TypeScript, JSON, CSS, HTML, Markdown, and more, with built-in support for Java, PHP, SQL, and XML – no extra setup required.": "Prettier integration for Nova – format JavaScript, TypeScript, JSON, CSS, HTML, Markdown, and more, with built-in support for Java, PHP, SQL, and XML – no extra setup required.",
   "Format Document": "Format Document",
   "Format Selection": "Format Selection",
+  "Format Document (Forced)": "Format Document (Forced)",
   "Save Without Formatting": "Save Without Formatting",
   "Reset Syntax Warnings for Prettier+": "Reset Syntax Warnings for Prettier+"
 }
