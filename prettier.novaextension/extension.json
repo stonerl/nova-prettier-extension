@@ -68,8 +68,14 @@
       {
         "title": "Format Selection",
         "command": "prettier.format-selection",
-        "when": "editorHasSelection",
+        "when": "editorHasSelection && (!prettier_selectionUnsupportedDismissed || (editorSyntax == 'flow' || editorSyntax == 'graphql' || editorSyntax == 'javascript' || editorSyntax == 'typescript' || editorSyntax == 'jsx'))",
         "shortcut": "ctrl-opt-shift-f"
+      },
+      { "separator": true },
+      {
+        "title": "Format Document (Forced)",
+        "command": "prettier.format-forced",
+        "when": "editorHasFocus"
       },
       {
         "title": "Save Without Formatting",

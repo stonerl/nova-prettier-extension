@@ -9,9 +9,13 @@ Experience seamless code formatting with Prettier directly in Nova.
 
 ## Features
 
-- **Format on save:** Automatically format your code on save
+- **Format on Save:** Automatically format your code on save
   (this setting can be customized per project), or manually format using
   `Editor > Prettier+ > Format Document` (**⌥⇧F**).
+- **Format Document (Forced):** Ignores `.prettierignore` and Ignored Syntaxes,
+  formatting anyway via `Editor > Prettier+ > Format Document (Forced)`.
+- **Format Selection:** Precisely formats only the highlighted portion of your code
+  (currently supports JavaScript, TypeScript, GraphQL, and Handlebars).
 - **Language Support:** Supports all Prettier-supported languages, including
   `Angular`,
   `CSS`,
