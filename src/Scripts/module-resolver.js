@@ -8,7 +8,11 @@
  * Detects Prettier installations via filesystem and npm, falling back to bundled modules when necessary.
  */
 
-const { handleProcessResult, log } = require('./helpers.js')
+const {
+  getConfigWithWorkspaceOverride,
+  handleProcessResult,
+  log,
+} = require('./helpers.js')
 
 function findPathRecursively(directory, subPath, callback) {
   while (true) {
@@ -121,6 +125,25 @@ async function installPackages(directory) {
 }
 
 module.exports = async function () {
+  const preferBundled = getConfigWithWorkspaceOverride(
+    'prettier.module.preferBundled',
+  )
+  if (preferBundled) {
+    try {
+      const prettierPath = nova.path.join(
+        nova.extension.path,
+        'node_modules',
+        'prettier',
+      )
+      log.info(
+        `Using bundled Prettier because "prettier.module.preferBundled" is set: ${prettierPath}`,
+      )
+      return prettierPath
+    } catch (err) {
+      log.warn('Error while resolving bundled Prettier:', err)
+      throw err
+    }
+  }
   // Try finding in the workspace
   if (nova.workspace.path) {
     // Try finding purely through file system first
