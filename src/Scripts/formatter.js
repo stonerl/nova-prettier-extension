@@ -219,6 +219,31 @@ class Formatter {
     const { document } = editor
     nova.notifications.cancel('prettier-unsupported-syntax')
 
+    // Read the custom config file path from settings.
+    const customConfigFile = getConfigWithWorkspaceOverride(
+      'prettier.config.file',
+    )
+
+    let customFileConfig = {}
+
+    // If a custom config file path is provided, use Nova's file handling.
+    if (customConfigFile) {
+      try {
+        const file = await nova.fs.open(customConfigFile, 'r')
+        // Read all lines and join them with newline characters.
+        const lines = await file.readlines()
+        file.close()
+        const fileContent = lines.join('\n')
+        // Parse the JSON content into an object.
+        customFileConfig = JSON.parse(fileContent)
+        log.info('Custom configuration loaded successfully:')
+      } catch (error) {
+        log.error(
+          `Error reading or parsing custom config file at "${customConfigFile}": ${error}`,
+        )
+      }
+    }
+
     const pathForConfig = document.path || nova.workspace.path
     const shouldApplyDefaultConfig = await this.shouldApplyDefaultConfig(
       document,
@@ -227,8 +252,9 @@ class Formatter {
     )
     if (shouldApplyDefaultConfig === null && !flags.force) return []
 
+    // Retrieve the ignore flag and custom config file settings:
     const ignoreConfigFile = getConfigWithWorkspaceOverride(
-      'prettier.ignore-config',
+      'prettier.config.ignore',
     )
 
     log.info(`[Forced=${flags.force}] Formatting ${document.path}`)
@@ -288,9 +314,11 @@ class Formatter {
       parser: this.getParserForSyntax(document.syntax),
       ...(plugins.length > 0 ? { plugins } : {}),
       ...(document.path ? { filepath: document.path } : {}),
-      ...(ignoreConfigFile || shouldApplyDefaultConfig
-        ? this.defaultConfig
-        : {}),
+      ...(customConfigFile
+        ? customFileConfig
+        : ignoreConfigFile || shouldApplyDefaultConfig
+          ? this.defaultConfig
+          : {}),
       ...(selectionOnly
         ? {
             rangeStart: editor.selectedRange.start,
@@ -299,10 +327,11 @@ class Formatter {
         : {}),
       // Pass the flag to the Prettier service so it knows to ignore external config.
       _ignoreConfigFile: ignoreConfigFile,
+      _customConfigFile: customConfigFile,
     }
 
     // Only load the plugins options if no prettier config file exists.
-    if (ignoreConfigFile || shouldApplyDefaultConfig) {
+    if (!customConfigFile && (ignoreConfigFile || shouldApplyDefaultConfig)) {
       // Add PHP plugin options if the document is PHP
       if (document.syntax === 'php') {
         Object.assign(options, this.phpConfig)
