@@ -227,6 +227,10 @@ class Formatter {
     )
     if (shouldApplyDefaultConfig === null && !flags.force) return []
 
+    const ignoreConfigFile = getConfigWithWorkspaceOverride(
+      'prettier.ignore-config',
+    )
+
     log.info(`[Forced=${flags.force}] Formatting ${document.path}`)
 
     const documentRange = new Range(0, document.length)
@@ -284,17 +288,21 @@ class Formatter {
       parser: this.getParserForSyntax(document.syntax),
       ...(plugins.length > 0 ? { plugins } : {}),
       ...(document.path ? { filepath: document.path } : {}),
-      ...(shouldApplyDefaultConfig ? this.defaultConfig : {}),
+      ...(ignoreConfigFile || shouldApplyDefaultConfig
+        ? this.defaultConfig
+        : {}),
       ...(selectionOnly
         ? {
             rangeStart: editor.selectedRange.start,
             rangeEnd: editor.selectedRange.end,
           }
         : {}),
+      // Pass the flag to the Prettier service so it knows to ignore external config.
+      _ignoreConfigFile: ignoreConfigFile,
     }
 
     // Only load the plugins options if no prettier config file exists.
-    if (shouldApplyDefaultConfig) {
+    if (ignoreConfigFile || shouldApplyDefaultConfig) {
       // Add PHP plugin options if the document is PHP
       if (document.syntax === 'php') {
         Object.assign(options, this.phpConfig)
