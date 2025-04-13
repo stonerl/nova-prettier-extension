@@ -90,9 +90,14 @@ class PrettierService extends FormattingService {
       if (info.ignored) return { ignored: true }
     }
 
-    const inferredConfig = await this.prettier.resolveConfig(pathForConfig, {
-      editorconfig: true,
-    })
+    let inferredConfig = {}
+    // Only resolve external configuration if the flag isn’t set
+    if (!options._ignoreConfigFile) {
+      inferredConfig = await this.prettier.resolveConfig(pathForConfig, {
+        editorconfig: true,
+      })
+    }
+
     const config = { ...options, ...inferredConfig }
     // Prefer prettier's inferred parser over our 'default' based on Nova syntax
     if (info.inferredParser) {

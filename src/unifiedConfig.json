@@ -21,6 +21,26 @@
         }
       },
       {
+        "key": "prettier.ignore-config",
+        "title": "Ignore Configuration Files",
+        "description": "Ignore external configuration files and always use the extension's configuration.",
+        "link": "https://prettier.io/docs/configuration",
+        "config": {
+          "type": "boolean",
+          "default": false
+        },
+        "configWorkspace": {
+          "type": "enum",
+          "radio": false,
+          "values": [
+            [null, "Global Setting"],
+            [true, "Enabled"],
+            [false, "Disabled"]
+          ],
+          "default": null
+        }
+      },
+      {
         "key": "prettier.debug.logging",
         "title": "Log Debug Information",
         "description": "Send debug information to the Extension Console.",
