@@ -293,33 +293,36 @@ class Formatter {
         : {}),
     }
 
-    // Add PHP plugin options if the document is PHP
-    if (document.syntax === 'php') {
-      Object.assign(options, this.phpConfig)
-    }
-
-    // Add XML plugin options if the document is XML
-    if (document.syntax === 'xml') {
-      Object.assign(options, this.xmlConfig)
-    }
-
-    // Add SQL plugin options if the document is SQL
-    if (document.syntax === 'sql') {
-      if (sqlFormatter === 'sql-formatter') {
-        Object.assign(options, this.sqlFormatterConfig)
-      } else if (sqlFormatter === 'node-sql-parser') {
-        Object.assign(options, this.nodeSqlParserConfig)
+    // Only load the plugins options if no prettier config file exists.
+    if (shouldApplyDefaultConfig) {
+      // Add PHP plugin options if the document is PHP
+      if (document.syntax === 'php') {
+        Object.assign(options, this.phpConfig)
       }
-    }
 
-    // Add PROPERTIES plugin options if the document is JAVA-PROPERTIES
-    if (document.syntax === 'java-properties') {
-      Object.assign(options, this.propertiesConfig)
-    }
+      // Add XML plugin options if the document is XML
+      if (document.syntax === 'xml') {
+        Object.assign(options, this.xmlConfig)
+      }
 
-    // Add NGINX plugin options if the document is NGINX
-    if (document.syntax === 'nginx') {
-      Object.assign(options, this.nginxConfig)
+      // Add SQL plugin options if the document is SQL
+      if (document.syntax === 'sql') {
+        if (sqlFormatter === 'sql-formatter') {
+          Object.assign(options, this.sqlFormatterConfig)
+        } else if (sqlFormatter === 'node-sql-parser') {
+          Object.assign(options, this.nodeSqlParserConfig)
+        }
+      }
+
+      // Add PROPERTIES plugin options if the document is JAVA-PROPERTIES
+      if (document.syntax === 'java-properties') {
+        Object.assign(options, this.propertiesConfig)
+      }
+
+      // Add NGINX plugin options if the document is NGINX
+      if (document.syntax === 'nginx') {
+        Object.assign(options, this.nginxConfig)
+      }
     }
 
     // Log the options being used
