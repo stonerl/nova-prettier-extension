@@ -43,7 +43,8 @@ Experience seamless code formatting with Prettier directly in Nova.
   or defaults to the built-in Prettier and plugins if none are installed.
 
 This extension can be used as a drop-in replacement for the original [Prettier Extension](https://extensions.panic.com/extensions/alexanderweiss/alexanderweiss.prettier/).
-You can freely switch between both; just make sure that you only have one enabled at a time.
+You can freely switch between both; just make sure that you only have one enabled
+at a time.
 
 ## Bundled plugins
 
@@ -56,13 +57,16 @@ You can freely switch between both; just make sure that you only have one enable
 
 ✅ Enabled by default
 
-⚠️ **Note:** Before enabling any of the following plugins, make sure the corresponding Nova language extensions are installed:
+⚠️ **Note:** Before enabling any of the following plugins, make sure the corresponding
+Nova language extensions are installed:
 
 - `prettier-plugin-java` and `prettier-plugin-properties`
-  ➤ Requires the [Java Language Definition](https://extensions.panic.com/extensions/me.frmr/me.frmr.JavaLanguage/) extension
+  ➤ Requires the [Java Language Definition](https://extensions.panic.com/extensions/me.frmr/me.frmr.JavaLanguage/)
+  extension
 
 - `prettier-plugin-nginx`
-  ➤ Requires the [NGINX for Nova](https://extensions.panic.com/extensions/joncoole/joncoole.nginx) extension
+  ➤ Requires the [NGINX for Nova](https://extensions.panic.com/extensions/joncoole/joncoole.nginx)
+  extension
 
 ## Using external plugins in your project
 
@@ -72,7 +76,7 @@ your project.
 ## Ignoring files
 
 You can disable `Format on Save` for remote documents, documents without a Prettier
-configuration file, or specific syntaxes in the extension and project preferences.
+configuration file, or specific syntaxes in the extension and project settings.
 Additionally you can use Prettier's [built-in exclusion](https://prettier.io/docs/ignore#ignoring-files-prettierignore)
 feature by adding a `.prettierignore` file to the root of your project.
 
@@ -98,10 +102,10 @@ by explicitly specifying the `Prettier module` path in the extension or project 
 ## Working with remote files
 
 Most features are supported for remote files; however,
-[Prettier configuration](https://prettier.io/docs/en/configuration.html) and
-[.prettierignore](https://prettier.io/docs/en/ignore.html) files are not.
-The default configuration set in the extension or project preferences will be
-used instead.
+[Prettier configuration](https://prettier.io/docs/configuration.html) and
+[.prettierignore](https://prettier.io/docs/ignore.html) files are not.
+Instead, the default configuration set in the extension or project settings will
+be used.
 
 ## Versioning
 
