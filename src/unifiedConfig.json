@@ -39,10 +39,25 @@
         }
       },
       {
-        "key": "prettier.ignore-config",
-        "title": "Ignore Configuration Files",
-        "description": "Ignore external configuration files and always use the extension's configuration.",
+        "key": "prettier.config.file",
+        "title": "Prettier Configuration",
+        "description": "Set a path to a custom Prettier configuration file. If unset, the extension will attempt to resolve one from the workspace or fall back to its own configuration.\n\nOnly files with JSON syntax are supported.",
         "link": "https://prettier.io/docs/configuration",
+        "type": "path",
+        "allowFiles": true,
+        "allowFolders": false,
+        "default": true,
+        "config": {
+          "placeholder": "e.g. /Users/Prettier/prettierrc"
+        },
+        "configWorkspace": {
+          "placeholder": "Global Setting"
+        }
+      },
+      {
+        "key": "prettier.config.ignore",
+        "title": "Ignore Configuration Files",
+        "description": "Ignore all external configuration files and always use the extension's configuration. This is ignored if a custom Prettier configuration file is set.",
         "config": {
           "type": "boolean",
           "default": false

@@ -92,7 +92,7 @@ class PrettierService extends FormattingService {
 
     let inferredConfig = {}
     // Only resolve external configuration if the flag isn’t set
-    if (!options._ignoreConfigFile) {
+    if (!options._customConfigFile && !options._ignoreConfigFile) {
       inferredConfig = await this.prettier.resolveConfig(pathForConfig, {
         editorconfig: true,
       })
