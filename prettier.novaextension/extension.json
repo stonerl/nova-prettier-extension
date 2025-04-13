@@ -3,7 +3,7 @@
   "name": "Prettier+",
   "organization": "Toni Förster",
   "description": "Prettier integration for Nova – format JavaScript, TypeScript, JSON, CSS, HTML, Markdown, and more, with built-in support for Java, PHP, SQL, and XML – no extra setup required.",
-  "version": "3.5.15",
+  "version": "3.5.16",
   "license": "MIT License",
   "funding": "https://github.com/sponsors/stonerl",
   "categories": ["commands", "formatters"],

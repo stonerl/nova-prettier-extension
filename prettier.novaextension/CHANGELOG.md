@@ -1,3 +1,17 @@
+## 3.5.16 - 2025-04-13
+
+### Added
+
+- New Command: **Format Document (Forced)** — formats the current file even if its
+  syntax is ignored or excluded via `.prettierignore`.
+
+### Changed
+
+- Dismissing the warning shown when using _Format Selection_ on unsupported syntaxes
+  now disables the command for those syntaxes.
+- Refined user-facing notifications for unsupported syntaxes and reset actions
+- Internal: Refactored plugin and Prettier options handling
+
 ## 3.5.15 - 2025-04-12
 
 ### Added
