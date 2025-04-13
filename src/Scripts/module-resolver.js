@@ -128,24 +128,9 @@ module.exports = async function () {
   const preferBundled = getConfigWithWorkspaceOverride(
     'prettier.module.preferBundled',
   )
-  if (preferBundled) {
-    try {
-      const prettierPath = nova.path.join(
-        nova.extension.path,
-        'node_modules',
-        'prettier',
-      )
-      log.info(
-        `Using bundled Prettier because "prettier.module.preferBundled" is set: ${prettierPath}`,
-      )
-      return prettierPath
-    } catch (err) {
-      log.warn('Error while resolving bundled Prettier:', err)
-      throw err
-    }
-  }
+
   // Try finding in the workspace
-  if (nova.workspace.path) {
+  if (nova.workspace.path && !preferBundled) {
     // Try finding purely through file system first
     try {
       const fsResult = findModuleWithFileSystem(nova.workspace.path, 'prettier')
