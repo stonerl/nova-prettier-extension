@@ -32,9 +32,23 @@ function bumpJsonFile(file) {
   console.log(`✔ Updated version in ${file} (preserved formatting)`)
 }
 
+function prependChangelogEntry(file) {
+  const date = new Date().toISOString().split('T')[0] // e.g. "2025-04-13"
+  const entry = `## ${version} - ${date}\n\n`
+
+  const oldContent = fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : ''
+  const newContent = entry + oldContent
+
+  fs.writeFileSync(file, newContent)
+  console.log(`✔ Prepended changelog entry to ${file}`)
+}
+
 // 1. Bump both package.json files using npm
 bumpWithNpm('package.json')
 bumpWithNpm('prettier.novaextension/package.json')
 
 // 2. Update extension.json directly
 bumpJsonFile('prettier.novaextension/extension.json')
+
+// 3. Add new version to CHANGELOG.md
+prependChangelogEntry('prettier.novaextension/CHANGELOG.md')
