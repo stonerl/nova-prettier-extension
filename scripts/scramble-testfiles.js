@@ -30,7 +30,7 @@ const mistakeInjectors = {
   '.xml': simulateXmlMistakes,
   '.yaml': simulateYamlMistakes,
   '.sql': simulateSqlMistakes,
-  '.conf': simulateNginxMistakes,
+  '.nginx': simulateNginxMistakes,
   '.java': simulateJavaMistakes,
   '.properties': simulatePropertiesMistake,
 }
