@@ -1,0 +1,52 @@
+diff --git a/node_modules/prettier/index.mjs b/node_modules/prettier/index.mjs
+index 0c03045..eadcb38 100644
+--- a/node_modules/prettier/index.mjs
++++ b/node_modules/prettier/index.mjs
+@@ -20129,10 +20129,13 @@ async function printAstToDoc(ast, options8) {
+     embeds
+   );
+   ensureAllCommentsPrinted(options8);
+-  if (options8.nodeAfterCursor && !options8.nodeBeforeCursor) {
++  if (options8.nodeAfterCursor && options8.nodeBeforeCursor) {
++    return [doc2]; // Don't insert cursor manually
++  }
++  if (options8.nodeAfterCursor) {
+     return [cursor, doc2];
+   }
+-  if (options8.nodeBeforeCursor && !options8.nodeAfterCursor) {
++  if (options8.nodeBeforeCursor) {
+     return [doc2, cursor];
+   }
+   return doc2;
+@@ -20174,16 +20177,21 @@ function callPluginPrintFunction(path13, options8, printPath, args, embeds) {
+   } else {
+     doc2 = printer.print(path13, options8, printPath, args);
+   }
+-  switch (node) {
+-    case options8.cursorNode:
+-      doc2 = inheritLabel(doc2, (doc3) => [cursor, doc3, cursor]);
+-      break;
+-    case options8.nodeBeforeCursor:
+-      doc2 = inheritLabel(doc2, (doc3) => [doc3, cursor]);
+-      break;
+-    case options8.nodeAfterCursor:
+-      doc2 = inheritLabel(doc2, (doc3) => [cursor, doc3]);
+-      break;
++  if (!options8._cursorApplied) {
++    switch (node) {
++      case options8.cursorNode:
++        doc2 = inheritLabel(doc2, (doc3) => [cursor, doc3, cursor]);
++        options8._cursorApplied = true;
++        break;
++      case options8.nodeBeforeCursor:
++        doc2 = inheritLabel(doc2, (doc3) => [doc3, cursor]);
++        options8._cursorApplied = true;
++        break;
++      case options8.nodeAfterCursor:
++        doc2 = inheritLabel(doc2, (doc3) => [cursor, doc3]);
++        options8._cursorApplied = true;
++        break;
++    }
+   }
+   if (printer.printComment && (!printer.willPrintOwnComments || !printer.willPrintOwnComments(path13, options8))) {
+     doc2 = printComments(path13, doc2, options8);
