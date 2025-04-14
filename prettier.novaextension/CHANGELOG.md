@@ -1,4 +1,7 @@
-## 3.5.18 - 2025-04-14
+## 3.5.19 - 2025-04-14
+
+> Note: Version 3.5.19 replaces 3.5.18, which was briefly released but promptly
+> withdrawn after it failed to fully resolve the issue it aimed to fix.
 
 ### Fixed
 
@@ -70,7 +73,8 @@
 
 ## 3.5.14 - 2025-04-09
 
-> Note: This version supersedes 3.5.13, which was briefly published and then withdrawn due to a forgotten code update.
+> Note: This version supersedes 3.5.13, which was briefly published and then
+> withdrawn due to a forgotten code update.
 
 ### Changed
 
