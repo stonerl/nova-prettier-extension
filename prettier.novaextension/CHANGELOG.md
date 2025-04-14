@@ -1,3 +1,28 @@
+## 3.5.17 - 2025-04-14
+
+### Added
+
+- **New option: `Ignore Configuration`**
+
+  - When enabled, external configuration files (e.g. `.prettierrc`) are ignored
+  - The extension’s default settings and plugin options are always applied
+
+- **Custom Prettier configuration file support**
+
+  - A custom configuration file can now be set in the extension or project settings
+  - This file takes precedence over any configuration files in the workspace
+  - Supersedes the `Ignore Configuration` option when both are used
+
+- **New option: `Prefer Bundled Prettier`**
+  - Forces the extension to always use its bundled Prettier modules
+  - Has no effect when a custom module path is set
+
+### Fixed
+
+- **Respect project Prettier config when loading plugin options**
+  - Plugin-specific options are now only applied when no project configuration file is found
+  - Prevents unintentional overrides from plugin defaults when using `.prettierrc` or similar files
+
 ## 3.5.16 - 2025-04-13
 
 ### Added
