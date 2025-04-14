@@ -1,3 +1,9 @@
+## 3.5.18 - 2025-04-14
+
+### Fixed
+
+- Fixed a crash when formatting `.vue` files without a cursor set
+
 ## 3.5.17 - 2025-04-14
 
 ### Added
