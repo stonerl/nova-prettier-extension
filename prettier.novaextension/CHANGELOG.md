@@ -1,3 +1,25 @@
+## 3.5.20 - 2025-04-15
+
+### Added
+
+- **New command: Restart Prettier Service**
+  - Available via `Extensions > Prettier+ > Restart Prettier Service` (**⌃⇧⌘R**)
+  - Allows manually restarting the Prettier service without restarting Nova
+
+### Changed
+
+- **Prettier service now restarts automatically**
+  - Triggered on relevant module or settings changes:
+    - running `npm install` (adds or removes Prettier)
+    - setting/unsetting a global Prettier path
+    - toggling the “Prefer Bundled Prettier” option
+  - No need to restart Nova anymore — Prettier+ will pick up the correct module on its own
+
+### Fixed
+
+- **Crash on rapid Prettier restarts**
+  - Fixed a `ReferenceError` caused by incorrect access to `_isStoppedPromise` during service startup
+
 ## 3.5.19 - 2025-04-14
 
 > Note: Version 3.5.19 replaces 3.5.18, which was briefly released but promptly
