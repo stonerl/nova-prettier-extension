@@ -1,5 +1,5 @@
 /**
- * prettier-options.js — Prettier+ supported config option declarations
+ * prettier-options.js — Prettier⁺ supported config option declarations
  *
  * @license MIT
  * @author Toni Förster

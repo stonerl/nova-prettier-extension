@@ -1,4 +1,4 @@
-# Prettier+ for Nova
+# Prettier⁺ for Nova
 
 Experience seamless code formatting with Prettier directly in Nova.
 
@@ -11,9 +11,9 @@ Experience seamless code formatting with Prettier directly in Nova.
 
 - **Format on Save:** Automatically format your code on save
   (this setting can be customized per project), or manually format using
-  `Editor > Prettier+ > Format Document` (**⌥⇧F**).
+  `Editor > Prettier⁺ > Format Document` (**⌥⇧F**).
 - **Format Document (Forced):** Ignores `.prettierignore` and Ignored Syntaxes,
-  formatting anyway via `Editor > Prettier+ > Format Document (Forced)`.
+  formatting anyway via `Editor > Prettier⁺ > Format Document (Forced)`.
 - **Format Selection:** Precisely formats only the highlighted portion of your code
   (currently supports JavaScript, TypeScript, GraphQL, and Handlebars).
 - **Language Support:** Supports all Prettier-supported languages, including
@@ -70,14 +70,14 @@ Nova language extensions are installed:
 
 To use external Prettier plugins, simply install them along with Prettier in your project.
 
-## Configuring Prettier+
+## Configuring Prettier⁺
 
-Prettier+ automatically detects any supported configuration files in your project, including those located in subfolders
+Prettier⁺ automatically detects any supported configuration files in your project, including those located in subfolders
 (e.g. in monorepos), and uses them by default.
 
-If no configuration files are found, Prettier+ will fall back to the options set in the extension or project settings.
+If no configuration files are found, Prettier⁺ will fall back to the options set in the extension or project settings.
 
-You can also force Prettier+ to always use these settings — even if configuration files are present —
+You can also force Prettier⁺ to always use these settings — even if configuration files are present —
 by enabling the `Ignore Configuration Files` option.
 
 Additionally, you can specify a global configuration file in the extension or workspace settings.
@@ -101,8 +101,8 @@ You can also explicitly specify an installation of Prettier
 (or [`prettier-eslint`](https://github.com/prettier/prettier-eslint))
 by setting the `Prettier module` path in the extension or project settings.
 
-If Prettier+ does not automatically pick up the change, you can manually restart the service via
-`Extensions > Prettier+ > Restart Prettier Service` (**⌃⇧⌘R**).
+If Prettier⁺ does not automatically pick up the change, you can manually restart the service via
+`Extensions > Prettier⁺ > Restart Prettier Service` (**⌃⇧⌘R**).
 
 ## Using Prettier forks or prettier-eslint
 
@@ -120,7 +120,7 @@ be used.
 
 ## Versioning
 
-Prettier+ for Nova follows [Semantic Versioning](https://semver.org/),
+Prettier⁺ for Nova follows [Semantic Versioning](https://semver.org/),
 aligned with official Prettier releases. Versions are formatted as `a.b.c`, where:
 
 - `a.b` corresponds to the bundled Prettier version.
@@ -134,7 +134,7 @@ For example, `3.5.4` uses Prettier `v3.5.x` and is the fourth extension build.
 [![Languages](https://hosted.weblate.org/widget/prettier-for-nova/language-badge.svg)](https://hosted.weblate.org/projects/prettier-for-nova/)
 [![Translation Status](https://hosted.weblate.org/widget/prettier-for-nova/svg-badge.svg)](https://hosted.weblate.org/projects/prettier-for-nova/)
 
-Help translate Prettier+ for Nova and make it accessible to more developers in
+Help translate Prettier⁺ for Nova and make it accessible to more developers in
 your language!
 
 You can contribute translations directly via [Weblate](https://hosted.weblate.org/projects/prettier-for-nova/).

@@ -1,5 +1,5 @@
 /**
- * formatter.js — Prettier+ formatter engine for Nova
+ * formatter.js — Prettier⁺ formatter engine for Nova
  *
  * @license MIT
  * @author Alexander Weiss, Toni Förster

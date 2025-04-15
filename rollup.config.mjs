@@ -1,5 +1,5 @@
 /**
- * rollup.config.js — Build script for Prettier+ Nova extension
+ * rollup.config.js — Build script for Prettier⁺ Nova extension
  *
  * @license MIT
  * @author Alexander Weiss, Toni Förster

@@ -3,7 +3,7 @@
 ### Added
 
 - **New command: Restart Prettier Service**
-  - Available via `Extensions > Prettier+ > Restart Prettier Service` (**⌃⇧⌘R**)
+  - Available via `Extensions > Prettier⁺ > Restart Prettier Service` (**⌃⇧⌘R**)
   - Allows manually restarting the Prettier service without restarting Nova
 
 ### Changed
@@ -13,7 +13,7 @@
     - running `npm install` (adds or removes Prettier)
     - setting/unsetting a global Prettier path
     - toggling the “Prefer Bundled Prettier” option
-  - No need to restart Nova anymore — Prettier+ will pick up the correct module on its own
+  - No need to restart Nova anymore — Prettier⁺ will pick up the correct module on its own
 
 ### Fixed
 
@@ -84,7 +84,7 @@
     JavaScript, TypeScript, GraphQL, and Handlebars
   - This restriction is due to upstream limitations in Prettier's cursor handling logic
   - Displays a dismissible warning when attempting to format unsupported syntaxes
-  - Added command: **Reset Syntax Warnings for Prettier+** to restore suppressed messages
+  - Added command: **Reset Syntax Warnings for Prettier⁺** to restore suppressed messages
 
 ### Fixed
 
@@ -173,14 +173,14 @@ See the README for usage details.
 
 - Restores the internal enum keys (`Enable`, `Disable`, `Global Default`) while keeping the original
   workspace config UI label values (`Enabled`, `Disabled`, `Global Setting`).
-  This ensures compatibility with the original extension, allowing Prettier+ to be used as a drop-in replacement.
+  This ensures compatibility with the original extension, allowing Prettier⁺ to be used as a drop-in replacement.
   _Note: If you previously used custom values in your workspace config, you may need to update them manually._
 
 ## 3.5.6 - 2025-04-02
 
 ### Added
 
-- activationEvents: Prettier+ now uses conditional activation. It won’t run
+- activationEvents: Prettier⁺ now uses conditional activation. It won’t run
   unless it finds a supported config file (like `.prettierrc`) in the project
   root.
 - Localization groundwork: Initial translation support has been implemented.

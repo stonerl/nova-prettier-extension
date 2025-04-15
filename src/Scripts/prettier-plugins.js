@@ -1,5 +1,5 @@
 /**
- * prettier-plugins.js — Plugin path registry for Prettier+
+ * prettier-plugins.js — Plugin path registry for Prettier⁺
  *
  * @license MIT
  * @author Toni Förster

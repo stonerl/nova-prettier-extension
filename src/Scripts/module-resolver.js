@@ -1,5 +1,5 @@
 /**
- * module-resolver.js — Module resolution logic for Prettier+
+ * module-resolver.js — Module resolution logic for Prettier⁺
  *
  * @license MIT
  * @author Alexander Weiss, Toni Förster

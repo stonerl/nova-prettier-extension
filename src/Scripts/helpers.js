@@ -1,5 +1,5 @@
 /**
- * helpers.js — Utility functions for Prettier+ for Nova
+ * helpers.js — Utility functions for Prettier⁺ for Nova
  *
  * @license MIT
  * @author Alexander Weiss, Toni Förster
