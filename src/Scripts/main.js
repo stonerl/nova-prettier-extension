@@ -1,11 +1,11 @@
 /**
- * main.js — Nova extension entry point for Prettier+
+ * main.js — Nova extension entry point for Prettier⁺
  *
  * @license MIT
  * @author Alexander Weiss, Toni Förster
  * @copyright © 2023 Alexander Weiss, © 2025 Toni Förster
  *
- * Initializes and manages the Prettier+ extension, including commands, event hooks, and workspace observers.
+ * Initializes and manages the Prettier⁺ extension, including commands, event hooks, and workspace observers.
  */
 
 const findPrettier = require('./module-resolver.js')
@@ -133,7 +133,7 @@ class PrettierExtension {
       )
       nova.workspace.showInformativeMessage(
         nova.localize(
-          'Prettier+ notification restored. “Format Selection” will now reappear in the menu for unsupported syntaxes, showing a warning when used.',
+          'Prettier⁺ notification restored. “Format Selection” will now reappear in the menu for unsupported syntaxes, showing a warning when used.',
         ),
       )
     })
