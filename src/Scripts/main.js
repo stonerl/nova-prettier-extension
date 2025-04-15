@@ -23,6 +23,10 @@ class PrettierExtension {
     this.didAddTextEditor = this.didAddTextEditor.bind(this)
     this.toggleFormatOnSave = this.toggleFormatOnSave.bind(this)
     this.modulePathDidChange = this.modulePathDidChange.bind(this)
+    this.modulePreferBundledDidChange =
+      this.modulePreferBundledDidChange.bind(this)
+    this.moduleProjectPrettierDidChange =
+      this.moduleProjectPrettierDidChange.bind(this)
     this.prettierConfigFileDidChange =
       this.prettierConfigFileDidChange.bind(this)
     this.editorWillSave = this.editorWillSave.bind(this)
@@ -37,6 +41,8 @@ class PrettierExtension {
     this.issueCollection = new IssueCollection()
 
     this.formatter = new Formatter()
+
+    this.nodeModulesChangeTimeout = null
   }
 
   setupConfiguration() {
@@ -51,6 +57,10 @@ class PrettierExtension {
     observeConfigWithWorkspaceOverride(
       'prettier.module.path',
       this.modulePathDidChange,
+    )
+    observeConfigWithWorkspaceOverride(
+      'prettier.module.preferBundled',
+      this.modulePreferBundledDidChange,
     )
   }
 
@@ -94,6 +104,8 @@ class PrettierExtension {
       for (const pattern of configFilesToWatch) {
         nova.fs.watch(pattern, this.prettierConfigFileDidChange)
       }
+
+      nova.fs.watch('node_modules/**', this.moduleProjectPrettierDidChange)
     }
 
     nova.workspace.onDidAddTextEditor(this.didAddTextEditor)
@@ -151,8 +163,23 @@ class PrettierExtension {
   }
 
   async prettierConfigFileDidChange() {
-    await this.formatter.stop()
-    await this.formatter.start()
+    await this.modulePathDidChange()
+  }
+
+  async modulePreferBundledDidChange() {
+    await this.modulePathDidChange()
+  }
+
+  async moduleProjectPrettierDidChange() {
+    // Debounce the event so we only call modulePathDidChange() once per bulk update,
+    // instead of triggering it for each module installation event.
+    if (this.nodeModulesChangeTimeout) {
+      clearTimeout(this.nodeModulesChangeTimeout)
+    }
+    this.nodeModulesChangeTimeout = setTimeout(async () => {
+      await this.modulePathDidChange()
+      this.nodeModulesChangeTimeout = null
+    }, 1000)
   }
 
   async modulePathDidChange() {
