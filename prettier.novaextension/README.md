@@ -68,8 +68,20 @@ Nova language extensions are installed:
 
 ## Using external plugins in your project
 
-To use external Prettier plugins, simply install them along with Prettier in
-your project.
+To use external Prettier plugins, simply install them along with Prettier in your project.
+
+## Configuring Prettier+
+
+Prettier+ automatically detects any supported configuration files in your project, including those located in subfolders
+(e.g. in monorepos), and uses them by default.
+
+If no configuration files are found, Prettier+ will fall back to the options set in the extension or project settings.
+
+You can also force Prettier+ to always use these settings — even if configuration files are present —
+by enabling the `Ignore Configuration Files` option.
+
+Additionally, you can specify a global configuration file in the extension or workspace settings.
+When set, this file takes precedence over all other configurations — project settings, local configuration files, and extension defaults will be ignored.
 
 ## Ignoring files
 
@@ -82,14 +94,15 @@ _Note: adding it anywhere else won't work._
 
 ## Using a different version of Prettier
 
-Simply install the desired version of Prettier (2.0 or higher, although the latest
-version is always recommended) in the root folder of your project. If you already
-have the project open in Nova, you'll need to reopen it after installing or updating
-Prettier for the extension to recognize and start using the new version.
+To use a specific version of Prettier (v2.0 or higher—though the latest version is recommended),
+simply install it in your project’s root directory. The extension will automatically detect and use it.
 
-You can also explicitly select an installation of Prettier
+You can also explicitly specify an installation of Prettier
 (or [`prettier-eslint`](https://github.com/prettier/prettier-eslint))
 by setting the `Prettier module` path in the extension or project settings.
+
+If Prettier+ does not automatically pick up the change, you can manually restart the service via
+`Extensions > Prettier+ > Restart Prettier Service` (**⌃⇧⌘R**).
 
 ## Using Prettier forks or prettier-eslint
 
