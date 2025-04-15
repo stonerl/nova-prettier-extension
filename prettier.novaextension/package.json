@@ -20,7 +20,7 @@
     "prettier-plugin-java": "^2.6.7",
     "prettier-plugin-nginx": "^1.0.3",
     "prettier-plugin-properties": "^0.3.0",
-    "prettier-plugin-sql": "^0.18.1"
+    "prettier-plugin-sql": "^0.19.0"
   },
   "scripts": {
     "postinstall": "patch-package"
