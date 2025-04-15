@@ -123,10 +123,7 @@ class PrettierExtension {
       this.didInvokeSaveWithoutFormattingCommand,
     )
 
-    nova.commands.register(
-      'prettier.restart-service',
-      this.modulePathDidChange,
-    )
+    nova.commands.register('prettier.restart-service', this.modulePathDidChange)
 
     nova.commands.register('prettier.reset-suppressed-message', () => {
       nova.config.remove('prettier.selection-unsupported.dismissed')

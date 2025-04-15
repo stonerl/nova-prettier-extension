@@ -237,5 +237,6 @@
   "Format Selection": "Auswahl formatieren",
   "Format Document (Forced)": "",
   "Save Without Formatting": "Speichern ohne Formatierung",
-  "Reset Syntax Warnings for Prettier+": "Syntax-Warnungen für Prettier+ zurücksetzen"
+  "Restart Prettier Service": "",
+  "Reset Syntax Warnings": ""
 }
