@@ -22,9 +22,9 @@
     "strings:extract": "node scripts/extract-strings.js"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^24.0.1",
-    "@rollup/plugin-node-resolve": "^15.0.1",
+    "@rollup/plugin-commonjs": "^28.0.3",
+    "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-terser": "^0.4.4",
-    "rollup": "^2.79.1"
+    "rollup": "^4.40.0"
   }
 }

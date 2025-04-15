@@ -77,7 +77,15 @@ export default [
       format: 'cjs',
       exports: 'named',
     },
-    plugins: [commonjs(), resolve({ preferBuiltins: true }), terser()],
+    plugins: [
+      commonjs(),
+      resolve({ preferBuiltins: true }),
+      terser({
+        format: {
+          comments: false,
+        },
+      }),
+    ],
   },
   {
     input: './src/Scripts/prettier-service/prettier-service.js',
@@ -86,7 +94,14 @@ export default [
       format: 'cjs',
       exports: 'named',
     },
-    plugins: [terser()],
+    plugins: [
+      commonjs(),
+      terser({
+        format: {
+          comments: false,
+        },
+      }),
+    ],
   },
   {
     input: './src/Scripts/prettier-service/json-rpc.js',
@@ -95,6 +110,13 @@ export default [
       format: 'cjs',
       exports: 'named',
     },
-    plugins: [terser()],
+    plugins: [
+      commonjs(),
+      terser({
+        format: {
+          comments: false,
+        },
+      }),
+    ],
   },
 ]
