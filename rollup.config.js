@@ -75,7 +75,6 @@ export default [
     output: {
       file: './prettier.novaextension/Scripts/main.js',
       format: 'cjs',
-      exports: 'named',
     },
     plugins: [
       commonjs(),
@@ -92,10 +91,8 @@ export default [
     output: {
       file: './prettier.novaextension/Scripts/prettier-service/prettier-service.js',
       format: 'cjs',
-      exports: 'named',
     },
     plugins: [
-      commonjs(),
       terser({
         format: {
           comments: false,
@@ -108,10 +105,8 @@ export default [
     output: {
       file: './prettier.novaextension/Scripts/prettier-service/json-rpc.js',
       format: 'cjs',
-      exports: 'named',
     },
     plugins: [
-      commonjs(),
       terser({
         format: {
           comments: false,
