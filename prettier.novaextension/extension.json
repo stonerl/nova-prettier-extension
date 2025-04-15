@@ -86,7 +86,12 @@
     ],
     "extensions": [
       {
-        "title": "Reset Syntax Warnings for Prettier+",
+        "title": "Restart Prettier Service",
+        "command": "prettier.restart-service",
+        "shortcut": "cmd-ctrl-shift-r"
+      },
+      {
+        "title": "Reset Syntax Warnings",
         "command": "prettier.reset-suppressed-message"
       }
     ]
