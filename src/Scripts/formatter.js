@@ -91,7 +91,7 @@ class Formatter {
     if (!this._isReadyPromise) this.setupIsReadyPromise()
     // If we're currently stopping we'll wait for that to complete before starting
     if (this._isStoppedPromise) {
-      await _isStoppedPromise
+      await this._isStoppedPromise
     }
 
     if (this.prettierService) return
