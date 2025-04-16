@@ -184,7 +184,7 @@ class Formatter {
       ),
       nova.localize(
         'prettier.notification.could-not-load-prettier.body',
-        "Please ensure your Node.js installation is up to date. Additionally, check if the 'Prettier module' path is correctly set in your extension or project settings. For more details, refer to the error log in the Extension Console",
+        "Please ensure your Node.js installation is up to date. Additionally, check if the 'Prettier module' path is correctly set in your extension or project settings. For more details, refer to the error log in the Extension Console.",
         'notification',
       ),
       [
