@@ -179,7 +179,7 @@ class Formatter {
       'prettier-not-running',
       nova.localize(
         'prettier.notification.could-not-load-prettier.title',
-        'Couldn’t Load Prettier',
+        'Can’t Load Prettier',
         'notification',
       ),
       nova.localize(
@@ -432,7 +432,7 @@ class Formatter {
         showError(
           'prettier-unsupported-syntax',
           nova.localize(
-            'prettier.notification.missingParser.title',
+            'prettier.notification.unsupportedSyntax.title',
             'Unsupported Syntax',
             'notification',
           ),

@@ -6,7 +6,7 @@
   "prettier.notification.stopped-running.title": "",
   "prettier.notification.stopped-running.body": "",
   "prettier.notification.stopped-running.action.restart": "",
-  "prettier.notification.missingParser.title": "",
+  "prettier.notification.unsupportedSyntax.title": "",
   "prettier.notification.missingParser.body": "",
   "prettier.notification.actions.ok": "",
   "prettier.notification.config.updated.title": "",
@@ -18,7 +18,6 @@
   "prettier.notification.prettier-start-failed.title": "",
   "prettier.notification.prettier-start-failed.body": "",
   "prettier.notification.force-format-error.title": "",
-  "prettier.notification.unsupportedSyntax.title": "",
   "prettier.notification.unsupportedSyntax.body": "",
   "prettier.notification.actions.dismiss": "",
   "prettier.notification.format-error.title": ""
