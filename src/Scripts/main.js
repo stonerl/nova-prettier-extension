@@ -203,7 +203,7 @@ class PrettierExtension {
           ),
           nova.localize(
             'prettier.notification.prettier-not-found.body',
-            'Prettier couldn’t be found because npm isn’t available. Make sure Node is installed and accessible.\nIf you’re using NVM, adjust your shell configuration so Nova can load the environment correctly.\nSee Nova’s environment variables guide for help.',
+            'Prettier can’t be found because npm isn’t available. Make sure Node is installed and accessible.\nIf you’re using NVM, adjust your shell configuration so Nova can load the environment correctly.\nSee Nova’s environment variables guide for help.',
             'notification',
           ),
           [
@@ -239,7 +239,7 @@ class PrettierExtension {
         ),
         nova.localize(
           'prettier.notification.prettier-start-failed.body',
-          'Please check the extension console for additional logs.',
+          'Please check the Extension Console for additional logs.',
           'notification',
         ),
       )
@@ -398,7 +398,7 @@ exports.activate = async function () {
       ),
       nova.localize(
         'prettier.notification.prettier-start-failed.body',
-        'Please check the extension console for additional logs.',
+        'Please check the Extension Console for additional logs.',
         'notification',
       ),
     )
