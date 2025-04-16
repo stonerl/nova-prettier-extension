@@ -1,11 +1,11 @@
 {
-  "prettier.notification.showErrors.actions": "",
-  "prettier.notification.config.updated.title": "",
-  "prettier.notification.config.updated.body": "",
-  "prettier.notification.config.updated.actions": "",
-  "prettier.notification.formatSelection.restored.message": "",
-  "prettier.notification.unsupportedSyntax.title": "",
-  "prettier.notification.unsupportedSyntax.body": "",
-  "prettier.notification.unsupportedSyntax.actions.ok": "",
-  "prettier.notification.unsupportedSyntax.actions.dismiss": ""
+  "prettier.notification.showErrors.actions": "OK",
+  "prettier.notification.config.updated.title": "Projekteinstellungen aktualisiert",
+  "prettier.notification.config.updated.body": "Die Prettier-Einstellungen Ihres Projekts wurden auf das neue Format umgestellt.",
+  "prettier.notification.config.updated.actions": "OK",
+  "prettier.notification.formatSelection.restored.message": "Prettier⁺-Benachrichtigung wiederhergestellt. „Auswahl formatieren“ ist wieder im Menü sichtbar, auch bei nicht unterstützter Syntax – mit entsprechender Warnung.",
+  "prettier.notification.unsupportedSyntax.title": "Nicht unterstützte Syntax",
+  "prettier.notification.unsupportedSyntax.body": "„Auswahl formatieren“ ist für diesen Dateityp nicht verfügbar. Unterstützte Syntax: JavaScript, TypeScript, GraphQL und Handlebars.\n\nDurch Klicken auf „Ausblenden“ wird der Befehl für nicht unterstützte Syntax deaktiviert.",
+  "prettier.notification.unsupportedSyntax.actions.ok": "OK",
+  "prettier.notification.unsupportedSyntax.actions.dismiss": "Ausblenden"
 }
