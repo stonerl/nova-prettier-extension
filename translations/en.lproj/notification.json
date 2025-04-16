@@ -1,12 +1,12 @@
 {
-  "prettier.notification.could-not-load-prettier.title": "Couldn’t Load Prettier",
+  "prettier.notification.could-not-load-prettier.title": "Can’t Load Prettier",
   "prettier.notification.could-not-load-prettier.body": "Please ensure your Node.js installation is up to date. Additionally, check if the 'Prettier module' path is correctly set in your extension or project settings. For more details, refer to the error log in the Extension Console",
   "prettier.notification.could-not-load-prettier.action.project": "Project Settings",
   "prettier.notification.could-not-load-prettier.action.extension": "Extension Settings",
   "prettier.notification.stopped-running.title": "Prettier Stopped Running",
   "prettier.notification.stopped-running.body": "If this problem persists, please report the issue through the Extension Library.",
   "prettier.notification.stopped-running.action.restart": "Restart Prettier",
-  "prettier.notification.missingParser.title": "Unsupported Syntax",
+  "prettier.notification.unsupportedSyntax.title": "Unsupported Syntax",
   "prettier.notification.missingParser.body": "Prettier can’t format this file — no parser is available for its type.",
   "prettier.notification.actions.ok": "OK",
   "prettier.notification.config.updated.title": "Project Configuration Updated",
@@ -18,7 +18,6 @@
   "prettier.notification.prettier-start-failed.title": "Unable to Start Prettier",
   "prettier.notification.prettier-start-failed.body": "Please check the extension console for additional logs.",
   "prettier.notification.force-format-error.title": "Error While Forcibly Formatting",
-  "prettier.notification.unsupportedSyntax.title": "Unsupported Syntax",
   "prettier.notification.unsupportedSyntax.body": "“Format Selection” isn’t available for this file type. Supported syntaxes: JavaScript, TypeScript, GraphQL, and Handlebars.\n\nClicking “Dismiss” will disable the command for unsupported syntaxes.",
   "prettier.notification.actions.dismiss": "Dismiss",
   "prettier.notification.format-error.title": "Error While Formatting"
