@@ -201,7 +201,7 @@ class PrettierExtension {
         )
       }
 
-      console.error('Unable to start prettier service', err, err.stack)
+      log.error('Unable to start prettier service', err, err.stack)
 
       return showError(
         'prettier-resolution-error',
@@ -234,7 +234,7 @@ class PrettierExtension {
       const issues = await this.formatter.formatEditorForced(editor)
       this.issueCollection.set(editor.document.uri, issues)
     } catch (err) {
-      console.error(err, err.stack)
+      log.error(err, err.stack)
       showError(
         'prettier-format-error',
         'Error while forcibly formatting',
@@ -323,7 +323,7 @@ class PrettierExtension {
       )
       this.issueCollection.set(editor.document.uri, issues)
     } catch (err) {
-      console.error(err, err.stack)
+      log.error(err, err.stack)
       showError(
         'prettier-format-error',
         `Error while formatting`,
@@ -338,7 +338,7 @@ exports.activate = async function () {
     const extension = new PrettierExtension()
     extension.start()
   } catch (err) {
-    console.error('Unable to set up prettier service', err, err.stack)
+    log.error('Unable to set up prettier service', err, err.stack)
 
     return showError(
       'prettier-resolution-error',

@@ -156,7 +156,7 @@ class Formatter {
     }
     if (!this.prettierService) return
 
-    console.error(`Prettier service exited with code ${exitCode}`)
+    log.error(`Prettier service exited with code ${exitCode}`)
 
     if (this._resolveIsReadyPromise) this._resolveIsReadyPromise(false)
     this._isReadyPromise = null
@@ -192,7 +192,7 @@ class Formatter {
       },
     )
 
-    console.error(`${error.name}: ${error.message}\n${error.stack}`)
+    log.error(`${error.name}: ${error.message}\n${error.stack}`)
   }
 
   showServiceNotRunningError() {
@@ -257,7 +257,7 @@ class Formatter {
       'prettier.config.ignore',
     )
 
-    log.info(`[Forced=${flags.force}] Formatting ${document.path}`)
+    log.debug(`[Forced=${flags.force}] Formatting ${document.path}`)
 
     const documentRange = new Range(0, document.length)
     const original = editor.getTextInRange(documentRange)
@@ -363,7 +363,7 @@ class Formatter {
     }
 
     // Log the options being used
-    log.info('Prettier options:', JSON.stringify(options, null, 2))
+    log.debug('Prettier options:', JSON.stringify(options, null, 2))
 
     const result = await this.prettierService.request('format', {
       original,
@@ -390,7 +390,7 @@ class Formatter {
     }
 
     if (ignored) {
-      log.info(`Prettier is configured to ignore ${document.path}`)
+      log.debug(`Prettier is configured to ignore ${document.path}`)
       return []
     }
 
@@ -402,12 +402,12 @@ class Formatter {
           'Prettier doesn’t include a parser for this file, and no installed plugin provides one.',
         )
       }
-      log.info(`No parser for ${document.path}`)
+      log.debug(`No parser for ${document.path}`)
       return []
     }
 
     if (formatted === original) {
-      log.info(`No changes for ${document.path}`)
+      log.debug(`No changes for ${document.path}`)
       return []
     }
 
@@ -422,7 +422,7 @@ class Formatter {
         `prettier.format-on-save.ignored-syntaxes.${document.syntax}`,
       ) === true
     ) {
-      log.info(
+      log.debug(
         `Not formatting (${document.syntax} syntax ignored) ${document.path}`,
       )
       return null
