@@ -3,6 +3,5 @@ node_modules
 
 prettier.novaextension/config.json
 prettier.novaextension/configWorkspace.json
-prettier.novaextension/de.lproj/
-prettier.novaextension/en.lproj/
+prettier.novaextension/*.lproj/
 prettier.novaextension/Scripts/

@@ -58,16 +58,33 @@ fs.writeFileSync(
 
 // Minify JSON files
 const minifyConfigFile = (filePath) => {
-  const data = JSON.parse(fs.readFileSync(filePath, 'utf8')) // Read and parse JSON
-  const minified = JSON.stringify(data) // Minify the JSON
-  fs.writeFileSync(filePath, minified) // Write back the minified JSON
+  if (!fs.existsSync(filePath)) {
+    console.warn(`⚠️  Skipping missing file: ${filePath}`)
+    return
+  }
+
+  const data = JSON.parse(fs.readFileSync(filePath, 'utf8'))
+  fs.writeFileSync(filePath, JSON.stringify(data))
 }
 
-// Minify the output files
-minifyConfigFile('./prettier.novaextension/config.json')
-minifyConfigFile('./prettier.novaextension/configWorkspace.json')
-minifyConfigFile('./prettier.novaextension/de.lproj/strings.json')
-minifyConfigFile('./prettier.novaextension/en.lproj/strings.json')
+// List of JSON files to minify
+const jsonFilesToMinify = [
+  'config.json',
+  'configWorkspace.json',
+  'de.lproj/notification.json',
+  'de.lproj/strings.json',
+  'en.lproj/notification.json',
+  'en.lproj/strings.json',
+  'fr.lproj/notification.json',
+  'fr.lproj/strings.json',
+  'jp.lproj/notification.json',
+  'jp.lproj/strings.json',
+  'zh-Hans.lproj/notification.json',
+  'zh-Hans.lproj/strings.json',
+].map((file) => `./prettier.novaextension/${file}`)
+
+// Minify all listed files
+jsonFilesToMinify.forEach(minifyConfigFile)
 
 export default [
   {
