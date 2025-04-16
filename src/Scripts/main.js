@@ -277,11 +277,12 @@ class PrettierExtension {
           'Error While Formatting',
           'notification',
         ),
-        nova.localize(
-          'prettier.notification.format-error.body',
-          `"${err.message}" occurred while formatting ${editor.document.path}. See the extension console for more info.`,
-          'notification',
-        ),
+        `"${err.message}"` +
+          nova.localize(
+            'prettier.notification.format-error.body',
+            '\n\nSee the Extension Console for more info.',
+            'notification',
+          ),
       )
     }
   }
@@ -370,11 +371,12 @@ class PrettierExtension {
           'Error While Formatting',
           'notification',
         ),
-        nova.localize(
-          'prettier.notification.format-error.body',
-          `"${err.message}" occurred while formatting ${editor.document.path}. See the extension console for more info.`,
-          'notification',
-        ),
+        `"${err.message}"` +
+          nova.localize(
+            'prettier.notification.format-error.body',
+            '\n\nSee the Extension Console for more info.',
+            'notification',
+          ),
       )
     }
   }

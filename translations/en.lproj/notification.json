@@ -18,7 +18,7 @@
   "prettier.notification.prettier-start-failed.title": "Unable to Start Prettier",
   "prettier.notification.prettier-start-failed.body": "Please check the extension console for additional logs.",
   "prettier.notification.format-error.title": "Error While Formatting",
-  "prettier.notification.format-error.body": "\"${...}\" occurred while formatting ${...}. See the extension console for more info.",
+  "prettier.notification.format-error.body": "\n\nSee the Extension Console for more info.",
   "prettier.notification.unsupportedSyntax.body": "“Format Selection” isn’t available for this file type. Supported syntaxes: JavaScript, TypeScript, GraphQL, and Handlebars.\n\nClicking “Dismiss” will disable the command for unsupported syntaxes.",
   "prettier.notification.actions.dismiss": "Dismiss"
 }
