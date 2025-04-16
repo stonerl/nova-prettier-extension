@@ -67,7 +67,9 @@ const minifyConfigFile = (filePath) => {
     const data = JSON.parse(fs.readFileSync(filePath, 'utf8'))
     fs.writeFileSync(filePath, JSON.stringify(data))
   } catch (error) {
-    console.warn(`⚠️  Failed to parse JSON in file: ${filePath}. Skipping. Error: ${error.message}`)
+    console.warn(
+      `⚠️  Failed to parse JSON in file: ${filePath}. Skipping. Error: ${error.message}`,
+    )
   }
 }
 
