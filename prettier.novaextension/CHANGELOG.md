@@ -1,3 +1,11 @@
+## 3.5.21 - 2025-04-16
+
+### Changed
+
+- Renamed the extension to **Prettier⁺** — because it just looks better 😎
+- updated `prettier-plugin-sql` to version `0.19.0`
+- updated `rollup` to version `4.4.0`
+
 ## 3.5.20 - 2025-04-15
 
 ### Added
