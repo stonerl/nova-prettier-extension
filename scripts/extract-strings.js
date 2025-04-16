@@ -165,6 +165,8 @@ function extractNotificationKeysAST(filePath) {
         if (
           args.length >= 2 &&
           args[0].type === 'StringLiteral' &&
+          // Only string literals are supported as fallback values. This is intentional to avoid
+          // handling dynamic runtime expressions in the translation extraction process.
           args[1].type === 'StringLiteral'
         ) {
           const key = args[0].value
