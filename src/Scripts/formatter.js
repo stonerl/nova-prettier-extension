@@ -398,8 +398,8 @@ class Formatter {
       if (!saving) {
         showError(
           'prettier-unsupported-syntax',
-          `Syntax Not Supported`,
-          `Prettier doesn't include a parser for this file, and no installed plugin provides one.`,
+          'Syntax Not Supported',
+          'Prettier doesn’t include a parser for this file, and no installed plugin provides one.',
         )
       }
       log.info(`No parser for ${document.path}`)

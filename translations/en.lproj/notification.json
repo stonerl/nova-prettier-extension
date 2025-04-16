@@ -1,0 +1,11 @@
+{
+  "prettier.notification.showErrors.actions": "OK",
+  "prettier.notification.config.updated.title": "Project Configuration Updated",
+  "prettier.notification.config.updated.body": "Your project’s Prettier configuration has been updated to the new config format.",
+  "prettier.notification.config.updated.actions": "OK",
+  "prettier.notification.formatSelection.restored.message": "Prettier⁺ notification restored. “Format Selection” will now reappear in the menu for unsupported syntaxes, showing a warning when used.",
+  "prettier.notification.unsupportedSyntax.title": "Unsupported Syntax",
+  "prettier.notification.unsupportedSyntax.body": "“Format Selection” isn’t available for this file type. Supported syntaxes: JavaScript, TypeScript, GraphQL, and Handlebars.\n\nClicking “Dismiss” will disable the command for unsupported syntaxes.",
+  "prettier.notification.unsupportedSyntax.actions.ok": "OK",
+  "prettier.notification.unsupportedSyntax.actions.dismiss": "Dismiss"
+}
