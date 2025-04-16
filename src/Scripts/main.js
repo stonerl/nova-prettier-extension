@@ -69,7 +69,7 @@ class PrettierExtension {
     const dismissed =
       nova.config.get('prettier.selection-unsupported.dismissed') === true
     nova.workspace.context.set(
-      'prettier_selectionUnsupportedDismissed',
+      'prettier.selectionUnsupportedDismissed',
       dismissed,
     )
   }
@@ -129,7 +129,7 @@ class PrettierExtension {
     nova.commands.register('prettier.reset-suppressed-message', () => {
       nova.config.remove('prettier.selection-unsupported.dismissed')
       nova.workspace.context.set(
-        'prettier_selectionUnsupportedDismissed',
+        'prettier.selectionUnsupportedDismissed',
         false,
       )
       nova.workspace.showInformativeMessage(
@@ -290,7 +290,7 @@ class PrettierExtension {
           if (response.actionIdx === 1) {
             nova.config.set(suppressionKey, true)
             nova.workspace.context.set(
-              'prettier_selectionUnsupportedDismissed',
+              'prettier.selectionUnsupportedDismissed',
               true,
             )
           }

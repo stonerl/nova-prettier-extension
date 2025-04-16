@@ -84,15 +84,18 @@ const log = Object.fromEntries(
   ['log', 'info', 'warn', 'error', 'debug'].map((fn) => [
     fn,
     (...args) => {
-      // Only gate debug logs in production
-      if (
-        fn === 'debug' &&
-        !nova.inDevMode() &&
-        !getConfigWithWorkspaceOverride('prettier.debug.logging')
-      ) {
-        return
+      if (fn === 'debug') {
+        // Gate debug logs: if not in dev mode or debug logging flag is off, do nothing.
+        if (
+          !nova.inDevMode() &&
+          !getConfigWithWorkspaceOverride('prettier.debug.logging')
+        ) {
+          return
+        }
+        // Remap debug to use console.log
+        return console.log(...args)
       }
-      console[fn](...args)
+      return console[fn](...args)
     },
   ]),
 )
