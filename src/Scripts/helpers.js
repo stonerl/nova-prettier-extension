@@ -28,7 +28,7 @@ function showError(id, title, body) {
     ),
   ]
 
-  nova.notifications.add(request).catch((err) => console.error(err, err.stack))
+  nova.notifications.add(request).catch((err) => log.error(err, err.stack))
 }
 
 function showActionableError(id, title, body, actions, callback) {
@@ -41,7 +41,7 @@ function showActionableError(id, title, body, actions, callback) {
   nova.notifications
     .add(request)
     .then((response) => callback(response.actionIdx))
-    .catch((err) => console.error(err, err.stack))
+    .catch((err) => log.error(err, err.stack))
 }
 
 function getConfigWithWorkspaceOverride(name) {
@@ -81,10 +81,12 @@ function handleProcessResult(process, reject, resolve) {
 }
 
 const log = Object.fromEntries(
-  ['log', 'info', 'warn'].map((fn) => [
+  ['log', 'info', 'warn', 'error', 'debug'].map((fn) => [
     fn,
     (...args) => {
+      // Only gate debug logs in production
       if (
+        fn === 'debug' &&
         !nova.inDevMode() &&
         !getConfigWithWorkspaceOverride('prettier.debug.logging')
       ) {
@@ -98,7 +100,7 @@ const log = Object.fromEntries(
 // Sanitize Prettier Config Function using Nova's File API with correct mode strings
 async function sanitizePrettierConfig() {
   const configPath = nova.workspace.path + '/.nova/Configuration.json'
-  console.info('Config Path:', configPath)
+  log.debug('Config Path:', configPath)
 
   let rawConfig = ''
   try {
@@ -106,9 +108,9 @@ async function sanitizePrettierConfig() {
     let file = await nova.fs.open(configPath, 'r')
     rawConfig = await file.read()
     file.close()
-    console.info('Configuration file read successfully.')
+    log.debug('Configuration file read successfully.')
   } catch (error) {
-    console.warn(
+    log.warn(
       'Prettier configuration file not found or cannot be read:',
       configPath,
       error,
@@ -117,26 +119,26 @@ async function sanitizePrettierConfig() {
   }
 
   try {
-    console.info('Raw configuration:', rawConfig)
+    log.debug('Raw configuration:', rawConfig)
     const config = JSON.parse(rawConfig)
     let modified = false
 
     for (const key in config) {
       if (key.startsWith('prettier.')) {
         const value = config[key]
-        console.info(`Processing key: ${key} with value: ${value}`)
+        log.debug(`Processing key: ${key} with value: ${value}`)
         if (value === 'Enable' || value === 'Enabled') {
           config[key] = true
           modified = true
-          console.info(`Key ${key} set to true`)
+          log.debug(`Key ${key} set to true`)
         } else if (value === 'Disable' || value === 'Disabled') {
           config[key] = false
           modified = true
-          console.info(`Key ${key} set to false`)
+          log.debug(`Key ${key} set to false`)
         } else if (value === 'Global Default' || value === 'Globale Setting') {
           delete config[key]
           modified = true
-          console.info(`Key ${key} removed`)
+          log.debug(`Key ${key} removed`)
         }
       }
     }
@@ -147,7 +149,7 @@ async function sanitizePrettierConfig() {
       let file = await nova.fs.open(configPath, 'w')
       await file.write(newContent)
       file.close()
-      console.info('Prettier configuration sanitized successfully.')
+      log.info('Prettier configuration sanitized successfully.')
 
       // Send a notification if values have been changed.
       let notification = new NotificationRequest('prettier-config-updated')
@@ -169,12 +171,12 @@ async function sanitizePrettierConfig() {
         ),
       ]
       await nova.notifications.add(notification)
-      console.info('Notification sent.')
+      log.info('Notification sent.')
     } else {
-      console.info('Prettier configuration is already sanitized.')
+      log.debug('Prettier configuration is already sanitized.')
     }
   } catch (error) {
-    console.error('Error sanitizing Prettier configuration:', error)
+    log.error('Error sanitizing Prettier configuration:', error)
   }
 }
 
