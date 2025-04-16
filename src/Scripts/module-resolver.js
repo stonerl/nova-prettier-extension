@@ -89,7 +89,7 @@ async function findModuleWithNPM(directory, module) {
     if (!name || !name.startsWith(`${module}@`)) return resolve(null)
     if (path === nova.workspace.path) {
       log.info(
-        `You seem to be working on ${module}! The extension doesn't work without ${module} built, so using the built-in ${module} instead.`,
+        `You seem to be working on ${module}! The extension doesn’t work without ${module} built, so using the built-in ${module} instead.`,
       )
       return resolve(null)
     }

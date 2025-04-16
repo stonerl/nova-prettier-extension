@@ -1,0 +1,11 @@
+{
+  "prettier.notification.showErrors.actions": "",
+  "prettier.notification.config.updated.title": "",
+  "prettier.notification.config.updated.body": "",
+  "prettier.notification.config.updated.actions": "",
+  "prettier.notification.formatSelection.restored.message": "",
+  "prettier.notification.unsupportedSyntax.title": "",
+  "prettier.notification.unsupportedSyntax.body": "",
+  "prettier.notification.unsupportedSyntax.actions.ok": "",
+  "prettier.notification.unsupportedSyntax.actions.dismiss": ""
+}

@@ -134,7 +134,9 @@ class PrettierExtension {
       )
       nova.workspace.showInformativeMessage(
         nova.localize(
+          'prettier.notification.formatSelection.restored.message',
           'Prettier⁺ notification restored. “Format Selection” will now reappear in the menu for unsupported syntaxes, showing a warning when used.',
+          'notification',
         ),
       )
     })
@@ -194,8 +196,8 @@ class PrettierExtension {
       if (err.status === 127) {
         return showError(
           'prettier-resolution-error',
-          `Can't find npm and Prettier`,
-          `Prettier couldn't be found because npm isn't available. Please make sure you have Node installed. If you've only installed Node through NVM, you'll need to change your shell configuration to work with Nova. See https://library.panic.com/nova/environment-variables/`,
+          'Can’t find npm and Prettier',
+          'Prettier couldn’t be found because npm isn’t available. Please make sure you have Node installed. If you’ve only installed Node through NVM, you’ll need to change your shell configuration to work with Nova. See https://library.panic.com/nova/environment-variables/',
         )
       }
 
@@ -203,8 +205,8 @@ class PrettierExtension {
 
       return showError(
         'prettier-resolution-error',
-        `Unable to start Prettier`,
-        `Please check the extension console for additional logs.`,
+        'Unable to start Prettier',
+        'Please check the extension console for additional logs.',
       )
     }
   }
@@ -235,7 +237,7 @@ class PrettierExtension {
       console.error(err, err.stack)
       showError(
         'prettier-format-error',
-        `Error while forcibly formatting`,
+        'Error while forcibly formatting',
         `"${err.message}" occurred while forcibly formatting ${editor.document.path}. See the extension console for more info.`,
       )
     }
@@ -259,11 +261,28 @@ class PrettierExtension {
       if (dismissed === true) return
 
       let req = new NotificationRequest('prettier-selection-unsupported')
-      req.title = nova.localize('Unsupported Syntax')
-      req.body = nova.localize(
-        '“Format Selection” isn’t available for this file type. Supported syntaxes: JavaScript, TypeScript, GraphQL, and Handlebars.\n\nClicking “Dismiss” will disable the command for unsupported syntaxes.',
+      req.title = nova.localize(
+        'prettier.notification.unsupportedSyntax.title',
+        'Unsupported Syntax',
+        'notification',
       )
-      req.actions = [nova.localize('OK'), nova.localize('Dismiss')]
+      req.body = nova.localize(
+        'prettier.notification.unsupportedSyntax.body',
+        '“Format Selection” isn’t available for this file type. Supported syntaxes: JavaScript, TypeScript, GraphQL, and Handlebars.\n\nClicking “Dismiss” will disable the command for unsupported syntaxes.',
+        'notification',
+      )
+      req.actions = [
+        nova.localize(
+          'prettier.notification.unsupportedSyntax.actions.ok',
+          'OK',
+          'notification',
+        ),
+        nova.localize(
+          'prettier.notification.unsupportedSyntax.actions.dismiss',
+          'Dismiss',
+          'notification',
+        ),
+      ]
 
       nova.notifications
         .add(req)

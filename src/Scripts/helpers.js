@@ -18,9 +18,15 @@ class ProcessError extends Error {
 function showError(id, title, body) {
   let request = new NotificationRequest(id)
 
-  request.title = nova.localize(title)
-  request.body = nova.localize(body)
-  request.actions = [nova.localize('OK')]
+  request.title = title
+  request.body = body
+  request.actions = [
+    nova.localize(
+      'prettier.notification.showErrors.actions',
+      'OK',
+      'notification',
+    ),
+  ]
 
   nova.notifications.add(request).catch((err) => console.error(err, err.stack))
 }
@@ -28,9 +34,9 @@ function showError(id, title, body) {
 function showActionableError(id, title, body, actions, callback) {
   let request = new NotificationRequest(id)
 
-  request.title = nova.localize(title)
-  request.body = nova.localize(body)
-  request.actions = actions.map((action) => nova.localize(action))
+  request.title = title
+  request.body = body
+  request.actions = actions.map((action) => action)
 
   nova.notifications
     .add(request)
@@ -145,10 +151,23 @@ async function sanitizePrettierConfig() {
 
       // Send a notification if values have been changed.
       let notification = new NotificationRequest('prettier-config-updated')
-      notification.title = 'Project Configuration Updated'
-      notification.body =
-        "Your project's Prettier configuration has been updated to the new config format."
-      notification.actions = ['OK']
+      notification.title = nova.localize(
+        'prettier.notification.config.updated.title',
+        'Project Configuration Updated',
+        'notification',
+      )
+      notification.body = nova.localize(
+        'prettier.notification.config.updated.body',
+        'Your project’s Prettier configuration has been updated to the new config format.',
+        'notification',
+      )
+      notification.actions = [
+        nova.localize(
+          'prettier.notification.config.updated.actions',
+          'OK',
+          'notification',
+        ),
+      ]
       await nova.notifications.add(notification)
       console.info('Notification sent.')
     } else {
