@@ -57,7 +57,7 @@
       {
         "key": "prettier.config.ignore",
         "title": "Ignore Configuration Files",
-        "description": "Ignore all external configuration files and always use the extension's configuration. This is ignored if a custom Prettier configuration file is set.",
+        "description": "Ignore all configuration files and always use the extension's configuration. This is ignored if a custom Prettier configuration file is set.",
         "config": {
           "type": "boolean",
           "default": false
@@ -312,26 +312,6 @@
         "title": "Bracket Line",
         "description": "Put the > of a multi-line HTML (HTML, JSX, Vue, Angular) element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).",
         "link": "https://prettier.io/docs/options#bracket-line",
-        "config": {
-          "type": "boolean",
-          "default": false
-        },
-        "configWorkspace": {
-          "type": "enum",
-          "radio": false,
-          "values": [
-            [null, "Global Setting"],
-            [true, "Enabled"],
-            [false, "Disabled"]
-          ],
-          "default": null
-        }
-      },
-      {
-        "key": "prettier.default-config.jsxBracketSameLine",
-        "title": "[Deprecated] JSX Brackets",
-        "description": "Put the > of a multi-line JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).",
-        "link": "https://prettier.io/docs/en/options#deprecated-jsx-brackets",
         "config": {
           "type": "boolean",
           "default": false
