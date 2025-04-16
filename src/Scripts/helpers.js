@@ -21,11 +21,7 @@ function showError(id, title, body) {
   request.title = title
   request.body = body
   request.actions = [
-    nova.localize(
-      'prettier.notification.showErrors.actions',
-      'OK',
-      'notification',
-    ),
+    nova.localize('prettier.notification.actions.ok', 'OK', 'notification'),
   ]
 
   nova.notifications.add(request).catch((err) => log.error(err, err.stack))
@@ -167,11 +163,7 @@ async function sanitizePrettierConfig() {
         'notification',
       )
       notification.actions = [
-        nova.localize(
-          'prettier.notification.config.updated.actions',
-          'OK',
-          'notification',
-        ),
+        nova.localize('prettier.notification.actions.ok', 'OK', 'notification'),
       ]
       await nova.notifications.add(notification)
       log.info('Notification sent.')

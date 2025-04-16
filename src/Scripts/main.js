@@ -194,10 +194,37 @@ class PrettierExtension {
       await this.startFormatter()
     } catch (err) {
       if (err.status === 127) {
-        return showError(
+        return showActionableError(
           'prettier-resolution-error',
-          'Can’t find npm and Prettier',
-          'Prettier couldn’t be found because npm isn’t available. Please make sure you have Node installed. If you’ve only installed Node through NVM, you’ll need to change your shell configuration to work with Nova. See https://library.panic.com/nova/environment-variables/',
+          nova.localize(
+            'prettier.notification.prettier-not-found.title',
+            'Can’t Find npm and Prettier',
+            'notification',
+          ),
+          nova.localize(
+            'prettier.notification.prettier-not-found.body',
+            'Prettier couldn’t be found because npm isn’t available. Make sure Node is installed and accessible.\nIf you’re using NVM, adjust your shell configuration so Nova can load the environment correctly.\nSee Nova’s environment variables guide for help.',
+            'notification',
+          ),
+          [
+            nova.localize(
+              'prettier.notification.prettier-not-found.action.help',
+              'Open Help Article',
+              'notification',
+            ),
+            nova.localize(
+              'prettier.notification.actions.ok',
+              'OK',
+              'notification',
+            ),
+          ],
+          (responseIdx) => {
+            if (responseIdx === 0) {
+              nova.openURL(
+                'https://library.panic.com/nova/environment-variables/',
+              )
+            }
+          },
         )
       }
 
@@ -205,8 +232,16 @@ class PrettierExtension {
 
       return showError(
         'prettier-resolution-error',
-        'Unable to start Prettier',
-        'Please check the extension console for additional logs.',
+        nova.localize(
+          'prettier.notification.prettier-start-failed.title',
+          'Unable to Start Prettier',
+          'notification',
+        ),
+        nova.localize(
+          'prettier.notification.prettier-start-failed.body',
+          'Please check the extension console for additional logs.',
+          'notification',
+        ),
       )
     }
   }
@@ -237,8 +272,16 @@ class PrettierExtension {
       log.error(err, err.stack)
       showError(
         'prettier-format-error',
-        'Error while forcibly formatting',
-        `"${err.message}" occurred while forcibly formatting ${editor.document.path}. See the extension console for more info.`,
+        nova.localize(
+          'prettier.notification.force-format-error.title',
+          'Error While Forcibly Formatting',
+          'notification',
+        ),
+        nova.localize(
+          'prettier.notification.force-format-error.body',
+          `"${err.message}" occurred while forcibly formatting ${editor.document.path}. See the extension console for more info.`,
+          'notification',
+        ),
       )
     }
   }
@@ -272,13 +315,9 @@ class PrettierExtension {
         'notification',
       )
       req.actions = [
+        nova.localize('prettier.notification.actions.ok', 'OK', 'notification'),
         nova.localize(
-          'prettier.notification.unsupportedSyntax.actions.ok',
-          'OK',
-          'notification',
-        ),
-        nova.localize(
-          'prettier.notification.unsupportedSyntax.actions.dismiss',
+          'prettier.notification.actions.dismiss',
           'Dismiss',
           'notification',
         ),
@@ -326,8 +365,16 @@ class PrettierExtension {
       log.error(err, err.stack)
       showError(
         'prettier-format-error',
-        `Error while formatting`,
-        `"${err.message}" occurred while formatting ${editor.document.path}. See the extension console for more info.`,
+        nova.localize(
+          'prettier.notification.format-error.title',
+          'Error While Formatting',
+          'notification',
+        ),
+        nova.localize(
+          'prettier.notification.format-error.body',
+          `"${err.message}" occurred while formatting ${editor.document.path}. See the extension console for more info.`,
+          'notification',
+        ),
       )
     }
   }
@@ -342,8 +389,16 @@ exports.activate = async function () {
 
     return showError(
       'prettier-resolution-error',
-      `Unable to start Prettier`,
-      `Please check the extension console for additional logs.`,
+      nova.localize(
+        'prettier.notification.prettier-start-failed.title',
+        'Unable to Start Prettier',
+        'notification',
+      ),
+      nova.localize(
+        'prettier.notification.prettier-start-failed.body',
+        'Please check the extension console for additional logs.',
+        'notification',
+      ),
     )
   }
 }

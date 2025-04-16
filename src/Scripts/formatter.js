@@ -177,9 +177,28 @@ class Formatter {
 
     showActionableError(
       'prettier-not-running',
-      `Couldn't Load Prettier`,
-      `Please ensure your Node.js installation is up to date. Additionally, check if the 'Prettier module' path is correctly set in your extension or project settings. For more details, refer to the error log in the Extension Console`,
-      ['Project settings', 'Extension settings'],
+      nova.localize(
+        'prettier.notification.could-not-load-prettier.title',
+        'Couldn’t Load Prettier',
+        'notification',
+      ),
+      nova.localize(
+        'prettier.notification.could-not-load-prettier.body',
+        "Please ensure your Node.js installation is up to date. Additionally, check if the 'Prettier module' path is correctly set in your extension or project settings. For more details, refer to the error log in the Extension Console",
+        'notification',
+      ),
+      [
+        nova.localize(
+          'prettier.notification.could-not-load-prettier.action.project',
+          'Project Settings',
+          'notification',
+        ),
+        nova.localize(
+          'prettier.notification.could-not-load-prettier.action.extension',
+          'Extension Settings',
+          'notification',
+        ),
+      ],
       (r) => {
         switch (r) {
           case 0:
@@ -198,9 +217,23 @@ class Formatter {
   showServiceNotRunningError() {
     showActionableError(
       'prettier-not-running',
-      'Prettier Stopped Running',
-      `If this problem persists, please report the issue through the Extension Library.`,
-      ['Restart Prettier'],
+      nova.localize(
+        'prettier.notification.stopped-running.title',
+        'Prettier Stopped Running',
+        'notification',
+      ),
+      nova.localize(
+        'prettier.notification.stopped-running.body',
+        'If this problem persists, please report the issue through the Extension Library.',
+        'notification',
+      ),
+      [
+        nova.localize(
+          'prettier.notification.stopped-running.action.restart',
+          'Restart Prettier',
+          'notification',
+        ),
+      ],
       (r) => {
         switch (r) {
           case 0:
@@ -398,8 +431,16 @@ class Formatter {
       if (!saving) {
         showError(
           'prettier-unsupported-syntax',
-          'Syntax Not Supported',
-          'Prettier doesn’t include a parser for this file, and no installed plugin provides one.',
+          nova.localize(
+            'prettier.notification.missingParser.title',
+            'Unsupported Syntax',
+            'notification',
+          ),
+          nova.localize(
+            'prettier.notification.missingParser.body',
+            'Prettier can’t format this file — no parser is available for its type.',
+            'notification',
+          ),
         )
       }
       log.debug(`No parser for ${document.path}`)

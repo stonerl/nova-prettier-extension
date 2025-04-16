@@ -239,8 +239,9 @@ languages.forEach((lang) => {
     const merged = Object.fromEntries(
       Object.keys(results[tableName]).map((key) => [
         key,
-        // For English, always use the fallback; for other languages, use fallback if no translation exists.
-        existing[key] ?? (lang === 'en.lproj' ? results[tableName][key] : ''),
+        lang === 'en.lproj'
+          ? results[tableName][key] // Always use updated fallback
+          : (existing[key] ?? ''), // Use existing or empty string for others
       ]),
     )
 
