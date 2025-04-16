@@ -372,7 +372,8 @@ class PrettierExtension {
         ),
         nova.localize(
           'prettier.notification.format-error.body',
-          `"${err.message}" occurred while formatting ${editor.document.path}. See the extension console for more info.'notification',`,
+          `"${err.message}" occurred while formatting ${editor.document.path}. See the extension console for more info.`,
+          'notification',
         ),
       )
     }
