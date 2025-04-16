@@ -18,7 +18,9 @@
   "prettier.notification.prettier-start-failed.title": "",
   "prettier.notification.prettier-start-failed.body": "",
   "prettier.notification.force-format-error.title": "",
+  "prettier.notification.force-format-error.body": "",
   "prettier.notification.unsupportedSyntax.body": "„Auswahl formatieren“ ist für diesen Dateityp nicht verfügbar. Unterstützte Syntax: JavaScript, TypeScript, GraphQL und Handlebars.\n\nDurch Klicken auf „Ausblenden“ wird der Befehl für nicht unterstützte Syntax deaktiviert.",
   "prettier.notification.actions.dismiss": "Ausblenden",
-  "prettier.notification.format-error.title": ""
+  "prettier.notification.format-error.title": "",
+  "prettier.notification.format-error.body": ""
 }

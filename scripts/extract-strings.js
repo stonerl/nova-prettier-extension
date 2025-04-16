@@ -165,10 +165,25 @@ function extractNotificationKeysAST(filePath) {
         if (
           args.length >= 2 &&
           args[0].type === 'StringLiteral' &&
-          args[1].type === 'StringLiteral'
+          (args[1].type === 'StringLiteral' ||
+            args[1].type === 'TemplateLiteral')
         ) {
           const key = args[0].value
-          const fallback = args[1].value
+          let fallback = ''
+
+          if (args[1].type === 'StringLiteral') {
+            fallback = args[1].value
+          } else if (args[1].type === 'TemplateLiteral') {
+            // Combine the literal parts and insert placeholders for the expressions
+            fallback = args[1].quasis
+              .map((elem, i) => {
+                const expressionPlaceholder = args[1].expressions[i]
+                  ? '${...}'
+                  : ''
+                return elem.value.cooked + expressionPlaceholder
+              })
+              .join('')
+          }
           // Default table is "strings"
           let tableName = 'strings'
           // If a third argument is provided and is a string literal, use that as the table name
