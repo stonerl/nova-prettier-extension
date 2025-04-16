@@ -273,13 +273,13 @@ class PrettierExtension {
       showError(
         'prettier-format-error',
         nova.localize(
-          'prettier.notification.force-format-error.title',
-          'Error While Forcibly Formatting',
+          'prettier.notification.format-error.title',
+          'Error While Formatting',
           'notification',
         ),
         nova.localize(
-          'prettier.notification.force-format-error.body',
-          `"${err.message}" occurred while forcibly formatting ${editor.document.path}. See the extension console for more info.`,
+          'prettier.notification.format-error.body',
+          `"${err.message}" occurred while formatting ${editor.document.path}. See the extension console for more info.`,
           'notification',
         ),
       )
