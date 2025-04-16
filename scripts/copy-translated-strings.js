@@ -76,7 +76,7 @@ languages.forEach((lang) => {
 
   // Write the filtered translations into the destination file.
   const destFile = path.join(destLangDir, 'strings.json')
-  fs.writeFileSync(destFile, JSON.stringify(filtered, null, 2) + '\n')
+  fs.writeFileSync(destFile, JSON.stringify(filtered, null, 2))
   console.log(
     `Copied ${filteredCount} translated strings for ${lang} to ${destFile}`,
   )
