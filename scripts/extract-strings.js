@@ -165,25 +165,12 @@ function extractNotificationKeysAST(filePath) {
         if (
           args.length >= 2 &&
           args[0].type === 'StringLiteral' &&
-          (args[1].type === 'StringLiteral' ||
-            args[1].type === 'TemplateLiteral')
+          // Only string literals are supported as fallback values. This is intentional to avoid
+          // handling dynamic runtime expressions in the translation extraction process.
+          args[1].type === 'StringLiteral'
         ) {
           const key = args[0].value
-          let fallback = ''
-
-          if (args[1].type === 'StringLiteral') {
-            fallback = args[1].value
-          } else if (args[1].type === 'TemplateLiteral') {
-            // Combine the literal parts and insert placeholders for the expressions
-            fallback = args[1].quasis
-              .map((elem, i) => {
-                const expressionPlaceholder = args[1].expressions[i]
-                  ? '${...}'
-                  : ''
-                return elem.value.cooked + expressionPlaceholder
-              })
-              .join('')
-          }
+          const fallback = args[1].value
           // Default table is "strings"
           let tableName = 'strings'
           // If a third argument is provided and is a string literal, use that as the table name
