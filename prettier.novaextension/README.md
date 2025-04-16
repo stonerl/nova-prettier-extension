@@ -4,7 +4,7 @@ Experience seamless code formatting with Prettier directly in Nova.
 
 ![GitHub Release](https://img.shields.io/github/v/release/stonerl/nova-prettier-extension)
 [![Install in Nova](https://img.shields.io/badge/install%20in-nova-blueviolet?style=flat)](https://extensions.panic.com/extensions/stonerl/stonerl.prettier)
-[![Join us on Matrix](https://img.shields.io/badge/chat-matrix-%230dbd8b?logo=matrix&logoColor=white)](https://matrix.to/#/#prettier+nova:matrix.org)
+[![Join us on Gitter](https://img.shields.io/badge/chat-gitter-%23ED1965?logo=gitter&logoColor=white)](https://matrix.to/#/#prettier+nova:gitter.im)
 [![Translate on Weblate](https://img.shields.io/badge/translate-weblate-brightgreen?logo=weblate&logoColor=white)](https://hosted.weblate.org/projects/prettier-for-nova/)
 
 ## Features
