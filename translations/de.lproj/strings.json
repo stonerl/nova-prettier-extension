@@ -50,8 +50,6 @@
   "collapse": "zusammenklappen",
   "Bracket Line": "Klammerposition",
   "Put the > of a multi-line HTML (HTML, JSX, Vue, Angular) element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).": "Setzt das > eines mehrzeiligen HTML-, JSX-, Vue- oder Angular-Elements ans Ende der letzten Zeile, anstatt es alleine in die nächste Zeile zu setzen (gilt nicht für selbstschließende Elemente).",
-  "[Deprecated] JSX Brackets": "[Veraltet] JSX-Klammern",
-  "Put the > of a multi-line JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).": "Setzt das > eines mehrzeiligen JSX-Elements ans Ende der letzten Zeile, anstatt es alleine in die nächste Zeile zu setzen (gilt nicht für selbstschließende Elemente).",
   "Arrow Function Parentheses": "Klammern bei Arrow-Funktionsparametern",
   "Include parentheses around a sole arrow function parameter.": "Fügt Klammern um einzelne Parameter von Arrow-Funktionen ein.",
   "always": "immer",

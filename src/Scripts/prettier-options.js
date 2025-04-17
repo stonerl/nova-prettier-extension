@@ -17,7 +17,6 @@ module.exports = {
     'endOfLine',
     'htmlWhitespaceSensitivity',
     'insertPragma',
-    'jsxBracketSameLine',
     'jsxSingleQuote',
     'objectWrap',
     'printWidth',
