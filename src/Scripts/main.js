@@ -8,6 +8,8 @@
  * Initializes and manages the Prettier⁺ extension, including commands, event hooks, and workspace observers.
  */
 
+let prettierExtensionInstance = null
+
 const findPrettier = require('./module-resolver.js')
 const {
   showError,
@@ -33,17 +35,23 @@ class PrettierExtension {
     this.didInvokeFormatCommand = this.didInvokeFormatCommand.bind(this)
     this.didInvokeFormatSelectionCommand =
       this.didInvokeFormatSelectionCommand.bind(this)
+    this.didInvokeFormatForcedCommand =
+      this.didInvokeFormatForcedCommand.bind(this)
     this.didInvokeSaveWithoutFormattingCommand =
       this.didInvokeSaveWithoutFormattingCommand.bind(this)
 
-    this.saveListeners = new Map()
     this.ignoredEditors = new Set()
     this.issueCollection = new IssueCollection()
 
+    // initialize disposables containers
+    this.fsWatchers = []
+    this.commandDisposables = []
+    this.configDisposables = []
+    this.saveListeners = new Map()
+    this.nodeModulesChangeTimeout = null
+
     this.formatter = new Formatter()
     this.hasStarted = false
-
-    this.nodeModulesChangeTimeout = null
   }
 
   setupConfiguration() {
@@ -51,17 +59,19 @@ class PrettierExtension {
     nova.config.remove('prettier.plugins.prettier-plugin-php.singleQuote')
     sanitizePrettierConfig()
 
-    observeConfigWithWorkspaceOverride(
-      'prettier.format-on-save',
-      this.toggleFormatOnSave,
-    )
-    observeConfigWithWorkspaceOverride(
-      'prettier.module.path',
-      this.modulePathDidChange,
-    )
-    observeConfigWithWorkspaceOverride(
-      'prettier.module.preferBundled',
-      this.modulePreferBundledDidChange,
+    this.configDisposables.push(
+      ...observeConfigWithWorkspaceOverride(
+        'prettier.format-on-save',
+        this.toggleFormatOnSave,
+      ),
+      ...observeConfigWithWorkspaceOverride(
+        'prettier.module.path',
+        this.modulePathDidChange,
+      ),
+      ...observeConfigWithWorkspaceOverride(
+        'prettier.module.preferBundled',
+        this.modulePreferBundledDidChange,
+      ),
     )
   }
 
@@ -77,6 +87,7 @@ class PrettierExtension {
   start() {
     this.setupConfiguration()
     this.syncSelectionUnsupportedContext()
+    // 1) File‐system watchers
     if (nova.workspace.path) {
       const configFilesToWatch = [
         '**/.prettierrc',
@@ -103,44 +114,61 @@ class PrettierExtension {
       ]
 
       for (const pattern of configFilesToWatch) {
-        nova.fs.watch(pattern, this.prettierConfigFileDidChange)
+        const watcher = nova.fs.watch(pattern, this.prettierConfigFileDidChange)
+        this.fsWatchers.push(watcher)
       }
 
-      nova.fs.watch('node_modules/**', this.moduleProjectPrettierDidChange)
+      const nodeModulesWatcher = nova.fs.watch(
+        'node_modules/**',
+        this.moduleProjectPrettierDidChange,
+      )
+      this.fsWatchers.push(nodeModulesWatcher)
     }
 
-    nova.workspace.onDidAddTextEditor(this.didAddTextEditor)
-    nova.commands.register('prettier.format', this.didInvokeFormatCommand)
-    nova.commands.register(
-      'prettier.format-selection',
-      this.didInvokeFormatSelectionCommand,
-    )
-    nova.commands.register(
-      'prettier.format-forced',
-      this.didInvokeFormatForcedCommand.bind(this),
-    )
-    nova.commands.register(
-      'prettier.save-without-formatting',
-      this.didInvokeSaveWithoutFormattingCommand,
+    // 2) Workspace text‐editor listener
+    this.didAddTextEditorDisposable = nova.workspace.onDidAddTextEditor(
+      this.didAddTextEditor,
     )
 
-    nova.commands.register('prettier.restart-service', this.modulePathDidChange)
+    // 3) Commands
+    this.commandDisposables = [
+      nova.commands.register('prettier.format', this.didInvokeFormatCommand),
 
-    nova.commands.register('prettier.reset-suppressed-message', () => {
-      nova.config.remove('prettier.selection-unsupported.dismissed')
-      nova.workspace.context.set(
-        'prettier.selectionUnsupportedDismissed',
-        false,
-      )
-      nova.workspace.showInformativeMessage(
-        nova.localize(
-          'prettier.notification.formatSelection.restored.message',
-          'Prettier⁺ notification restored. “Format Selection” will now reappear in the menu for unsupported syntaxes, showing a warning when used.',
-          'notification',
-        ),
-      )
-    })
+      nova.commands.register(
+        'prettier.format-selection',
+        this.didInvokeFormatSelectionCommand,
+      ),
 
+      nova.commands.register(
+        'prettier.format-forced',
+        this.didInvokeFormatForcedCommand,
+      ),
+
+      nova.commands.register(
+        'prettier.save-without-formatting',
+        this.didInvokeSaveWithoutFormattingCommand,
+      ),
+
+      nova.commands.register(
+        'prettier.restart-service',
+        this.modulePathDidChange,
+      ),
+
+      nova.commands.register('prettier.reset-suppressed-message', () => {
+        nova.config.remove('prettier.selection-unsupported.dismissed')
+        nova.workspace.context.set(
+          'prettier.selectionUnsupportedDismissed',
+          false,
+        )
+        nova.workspace.showInformativeMessage(
+          nova.localize(
+            'prettier.notification.formatSelection.restored.message',
+            'Prettier⁺ notification restored. “Format Selection” will now reappear in the menu for unsupported syntaxes, showing a warning when used.',
+            'notification',
+          ),
+        )
+      }),
+    ]
     this.hasStarted = true
   }
 
@@ -388,12 +416,47 @@ class PrettierExtension {
       )
     }
   }
+
+  dispose() {
+    // 1) stop the Prettier subprocess
+    this.formatter.stop()
+
+    // 2) dispose all fs.watch listeners
+    for (const watcher of this.fsWatchers) {
+      watcher.dispose()
+    }
+    this.fsWatchers = []
+
+    // 3) dispose all of commands
+    for (const cmd of this.commandDisposables) {
+      cmd.dispose()
+    }
+    this.commandDisposables = []
+
+    // 4) dispose the workspace.textEditor listener
+    this.didAddTextEditorDisposable.dispose()
+    this.didAddTextEditorDisposable = null
+
+    // 5) dispose all save‑listeners
+    for (const listener of this.saveListeners.values()) {
+      listener.dispose()
+    }
+    this.saveListeners.clear()
+
+    // 6) clear debounce timer
+    clearTimeout(this.nodeModulesChangeTimeout)
+    this.nodeModulesChangeTimeout = null
+
+    // 7) tear down config observers
+    for (const d of this.configDisposables) d.dispose()
+    this.configDisposables = []
+  }
 }
 
 exports.activate = async function () {
   try {
-    const extension = new PrettierExtension()
-    extension.start()
+    prettierExtensionInstance = new PrettierExtension()
+    prettierExtensionInstance.start()
   } catch (err) {
     log.error('Unable to set up prettier service', err, err.stack)
 
@@ -414,5 +477,8 @@ exports.activate = async function () {
 }
 
 exports.deactivate = function () {
-  // Clean up state before the extension is deactivated
+  if (prettierExtensionInstance) {
+    prettierExtensionInstance.dispose()
+    prettierExtensionInstance = null
+  }
 }
