@@ -1,3 +1,29 @@
+## 3.5.22 - 2025-04-17
+
+### Added
+
+- **Full German localization**
+  - All strings now translated — **100% complete** via Weblate.
+
+### Removed
+
+- **Deprecated Prettier option: `jsxBracketSameLine`**
+  - Removed per upstream deprecation.
+
+### Changed
+
+  - **Switched to Babel AST for localization extraction**
+    - Uses `@babel/parser` and `@babel/traverse` to extract `nova.localize()` calls.
+    - Supports multi-table output: calls with a third argument go into separate files (e.g. `notification.json`), others default to `strings.json`.
+    - Merges unified configuration and extension metadata into the default localization table.
+
+  - **Proper logging**
+    - Replaced raw `console` calls with `log.info`, `log.warn`, `log.error`, and `log.debug`.
+    - Debug logs now require “Log Debug Information” to be enabled.
+
+  - **Refactored i18n**
+    - Made remaining notification strings translatable.
+
 ## 3.5.21 - 2025-04-16
 
 ### Changed
