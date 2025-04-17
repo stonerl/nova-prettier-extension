@@ -1,9 +1,31 @@
+## 3.5.24 – 2025‑04‑18
+
+### Removed
+
+- Fully removed the deprecated Prettier option `jsxBracketSameLine` (this time for real…)
+
+### Added
+
+- **Full cleanup on extension deactivate**
+  - Capture and store all `Disposable` handles (file watchers, commands, editor listeners, config observers, etc.)
+  - Introduce `PrettierExtension.dispose()` to:
+    - Stop the Prettier subprocess
+    - Dispose watchers, commands, save‑listeners, debounce timer, and config observers
+  - Reset all internal collections after disposal to avoid any stale references
+
+### Changed
+
+- **Add a `hasStarted` flag**
+  - Prevents `modulePathDidChange()` from running during
+    startup while config observers are being registered
+  - Ensures the resolver only kicks in after the extension has fully initialized
+
 ## 3.5.23 - 2025-04-17
 
 ### Fixed
 
-- Re-added `jsxBracketSameLine` for compatibility with plugins that still depend
-  on it, despite upstream deprecation.
+- Re-added `jsxBracketSameLine` ~for compatibility with plugins that still depend
+  on it, despite upstream deprecation.~
 
 ## 3.5.22 - 2025-04-17
 
