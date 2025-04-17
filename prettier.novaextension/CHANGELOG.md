@@ -1,3 +1,10 @@
+## 3.5.23 - 2025-04-17
+
+### Fixed
+
+- Re-added `jsxBracketSameLine` for compatibility with plugins that still depend
+  on it, despite upstream deprecation.
+
 ## 3.5.22 - 2025-04-17
 
 ### Added
@@ -15,7 +22,8 @@
 - **Switched to Babel AST for localization extraction**
 
   - Uses `@babel/parser` and `@babel/traverse` to extract `nova.localize()` calls.
-  - Supports multi-table output: calls with a third argument go into separate files (e.g. `notification.json`), others default to `strings.json`.
+  - Supports multi-table output: calls with a third argument go into separate files
+    (e.g. `notification.json`), others default to `strings.json`.
   - Merges unified configuration and extension metadata into the default localization table.
 
 - **Proper logging**
