@@ -47,17 +47,27 @@ function getConfigWithWorkspaceOverride(name) {
   return workspaceConfig === null ? extensionConfig : workspaceConfig
 }
 
+/**
+ * Observe a config key in both workspace and extension, but only after
+ * the initial “current value” notification.
+ * Returns the two Disposables so callers can dispose them later.
+ */
 function observeConfigWithWorkspaceOverride(name, fn) {
-  let ignored = false
+  let skippedInitialCall = false
   function wrapped(...args) {
-    if (!ignored) {
-      ignored = true
+    if (!skippedInitialCall) {
+      // skip the first call (initial value)
+      skippedInitialCall = true
       return
     }
     fn.apply(this, args)
   }
-  nova.workspace.config.observe(name, wrapped)
-  nova.config.observe(name, wrapped)
+
+  // capture the two Disposables
+  const workspaceDisposable = nova.workspace.config.observe(name, wrapped)
+  const extensionDisposable = nova.config.observe(name, wrapped)
+
+  return [workspaceDisposable, extensionDisposable]
 }
 
 function handleProcessResult(process, reject, resolve) {
