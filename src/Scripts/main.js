@@ -41,6 +41,7 @@ class PrettierExtension {
     this.issueCollection = new IssueCollection()
 
     this.formatter = new Formatter()
+    this.hasStarted = false
 
     this.nodeModulesChangeTimeout = null
   }
@@ -139,6 +140,8 @@ class PrettierExtension {
         ),
       )
     })
+
+    this.hasStarted = true
   }
 
   async startFormatter() {
@@ -168,16 +171,22 @@ class PrettierExtension {
   }
 
   async prettierConfigFileDidChange() {
+    log.debug('prettierConfigFileDidChange invoked')
     await this.modulePathDidChange()
   }
 
   async modulePreferBundledDidChange() {
+    if (!this.hasStarted) return
+    log.debug(
+      `modulePreferBundledDidChange invoked — preferBundled: ${getConfigWithWorkspaceOverride('prettier.module.preferBundled')}`,
+    )
     await this.modulePathDidChange()
   }
 
   async moduleProjectPrettierDidChange() {
     // Debounce the event so we only call modulePathDidChange() once per bulk update,
     // instead of triggering it for each module installation event.
+    log.debug('moduleProjectPrettierDidChange invoked')
     if (this.nodeModulesChangeTimeout) {
       clearTimeout(this.nodeModulesChangeTimeout)
     }
