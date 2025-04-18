@@ -176,29 +176,40 @@ function simulatePhpMistakes(content) {
 }
 
 function simulateMarkdownMistakes(content) {
-  const lines = content.split('\n')
   let inFencedBlock = false
+  let inFrontmatter = false
 
-  return lines
+  return content
+    .split('\n')
     .map((line) => {
       const trimmed = line.trim()
 
-      // Toggle code block mode
+      // Toggle YAML front‑matter
+      if (trimmed === '---') {
+        inFrontmatter = !inFrontmatter
+        return line
+      }
+      if (inFrontmatter) return line
+
+      // Toggle fenced code blocks
       if (trimmed.startsWith('```')) {
         inFencedBlock = !inFencedBlock
         return line
       }
 
       const shouldSkip =
+        inFencedBlock ||
         trimmed === '' ||
-        /^\s*(#|>)/.test(line) || // headings, blockquotes
-        /`[^`]+`/.test(line) || // inline code
-        (/^\s*\/\//.test(line) && inFencedBlock) // comment inside code block
+        /^\s*[#>]/.test(trimmed) || // headings & blockquotes
+        /^\{[%{]/.test(trimmed) || // lines starting with {% or {{
+        /`[^`]+`/.test(trimmed) // inline code
 
       if (shouldSkip) return line
 
       // Line contains a template literal — don't touch
-      if (/`[^`]*\$\{[^}]+\}[^`]*`/.test(line)) return line
+      if (/\{\{[^}]+\}\}|\{\%[^%]+\%\}/.test(line)) {
+        return line
+      }
 
       // List item — scramble only the content
       const listMatch = line.match(/^(\s*([-+*]|\d+\.)\s+)(.*)$/)
