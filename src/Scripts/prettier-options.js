@@ -32,9 +32,23 @@ module.exports = {
     'vueIndentScriptAndStyle',
   ],
 
-  PRETTIER_PHP_PLUGIN_OPTIONS: ['phpVersion', 'trailingCommaPHP', 'braceStyle'],
+  PRETTIER_PHP_PLUGIN_OPTIONS: [
+    'phpVersion',
+    'printWidth',
+    'tabWidth',
+    'useTabs',
+    'singleQuote',
+    'trailingCommaPHP',
+    'braceStyle',
+    'requirePragma',
+    'insertPragma',
+  ],
 
   PRETTIER_XML_PLUGIN_OPTIONS: [
+    'bracketSameLine',
+    'printWidth',
+    'singleAttributePerLine',
+    'tabWidth',
     'xmlQuoteAttributes',
     'xmlSelfClosingSpace',
     'xmlSortAttributesByKey',
@@ -61,6 +75,9 @@ module.exports = {
   PRETTIER_PROPERTIES_PLUGIN_OPTIONS: ['escapeNonLatin1', 'keySeparator'],
 
   PRETTIER_NGINX_PLUGIN_OPTIONS: [
+    'printWidth',
+    'tabWidth',
+    'useTabs',
     'alignDirectives',
     'alignUniversally',
     'wrapParameters',
