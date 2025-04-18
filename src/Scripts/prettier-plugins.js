@@ -52,4 +52,12 @@ module.exports = {
     'prettier-plugin-properties',
     'index.js',
   ),
+  liquid: nova.path.join(
+    nova.extension.path,
+    'node_modules',
+    '@shopify',
+    'prettier-plugin-liquid',
+    'dist',
+    'index.js',
+  ),
 }

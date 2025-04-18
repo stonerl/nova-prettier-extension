@@ -33,6 +33,7 @@ Experience seamless code formatting with Prettier directly in Nova.
   `YAML` —
   plus additional ones via bundled plugins, such as
   `Java`,
+  `Liquid`,
   `PHP`,
   `SQL`, and
   `XML`.
@@ -49,6 +50,7 @@ This extension can be used as a drop-in replacement for the original [Prettier E
 - ✅ **[@prettier/plugin-php](https://github.com/prettier/plugin-php)**
 - ✅ **[@prettier/plugin-xml](https://github.com/prettier/plugin-xml)**
 - ✅ **[prettier-plugin-sql](https://github.com/un-ts/prettier/tree/master/packages/sql)**
+- ⚠️ **[prettier-plugin-liquid](https://github.com/Shopify/theme-tools/tree/main/packages/prettier-plugin-liquid)**
 - ⚠️ **[prettier-plugin-java](https://www.jhipster.tech/prettier-java/)**
 - ⚠️ **[prettier-plugin-properties](https://github.com/eemeli/prettier-plugin-properties)**
 - ⚠️ **[prettier-plugin-nginx](https://github.com/jxddk/prettier-plugin-nginx)**
@@ -57,6 +59,10 @@ This extension can be used as a drop-in replacement for the original [Prettier E
 
 ⚠️ **Note:** Before enabling any of the following plugins, make sure the corresponding
 Nova language extensions are installed:
+
+- `prettier-plugin-liquid`
+  ➤ Requires the [Liquid](https://extensions.panic.com/extensions/me.arthr/me.arthr.Liquid/)
+  extension
 
 - `prettier-plugin-java` and `prettier-plugin-properties`
   ➤ Requires the [Java Language Definition](https://extensions.panic.com/extensions/me.frmr/me.frmr.JavaLanguage/)
@@ -68,20 +74,24 @@ Nova language extensions are installed:
 
 ## Using external plugins in your project
 
-To use external Prettier plugins, simply install them along with Prettier in your project.
+To use external Prettier plugins, simply install them along with Prettier in
+your project.
 
 ## Configuring Prettier⁺
 
-Prettier⁺ automatically detects any supported configuration files in your project, including those located in subfolders
-(e.g. in monorepos), and uses them by default.
+Prettier⁺ automatically detects any supported configuration files in your project,
+including those located in subfolders (e.g. in monorepos), and uses them by default.
 
-If no configuration files are found, Prettier⁺ will fall back to the options set in the extension or project settings.
+If no configuration files are found, Prettier⁺ will fall back to the options set
+in the extension or project settings.
 
-You can also force Prettier⁺ to always use these settings — even if configuration files are present —
-by enabling the `Ignore Configuration Files` option.
+You can also force Prettier⁺ to always use these settings — even if configuration
+files are present — by enabling the `Ignore Configuration Files` option.
 
-Additionally, you can specify a global configuration file in the extension or workspace settings.
-When set, this file takes precedence over all other configurations — project settings, local configuration files, and extension defaults will be ignored.
+Additionally, you can specify a global configuration file in the extension or
+workspace settings. When set, this file takes precedence over all other
+configurations — project settings, local configuration files, and extension
+defaults will be ignored.
 
 ## Ignoring files
 
@@ -94,15 +104,16 @@ _Note: adding it anywhere else won't work._
 
 ## Using a different version of Prettier
 
-To use a specific version of Prettier (v2.0 or higher—though the latest version is recommended),
-simply install it in your project’s root directory. The extension will automatically detect and use it.
+To use a specific version of Prettier (v2.0 or higher—though the latest version
+is recommended), simply install it in your project’s root directory.
+The extension will automatically detect and use it.
 
 You can also explicitly specify an installation of Prettier
 (or [`prettier-eslint`](https://github.com/prettier/prettier-eslint))
 by setting the `Prettier module` path in the extension or project settings.
 
-If Prettier⁺ does not automatically pick up the change, you can manually restart the service via
-`Extensions > Prettier⁺ > Restart Prettier Service` (**⌃⇧⌘R**).
+If Prettier⁺ does not automatically pick up the change, you can manually restart
+the service via `Extensions > Prettier⁺ > Restart Prettier Service` (**⌃⇧⌘R**).
 
 ## Using Prettier forks or prettier-eslint
 

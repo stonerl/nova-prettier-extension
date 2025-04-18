@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="{{ page.lang | default: 'en' }}">
+  <head>
+    <meta charset="UTF-8" />
+    <title>{{ page.title | escape }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    {% comment %} Stylesheet links and inline styles {% endcomment %}
+    <link rel="stylesheet" href="{{ 'style.css' | asset_url }}" />
+    <link
+      rel="alternate"
+      href="{{ site.url }}/feed.xml"
+      type="application/rss+xml"
+    />
+
+    {% capture inline_style -%} body { background: {{ settings.bg_color }}; }
+    {%- endcapture %}
+    <style>
+      {{ inline_style | strip_newlines }}
+    </style>
+  </head>
+
+  <body>
+    {% assign user_name = customer.first_name | default: 'Guest' %}
+    <header>
+      <h1>Hello, {{ user_name }}!</h1>
+      {% if customer %}
+      <p>Welcome back!</p>
+      {% else %}
+      <p>Please <a href="/account/login">log in</a>.</p>
+      {% endif %}
+    </header>
+
+    <!-- Main navigation -->
+    <nav id="main-nav">
+      <ul>
+        {% for link in site.navigation %}
+        <li><a href="{{ link.url }}">{{ link.title | upcase }}</a></li>
+        {% endfor %}
+      </ul>
+    </nav>
+
+    {% raw %}
+    <!-- Raw block: Liquid inside here won’t be evaluated -->
+    {% if not_rendered %}This won't appear{% endif %} {% endraw %}
+
+    <main>
+      {%- comment -%} Product listing {% endcomment -%} {% for product in
+      collections.frontpage.products %}
+      <article class="product-item">
+        <h2><a href="{{ product.url }}">{{ product.title }}</a></h2>
+        <img
+          src="{{ product.featured_image | img_url: 'medium' }}"
+          alt="{{ product.title }}"
+        />
+        <p>{{ product.description | strip_html | truncate: 100 }}</p>
+        <p class="price">{{ product.price | money }}</p>
+        {% cycle 'row-odd', 'row-even' %}
+      </article>
+      {% endfor %} {% paginate blog.articles by 5 %}
+      <section class="articles">
+        {% for article in paginate.items %}
+        <article>
+          <h3><a href="{{ article.url }}">{{ article.title }}</a></h3>
+          <time datetime="{{ article.published_at | date: '%Y-%m-%d' }}">
+            {{ article.published_at | date: '%B %d, %Y' }}
+          </time>
+        </article>
+        {% endfor %}
+      </section>
+
+      <nav class="pagination">
+        {% if paginate.previous %}
+        <a href="{{ paginate.previous.url }}">← Previous</a>
+        {% endif %}
+        <span>Page {{ paginate.page }} of {{ paginate.pages }}</span>
+        {% if paginate.next %}
+        <a href="{{ paginate.next.url }}">Next →</a>
+        {% endif %}
+      </nav>
+      {% endpaginate %}
+    </main>
+
+    <footer>
+      <p>&copy; {{ 'now' | date: '%Y' }} {{ shop.name }}</p>
+    </footer>
+
+    <script>
+      {% comment %} Pass settings to JS {% endcomment %}
+      var CONFIG = {{ settings | json }};
+      console.log(CONFIG);
+    </script>
+
+    {% schema %} { "name": "Test Section", "settings": [ { "type": "text", "id":
+    "heading", "label": "Heading", "default": "Hello world" }, { "type":
+    "color", "id": "bg_color", "label": "Background color", "default": "#ffffff"
+    } ] } {% endschema %}
+  </body>
+</html>

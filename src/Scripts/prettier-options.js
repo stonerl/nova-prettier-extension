@@ -83,4 +83,18 @@ module.exports = {
     'wrapParameters',
     'continuationIndent',
   ],
+
+  PRETTIER_LIQUID_PLUGIN_OPTIONS: [
+    'printWidth',
+    'tabWidth',
+    'useTabs',
+    'singleQuote',
+    'bracketSameLine',
+    'liquidSingleQuote',
+    'embeddedSingleQuote',
+    'htmlWhitespaceSensitivity',
+    'captureWhitespaceSensitivity',
+    'singleLineLinkTags',
+    'indentSchema',
+  ],
 }

@@ -25,6 +25,7 @@ const {
   PRETTIER_SQL_PLUGIN_NODE_SQL_PARSER_OPTIONS,
   PRETTIER_PROPERTIES_PLUGIN_OPTIONS,
   PRETTIER_NGINX_PLUGIN_OPTIONS,
+  PRETTIER_LIQUID_PLUGIN_OPTIONS,
 } = require('./prettier-options.js')
 
 const {
@@ -35,6 +36,7 @@ const {
   getNodeSqlParserConfig,
   getPropertiesConfig,
   getNginxConfig,
+  getLiquidConfig,
 } = require('./prettier-config.js')
 
 class Formatter {
@@ -70,6 +72,10 @@ class Formatter {
 
   get nginxConfig() {
     return getNginxConfig()
+  }
+
+  get liquidConfig() {
+    return getLiquidConfig()
   }
 
   get nodeSqlParserConfig() {
@@ -291,6 +297,7 @@ class Formatter {
     )
 
     log.debug(`[Forced=${flags.force}] Formatting ${document.path}`)
+    log.debug(`Document Syntax: ${document.syntax}`)
 
     const documentRange = new Range(0, document.length)
     const original = editor.getTextInRange(documentRange)
@@ -313,6 +320,9 @@ class Formatter {
     )
     const propertiesPluginEnabled = getConfigWithWorkspaceOverride(
       'prettier.plugins.prettier-plugin-properties.enabled',
+    )
+    const liquidPluginEnabled = getConfigWithWorkspaceOverride(
+      'prettier.plugins.prettier-plugin-liquid.enabled',
     )
 
     /// Retrieve the configured SQL formatter type
@@ -340,6 +350,13 @@ class Formatter {
       }
       if (document.syntax === 'java-properties' && propertiesPluginEnabled) {
         plugins.push(pluginPaths.properties)
+      }
+      if (
+        (document.syntax === 'liquid-html' ||
+          document.syntax === 'liquid-md') &&
+        liquidPluginEnabled
+      ) {
+        plugins.push(pluginPaths.liquid)
       }
     }
 
@@ -392,6 +409,14 @@ class Formatter {
       // Add NGINX plugin options if the document is NGINX
       if (document.syntax === 'nginx') {
         Object.assign(options, this.nginxConfig)
+      }
+
+      // Add LIQUID plugin options if the document is LIQUID
+      if (
+        document.syntax === 'liquid-html' ||
+        document.syntax === 'liquid-md'
+      ) {
+        Object.assign(options, this.liquidConfig)
       }
     }
 
@@ -517,6 +542,9 @@ class Formatter {
         return 'erb'
       case 'java-properties':
         return 'dot-properties'
+      case 'liquid-html':
+      case 'liquid-md':
+        return 'liquid-html-ast'
       default:
         return syntax
     }

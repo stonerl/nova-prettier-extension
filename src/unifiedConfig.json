@@ -1377,6 +1377,257 @@
         ]
       },
       {
+        "key": "prettier.plugins.prettier-plugin-liquid.section",
+        "title": "prettier-plugin-liquid",
+        "description": "Liquid formatter plugin for Prettier",
+        "link": "https://github.com/Shopify/theme-tools/tree/main/packages/prettier-plugin-liquid",
+        "type": "section",
+        "children": [
+          {
+            "key": "prettier.plugins.prettier-plugin-liquid.enabled",
+            "config": {
+              "title": "Plugin Enabled",
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "title": "Plugin Status",
+              "description": "Select whether to use global settings, enable, or disable the plugin.",
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-liquid.printWidth",
+            "title": "Print Width",
+            "description": "Same as in Prettier.",
+            "link": "https://prettier.io/docs/options#print-width",
+            "type": "number",
+            "min": 0,
+            "config": {
+              "placeholder": "120",
+              "default": 120,
+              "required": true
+            },
+            "configWorkspace": {
+              "placeholder": "Global Setting",
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-liquid.tabWidth",
+            "title": "Tab Width",
+            "description": "Same as in Prettier.",
+            "link": "https://prettier.io/docs/options#tab-width",
+            "type": "number",
+            "min": 0,
+            "config": {
+              "placeholder": "2",
+              "default": 2,
+              "required": true
+            },
+            "configWorkspace": {
+              "placeholder": "Global Setting",
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-liquid.useTabs",
+            "title": "Tabs",
+            "description": "Same as in Prettier.",
+            "link": "https://prettier.io/docs/options#tabs",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-liquid.singleQuote",
+            "title": "Single Quotes",
+            "description": "Same as in Prettier.",
+            "link": "https://prettier.io/docs/options#quotes",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-liquid.bracketSameLine",
+            "title": "Bracket Line",
+            "description": "Same as in Prettier.",
+            "link": "https://prettier.io/docs/options#bracket-line",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-liquid.liquidSingleQuote",
+            "title": "Liquid Single Quotes",
+            "description": "Use single quotes instead of double quotes in Liquid tag and objects.",
+            "link": "https://github.com/Shopify/theme-tools/tree/main/packages/prettier-plugin-liquid#configuration",
+            "config": {
+              "type": "boolean",
+              "default": true
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-liquid.embeddedSingleQuote",
+            "title": "Embedded Single Quotes",
+            "description": "Use single quotes instead of double quotes in embedded languages (JavaScript, CSS, TypeScript inside <script>, <style> or Liquid equivalent).",
+            "link": "https://github.com/Shopify/theme-tools/tree/main/packages/prettier-plugin-liquid#configuration",
+            "config": {
+              "type": "boolean",
+              "default": true
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-liquid.htmlWhitespaceSensitivity",
+            "title": "HTML Whitespace Sensitivity",
+            "description": "Same as in Prettier.",
+            "link": "https://prettier.io/docs/options#html-whitespace-sensitivity",
+            "type": "enum",
+            "radio": false,
+            "config": {
+              "default": "css",
+              "values": [
+                ["css", "css"],
+                ["strict", "strict"],
+                ["ignore", "ignore"]
+              ]
+            },
+            "configWorkspace": {
+              "default": null,
+              "values": [
+                [null, "Global Setting"],
+                ["css", "css"],
+                ["strict", "strict"],
+                ["ignore", "ignore"]
+              ]
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-liquid.captureWhitespaceSensitivity",
+            "title": "Capture Whitespace Sensitivity",
+            "description": "Specify the default whitespace sensitivity of the 'capture' Liquid tag.",
+            "link": "https://github.com/Shopify/theme-tools/tree/main/packages/prettier-plugin-liquid#configuration",
+            "type": "enum",
+            "radio": false,
+            "config": {
+              "default": "strict",
+              "values": [
+                ["strict", "strict"],
+                ["ignore", "ignore"]
+              ]
+            },
+            "configWorkspace": {
+              "default": null,
+              "values": [
+                [null, "Global Setting"],
+                ["strict", "strict"],
+                ["ignore", "ignore"]
+              ]
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-liquid.singleLineLinkTags",
+            "title": "Single Line Link Tags",
+            "description": "If enabled, will print <link> tags on a single line to remove clutter.",
+            "link": "https://github.com/Shopify/theme-tools/tree/main/packages/prettier-plugin-liquid#configuration",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-liquid.indentSchema",
+            "title": "Indent Schema",
+            "description": "If enabled, will indent the contents of the {% schema %} tag",
+            "link": "https://github.com/Shopify/theme-tools/tree/main/packages/prettier-plugin-liquid#configuration",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          }
+        ]
+      },
+      {
         "key": "prettier.plugins.prettier-plugin-java.section",
         "title": "prettier-plugin-java",
         "description": "Java formatter plugin for Prettier",
@@ -1782,6 +2033,24 @@
             }
           },
           {
+            "key": "prettier.format-on-save.ignored-syntaxes.liquid-html",
+            "title": "HTML (Liquid)",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [false, "Format on Save"],
+                [true, "Ignore"]
+              ],
+              "default": null
+            }
+          },
+          {
             "key": "prettier.format-on-save.ignored-syntaxes.javascript",
             "title": "JavaScript",
             "config": {
@@ -1856,6 +2125,24 @@
           {
             "key": "prettier.format-on-save.ignored-syntaxes.markdown",
             "title": "Markdown",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [false, "Format on Save"],
+                [true, "Ignore"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.format-on-save.ignored-syntaxes.liquid-md",
+            "title": "Markdown (Liquid)",
             "config": {
               "type": "boolean",
               "default": false

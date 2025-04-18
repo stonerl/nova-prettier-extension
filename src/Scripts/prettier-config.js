@@ -17,6 +17,7 @@ const {
   PRETTIER_SQL_PLUGIN_NODE_SQL_PARSER_OPTIONS,
   PRETTIER_PROPERTIES_PLUGIN_OPTIONS,
   PRETTIER_NGINX_PLUGIN_OPTIONS,
+  PRETTIER_LIQUID_PLUGIN_OPTIONS,
 } = require('./prettier-options.js')
 
 function getDefaultConfig() {
@@ -94,6 +95,17 @@ function getNginxConfig() {
   )
 }
 
+function getLiquidConfig() {
+  return Object.fromEntries(
+    PRETTIER_LIQUID_PLUGIN_OPTIONS.map((option) => [
+      option,
+      getConfigWithWorkspaceOverride(
+        `prettier.plugins.prettier-plugin-liquid.${option}`,
+      ),
+    ]),
+  )
+}
+
 module.exports = {
   getDefaultConfig,
   getPhpConfig,
@@ -102,4 +114,5 @@ module.exports = {
   getNodeSqlParserConfig,
   getPropertiesConfig,
   getNginxConfig,
+  getLiquidConfig,
 }
