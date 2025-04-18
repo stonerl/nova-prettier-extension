@@ -1031,48 +1031,48 @@
                 "config": {
                   "default": "sql",
                   "values": [
-                    ["bigquery", "BigQuery"],
-                    ["db2", "DB2"],
-                    ["db2i", "DB2i"],
-                    ["hive", "Hive"],
+                    ["bigquery", "GCP BigQuery"],
+                    ["db2", "IBM DB2"],
+                    ["db2i", "IBM DB2i (experimental)"],
+                    ["hive", "Apache Hive"],
                     ["mariadb", "MariaDB"],
                     ["mysql", "MySQL"],
-                    ["n1ql", "N1QL"],
-                    ["plsql", "PL/SQL"],
+                    ["tidb", "TiDB"],
+                    ["n1ql", "Couchbase N1QL"],
+                    ["plsql", "Oracle PL/SQL"],
                     ["postgresql", "PostgreSQL"],
-                    ["redshift", "Redshift"],
+                    ["redshift", "Amazon Redshift"],
                     ["singlestoredb", "SingleStoreDB"],
                     ["snowflake", "Snowflake"],
                     ["spark", "Spark"],
-                    ["sql", "SQL"],
+                    ["sql", "Standard SQL"],
                     ["sqlite", "SQLite"],
-                    ["transactsql", "Transact-SQL"],
-                    ["trino", "Trino"],
-                    ["tsql", "T-SQL"]
+                    ["transactsql", "SQL Server Transact-SQL"],
+                    ["trino", "Trino / Presto"]
                   ]
                 },
                 "configWorkspace": {
                   "default": null,
                   "values": [
                     [null, "Global Setting"],
-                    ["bigquery", "BigQuery"],
-                    ["db2", "DB2"],
-                    ["db2i", "DB2i"],
-                    ["hive", "Hive"],
+                    ["bigquery", "GCP BigQuery"],
+                    ["db2", "IBM DB2"],
+                    ["db2i", "IBM DB2i (experimental)"],
+                    ["hive", "Apache Hive"],
                     ["mariadb", "MariaDB"],
                     ["mysql", "MySQL"],
-                    ["n1ql", "N1QL"],
-                    ["plsql", "PL/SQL"],
+                    ["tidb", "TiDB"],
+                    ["n1ql", "Couchbase N1QL"],
+                    ["plsql", "Oracle PL/SQL"],
                     ["postgresql", "PostgreSQL"],
-                    ["redshift", "Redshift"],
+                    ["redshift", "Amazon Redshift"],
                     ["singlestoredb", "SingleStoreDB"],
                     ["snowflake", "Snowflake"],
                     ["spark", "Spark"],
-                    ["sql", "SQL"],
+                    ["sql", "Standard SQL"],
                     ["sqlite", "SQLite"],
-                    ["transactsql", "Transact-SQL"],
-                    ["trino", "Trino"],
-                    ["tsql", "T-SQL"]
+                    ["transactsql", "SQL Server Transact-SQL"],
+                    ["trino", "Trino / Presto"]
                   ]
                 }
               },
@@ -1323,30 +1323,30 @@
                 "config": {
                   "default": "mysql",
                   "values": [
-                    ["bigquery", "BigQuery"],
-                    ["db2", "DB2"],
+                    ["bigquery", "GCP BigQuery"],
+                    ["db2", "IBM DB2"],
                     ["flinksql", "FlinkSQL"],
-                    ["hive", "Hive"],
+                    ["hive", "Apache Hive"],
                     ["mariadb", "MariaDB"],
                     ["mysql", "MySQL"],
                     ["postgresql", "PostgreSQL"],
                     ["snowflake", "Snowflake"],
-                    ["transactsql", "Transact-SQL"]
+                    ["transactsql", "SQL Server Transact-SQL"]
                   ]
                 },
                 "configWorkspace": {
                   "default": null,
                   "values": [
                     [null, "Global Setting"],
-                    ["bigquery", "BigQuery"],
-                    ["db2", "DB2"],
+                    ["bigquery", "GCP BigQuery"],
+                    ["db2", "IBM DB2"],
                     ["flinksql", "FlinkSQL"],
-                    ["hive", "Hive"],
+                    ["hive", "Apache Hive"],
                     ["mariadb", "MariaDB"],
                     ["mysql", "MySQL"],
                     ["postgresql", "PostgreSQL"],
                     ["snowflake", "Snowflake"],
-                    ["transactsql", "Transact-SQL"]
+                    ["transactsql", "SQL Server Transact-SQL"]
                   ]
                 }
               },
