@@ -569,7 +569,7 @@
             "key": "prettier.plugins.prettier-plugin-php.phpVersion",
             "title": "PHP Version",
             "description": "Allows specifying the PHP version you're using. If you're using PHP 7.1 or later, setting this option will make use of modern language features in the printed output. If you're using PHP lower than 7.0, you'll have to set this option or Prettier will generate incompatible code.",
-            "link": "https://github.com/prettier/plugin-php?tab=readme-ov-file#configuration",
+            "link": "https://github.com/prettier/plugin-php#configuration",
             "type": "enum",
             "radio": false,
             "config": {
@@ -672,7 +672,7 @@
             "key": "prettier.plugins.prettier-plugin-php.singleQuote",
             "title": "Single Quotes",
             "description": "If set to true, strings that use double quotes but do not rely on the features they add, will be reformatted.",
-            "link": "https://github.com/prettier/plugin-php?tab=readme-ov-file#configuration",
+            "link": "https://github.com/prettier/plugin-php#configuration",
             "config": {
               "type": "boolean",
               "default": false
@@ -692,7 +692,7 @@
             "key": "prettier.plugins.prettier-plugin-php.trailingCommaPHP",
             "title": "Trailing Commas",
             "description": "If set to true, trailing commas will be added wherever possible. If set to false, no trailing commas are printed.",
-            "link": "https://github.com/prettier/plugin-php?tab=readme-ov-file#configuration",
+            "link": "https://github.com/prettier/plugin-php#configuration",
             "config": {
               "type": "boolean",
               "default": true
@@ -712,7 +712,7 @@
             "key": "prettier.plugins.prettier-plugin-php.braceStyle",
             "title": "Brace Style",
             "description": "If set to 'per-cs', prettier will move open brace for code blocks (classes, functions and methods) onto new line. If set to '1tbs', prettier will move open brace for code blocks (classes, functions and methods) onto same line.",
-            "link": "https://github.com/prettier/plugin-php?tab=readme-ov-file#configuration",
+            "link": "https://github.com/prettier/plugin-php#configuration",
             "type": "enum",
             "radio": false,
             "config": {
@@ -800,9 +800,84 @@
             }
           },
           {
+            "key": "prettier.plugins.prettier-plugin-xml.bracketSameLine",
+            "title": "Bracket Line",
+            "description": "Same as in Prettier.",
+            "link": "https://prettier.io/docs/options#bracket-line",
+            "config": {
+              "type": "boolean",
+              "default": true
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-xml.printWidth",
+            "title": "Print Width",
+            "description": "Same as in Prettier.",
+            "link": "https://prettier.io/docs/options#print-width",
+            "type": "number",
+            "min": 0,
+            "config": {
+              "placeholder": "80",
+              "default": 80,
+              "required": true
+            },
+            "configWorkspace": {
+              "placeholder": "Global Setting",
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-xml.singleAttributePerLine",
+            "title": "Single Attribute Per Line",
+            "description": "Same as in Prettier.",
+            "link": "https://prettier.io/docs/options#single-attribute-per-line",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-xml.tabWidth",
+            "title": "Tab Width",
+            "description": "Same as in Prettier.",
+            "link": "https://prettier.io/docs/options#tab-width",
+            "type": "number",
+            "min": 0,
+            "config": {
+              "placeholder": "2",
+              "default": 2,
+              "required": true
+            },
+            "configWorkspace": {
+              "placeholder": "Global Setting",
+              "default": null
+            }
+          },
+          {
             "key": "prettier.plugins.prettier-plugin-xml.xmlQuoteAttributes",
             "title": "Quote Attributes",
             "description": "Quote style for XML attributes.",
+            "link": "https://github.com/prettier/plugin-xml#configuration",
             "type": "enum",
             "radio": false,
             "config": {
@@ -827,6 +902,7 @@
             "key": "prettier.plugins.prettier-plugin-xml.xmlSelfClosingSpace",
             "title": "Self Closing Space",
             "description": "Adds a space before self-closing tags.",
+            "link": "https://github.com/prettier/plugin-xml#configuration",
             "config": {
               "type": "boolean",
               "default": true
@@ -846,6 +922,7 @@
             "key": "prettier.plugins.prettier-plugin-xml.xmlSortAttributesByKey",
             "title": "Sort Attributes by Key",
             "description": "Orders XML attributes by key alphabetically while prioritizing xmlns attributes.",
+            "link": "https://github.com/prettier/plugin-xml#configuration",
             "config": {
               "type": "boolean",
               "default": false
@@ -941,7 +1018,7 @@
             "key": "prettier.plugins.prettier-plugin-sql.sql-formatter.section",
             "title": "sql-formatter",
             "description": "Options for sql-formatter",
-            "link": "https://github.com/sql-formatter-org/sql-formatter?tab=readme-ov-file#configuration-options",
+            "link": "https://github.com/sql-formatter-org/sql-formatter#configuration-options",
             "type": "section",
             "children": [
               {
@@ -1377,7 +1454,7 @@
             "key": "prettier.plugins.prettier-plugin-properties.keySeparator",
             "title": "Key Separator",
             "description": "Set the separator to use between a property key and its value.",
-            "link": "https://github.com/eemeli/prettier-plugin-properties?tab=readme-ov-file#key-separator",
+            "link": "https://github.com/eemeli/prettier-plugin-properties#key-separator",
             "type": "enum",
             "radio": false,
             "config": {

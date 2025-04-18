@@ -45,6 +45,10 @@ module.exports = {
   ],
 
   PRETTIER_XML_PLUGIN_OPTIONS: [
+    'bracketSameLine',
+    'printWidth',
+    'singleAttributePerLine',
+    'tabWidth',
     'xmlQuoteAttributes',
     'xmlSelfClosingSpace',
     'xmlSortAttributesByKey',
