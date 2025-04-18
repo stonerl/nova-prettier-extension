@@ -34,9 +34,14 @@ module.exports = {
 
   PRETTIER_PHP_PLUGIN_OPTIONS: [
     'phpVersion',
+    'printWidth',
+    'tabWidth',
+    'useTabs',
     'singleQuote',
     'trailingCommaPHP',
     'braceStyle',
+    'requirePragma',
+    'insertPragma',
   ],
 
   PRETTIER_XML_PLUGIN_OPTIONS: [

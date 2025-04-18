@@ -569,6 +569,7 @@
             "key": "prettier.plugins.prettier-plugin-php.phpVersion",
             "title": "PHP Version",
             "description": "Allows specifying the PHP version you're using. If you're using PHP 7.1 or later, setting this option will make use of modern language features in the printed output. If you're using PHP lower than 7.0, you'll have to set this option or Prettier will generate incompatible code.",
+            "link": "https://github.com/prettier/plugin-php?tab=readme-ov-file#configuration",
             "type": "enum",
             "radio": false,
             "config": {
@@ -614,9 +615,64 @@
             }
           },
           {
+            "key": "prettier.plugins.prettier-plugin-php.printWidth",
+            "title": "Print Width",
+            "description": "Same as in Prettier.",
+            "link": "https://prettier.io/docs/options#print-width",
+            "type": "number",
+            "min": 0,
+            "config": {
+              "placeholder": "80",
+              "default": 80,
+              "required": true
+            },
+            "configWorkspace": {
+              "placeholder": "Global Setting",
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-php.tabWidth",
+            "title": "Tab Width",
+            "description": "Same as in Prettier. The default is '4' based on the 'PSR-2' coding standard.",
+            "link": "https://prettier.io/docs/options#tab-width",
+            "type": "number",
+            "min": 0,
+            "config": {
+              "placeholder": "4",
+              "default": 4,
+              "required": true
+            },
+            "configWorkspace": {
+              "placeholder": "Global Setting",
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-php.useTabs",
+            "title": "Tabs",
+            "description": "Same as in Prettier.",
+            "link": "https://prettier.io/docs/options#tabs",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
             "key": "prettier.plugins.prettier-plugin-php.singleQuote",
             "title": "Single Quotes",
             "description": "If set to true, strings that use double quotes but do not rely on the features they add, will be reformatted.",
+            "link": "https://github.com/prettier/plugin-php?tab=readme-ov-file#configuration",
             "config": {
               "type": "boolean",
               "default": false
@@ -636,6 +692,7 @@
             "key": "prettier.plugins.prettier-plugin-php.trailingCommaPHP",
             "title": "Trailing Commas",
             "description": "If set to true, trailing commas will be added wherever possible. If set to false, no trailing commas are printed.",
+            "link": "https://github.com/prettier/plugin-php?tab=readme-ov-file#configuration",
             "config": {
               "type": "boolean",
               "default": true
@@ -655,6 +712,7 @@
             "key": "prettier.plugins.prettier-plugin-php.braceStyle",
             "title": "Brace Style",
             "description": "If set to 'per-cs', prettier will move open brace for code blocks (classes, functions and methods) onto new line. If set to '1tbs', prettier will move open brace for code blocks (classes, functions and methods) onto same line.",
+            "link": "https://github.com/prettier/plugin-php?tab=readme-ov-file#configuration",
             "type": "enum",
             "radio": false,
             "config": {
@@ -670,6 +728,45 @@
                 [null, "Global Setting"],
                 ["per-cs", "per-cs"],
                 ["1tbs", "1tbs"]
+              ]
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-php.requirePragma",
+            "title": "Require Pragma",
+            "description": "Same as in Prettier.",
+            "link": "https://prettier.io/docs/options#require-pragma",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "default": null,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ]
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-php.insertPragma",
+            "title": "Insert Pragma",
+            "description": "Same as in Prettier.",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "default": null,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
               ]
             }
           }

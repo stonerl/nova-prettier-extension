@@ -3,11 +3,11 @@
 declare(strict_types=1);
 
 // Variable declarations with inconsistent spacing
-$foo = 'bar';
-$baz = ['one', 'two', 'three'];
+$foo = "bar";
+$baz = ["one", "two", "three"];
 
 // Functions with messy formatting
-function greet($name = 'World')
+function greet($name = "World")
 {
     return "Hello, $name!";
 }
@@ -46,9 +46,9 @@ for ($i = 0; $i < 10; $i++) {
 
 // Arrays: short vs long syntax, spacing, trailing commas
 $data = [
-    'name' => 'Alice',
-    'age' => 30,
-    'languages' => ['PHP', 'JavaScript'],
+    "name" => "Alice",
+    "age" => 30,
+    "languages" => ["PHP", "JavaScript"],
 ];
 
 // Inline HTML
@@ -72,8 +72,8 @@ use App\Models\User as UserModel;
 
 // Match expressions
 $value = match ($foo) {
-    'bar' => 1,
-    'baz' => 2,
+    "bar" => 1,
+    "baz" => 2,
     default => 0,
 };
 

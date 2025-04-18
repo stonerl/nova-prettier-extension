@@ -1,6 +1,7 @@
 {
   "1": "1",
   "2": "2",
+  "4": "4",
   "50": "50",
   "80": "80",
   "General": "General",
@@ -103,6 +104,8 @@
   "8.0": "8.0",
   "8.1": "8.1",
   "8.2": "8.2",
+  "Same as in Prettier.": "Same as in Prettier.",
+  "Same as in Prettier. The default is '4' based on the 'PSR-2' coding standard.": "Same as in Prettier. The default is '4' based on the 'PSR-2' coding standard.",
   "If set to true, strings that use double quotes but do not rely on the features they add, will be reformatted.": "If set to true, strings that use double quotes but do not rely on the features they add, will be reformatted.",
   "If set to true, trailing commas will be added wherever possible. If set to false, no trailing commas are printed.": "If set to true, trailing commas will be added wherever possible. If set to false, no trailing commas are printed.",
   "Brace Style": "Brace Style",
