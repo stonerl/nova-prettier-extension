@@ -614,6 +614,25 @@
             }
           },
           {
+            "key": "prettier.plugins.prettier-plugin-php.singleQuote",
+            "title": "Single Quotes",
+            "description": "If set to true, strings that use double quotes but do not rely on the features they add, will be reformatted.",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
             "key": "prettier.plugins.prettier-plugin-php.trailingCommaPHP",
             "title": "Trailing Commas",
             "description": "If set to true, trailing commas will be added wherever possible. If set to false, no trailing commas are printed.",

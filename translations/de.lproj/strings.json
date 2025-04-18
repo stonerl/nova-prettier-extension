@@ -103,6 +103,7 @@
   "8.0": "8.0",
   "8.1": "8.1",
   "8.2": "8.2",
+  "If set to true, strings that use double quotes but do not rely on the features they add, will be reformatted.": "Wenn auf „wahr“ gesetzt, werden Strings, die doppelte Anführungszeichen verwenden, aber nicht auf die zusätzlichen Funktionen angewiesen sind, neu formatiert.",
   "If set to true, trailing commas will be added wherever possible. If set to false, no trailing commas are printed.": "Wenn auf „wahr“ gesetzt, werden abschließende Kommata überall dort hinzugefügt, wo es möglich ist. Wenn auf „falsch“ gesetzt, werden keine abschließenden Kommata ausgegeben.",
   "Brace Style": "Klammerstil",
   "If set to 'per-cs', prettier will move open brace for code blocks (classes, functions and methods) onto new line. If set to '1tbs', prettier will move open brace for code blocks (classes, functions and methods) onto same line.": "Wenn auf „per-cs“ gesetzt, wird die öffnende Klammer für Codeblöcke (Klassen, Funktionen und Methoden) in eine neue Zeile verschoben. Wenn auf „1tbs“ gesetzt, wird die öffnende Klammer für Codeblöcke (Klassen, Funktionen und Methoden) in derselben Zeile belassen.",

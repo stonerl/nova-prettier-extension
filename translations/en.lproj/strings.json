@@ -103,6 +103,7 @@
   "8.0": "8.0",
   "8.1": "8.1",
   "8.2": "8.2",
+  "If set to true, strings that use double quotes but do not rely on the features they add, will be reformatted.": "If set to true, strings that use double quotes but do not rely on the features they add, will be reformatted.",
   "If set to true, trailing commas will be added wherever possible. If set to false, no trailing commas are printed.": "If set to true, trailing commas will be added wherever possible. If set to false, no trailing commas are printed.",
   "Brace Style": "Brace Style",
   "If set to 'per-cs', prettier will move open brace for code blocks (classes, functions and methods) onto new line. If set to '1tbs', prettier will move open brace for code blocks (classes, functions and methods) onto same line.": "If set to 'per-cs', prettier will move open brace for code blocks (classes, functions and methods) onto new line. If set to '1tbs', prettier will move open brace for code blocks (classes, functions and methods) onto same line.",

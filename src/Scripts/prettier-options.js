@@ -32,7 +32,12 @@ module.exports = {
     'vueIndentScriptAndStyle',
   ],
 
-  PRETTIER_PHP_PLUGIN_OPTIONS: ['phpVersion', 'trailingCommaPHP', 'braceStyle'],
+  PRETTIER_PHP_PLUGIN_OPTIONS: [
+    'phpVersion',
+    'singleQuote',
+    'trailingCommaPHP',
+    'braceStyle',
+  ],
 
   PRETTIER_XML_PLUGIN_OPTIONS: [
     'xmlQuoteAttributes',
