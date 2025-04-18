@@ -1512,6 +1512,60 @@
             }
           },
           {
+            "key": "prettier.plugins.prettier-plugin-nginx.printWidth",
+            "title": "Print Width",
+            "description": "Same as in Prettier.",
+            "link": "https://prettier.io/docs/options#print-width",
+            "type": "number",
+            "min": 0,
+            "config": {
+              "placeholder": "80",
+              "default": 80,
+              "required": true
+            },
+            "configWorkspace": {
+              "placeholder": "Global Setting",
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-nginx.tabWidth",
+            "title": "Tab Width",
+            "description": "Same as in Prettier.",
+            "link": "https://prettier.io/docs/options#tab-width",
+            "type": "number",
+            "min": 0,
+            "config": {
+              "placeholder": "4",
+              "default": 4,
+              "required": true
+            },
+            "configWorkspace": {
+              "placeholder": "Global Setting",
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-nginx.useTabs",
+            "title": "Tabs",
+            "description": "Same as in Prettier.",
+            "link": "https://prettier.io/docs/options#tabs",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
             "key": "prettier.plugins.prettier-plugin-nginx.alignDirectives",
             "title": "Align Directives",
             "description": "Align directive parameters within a block to the same column.",
