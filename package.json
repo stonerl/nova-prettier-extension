@@ -1,6 +1,6 @@
 {
   "name": "nova-prettier-extension",
-  "version": "3.5.24",
+  "version": "3.5.25",
   "author": "Toni Förster",
   "license": "MIT",
   "description": "Prettier integration for Nova – format JavaScript, TypeScript, JSON, CSS, HTML, Markdown, and more, with built-in support for Java, PHP, SQL, and XML – no extra setup required.",

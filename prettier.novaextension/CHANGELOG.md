@@ -1,3 +1,33 @@
+## 3.5.25 – 2025‑04‑19
+
+### Added
+
+- Added support for Liquid via `prettier-plugin-liquid`. Ensure the
+  [Liquid Extension](https://extensions.panic.com/extensions/me.arthr/me.arthr.Liquid/)
+  is installed before enabling this plugin.
+
+### Fixed
+
+- Included missing plugin options for:
+  - **@prettier/prettier-plugin-php**:
+    - printWidth
+    - tabWidth
+    - useTabs
+    - singleQuote
+    - requirePragma
+    - insertPragma
+  - **@prettier/prettier-plugin-xml**:
+    - bracketSameLine
+    - printWidth
+    - singleAttributePerLine
+    - tabWidth
+  - **prettier-plugin-sql**:
+    - updated DB strings
+  - **prettier-plugin-nginx**:
+    - printWidth
+    - tabWidth
+    - useTabs
+
 ## 3.5.24 – 2025‑04‑18
 
 ### Removed
