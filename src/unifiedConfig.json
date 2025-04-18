@@ -1608,7 +1608,7 @@
           {
             "key": "prettier.plugins.prettier-plugin-liquid.indentSchema",
             "title": "Indent Schema",
-            "description": "If enabled, will indent the contents of the {% schema %} tag",
+            "description": "If enabled, will indent the contents of the {% schema %} tag.",
             "link": "https://github.com/Shopify/theme-tools/tree/main/packages/prettier-plugin-liquid#configuration",
             "config": {
               "type": "boolean",

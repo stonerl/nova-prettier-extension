@@ -196,7 +196,7 @@
   "Single Line Link Tags": "",
   "If enabled, will print <link> tags on a single line to remove clutter.": "",
   "Indent Schema": "",
-  "If enabled, will indent the contents of the {% schema %} tag": "",
+  "If enabled, will indent the contents of the {% schema %} tag.": "",
   "prettier-plugin-java": "",
   "Java formatter plugin for Prettier": "",
   "prettier-plugin-properties": "",

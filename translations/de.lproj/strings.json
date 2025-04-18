@@ -196,7 +196,7 @@
   "Single Line Link Tags": "Einzeilige Link-Tags",
   "If enabled, will print <link> tags on a single line to remove clutter.": "Wenn aktiviert, werden <link>‑Tags in einer einzigen Zeile ausgegeben, um Unordnung zu vermeiden.",
   "Indent Schema": "Schema einrücken",
-  "If enabled, will indent the contents of the {% schema %} tag": "Wenn aktiviert, wird der Inhalt des {% schema %}‑Tags eingerückt.",
+  "If enabled, will indent the contents of the {% schema %} tag.": "Wenn aktiviert, wird der Inhalt des {% schema %}‑Tags eingerückt.",
   "prettier-plugin-java": "prettier-plugin-java",
   "Java formatter plugin for Prettier": "Java-Formatierungs-Plugin für Prettier",
   "prettier-plugin-properties": "prettier-plugin-properties",
