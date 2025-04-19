@@ -1377,6 +1377,125 @@
         ]
       },
       {
+        "key": "prettier.plugins.prettier-plugin-tailwind.section",
+        "title": "prettier-plugin-tailwindcss",
+        "description": "TailwindCSS CSS class sorting plugin for Prettier",
+        "link": "https://github.com/tailwindlabs/prettier-plugin-tailwindcss",
+        "type": "section",
+        "children": [
+          {
+            "key": "prettier.plugins.prettier-plugin-tailwind.enabled",
+            "config": {
+              "title": "Plugin Enabled",
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "title": "Plugin Status",
+              "description": "Select whether to use global settings, enable, or disable the plugin.",
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-tailwind.tailwindConfig",
+            "title": "Tailwind Config",
+            "description": "Specifies the Tailwind JavaScript config path.",
+            "link": "https://github.com/tailwindlabs/prettier-plugin-tailwindcss#specifying-your-tailwind-javascript-config-path",
+            "type": "path",
+            "allowFiles": true,
+            "allowFolders": false,
+            "default": true,
+            "config": {
+              "placeholder": "e.g. ./styles/tailwind.config.js"
+            },
+            "configWorkspace": {
+              "placeholder": "Global Setting"
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-tailwind.tailwindStylesheet",
+            "title": "Tailwind Stylesheet",
+            "description": "Specifies the Tailwind stylesheet path.",
+            "link": "https://github.com/tailwindlabs/prettier-plugin-tailwindcss#specifying-your-tailwind-stylesheet-path",
+            "type": "path",
+            "allowFiles": true,
+            "allowFolders": false,
+            "default": true,
+            "config": {
+              "placeholder": "e.g. ./resources/css/app.css"
+            },
+            "configWorkspace": {
+              "placeholder": "Global Setting"
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-tailwind.tailwindAttributes",
+            "title": "Non-Standard Attributes",
+            "description": "Sorting order for non-standard attributes.",
+            "link": "https://github.com/tailwindlabs/prettier-plugin-tailwindcss#sorting-non-standard-attributes",
+            "type": "stringArray",
+            "config": {},
+            "configWorkspace": {}
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-tailwind.tailwindFunctions",
+            "title": "Functions and Templates",
+            "description": "Sorting order for classes in function calls and tagged template literals.",
+            "link": "https://github.com/tailwindlabs/prettier-plugin-tailwindcss#sorting-classes-in-function-calls",
+            "type": "stringArray",
+            "config": {},
+            "configWorkspace": {}
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-tailwind.tailwindPreserveWhitespace",
+            "title": "Preserve Whitespace",
+            "description": "If enabled, preserves original whitespace between classes. If disabled, removes unnecessary whitespace between classes for consistent formatting.",
+            "link": "https://github.com/tailwindlabs/prettier-plugin-tailwindcss#preserving-whitespace",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-tailwind.tailwindPreserveDuplicates",
+            "title": "Preserve Duplicate Classes",
+            "description": "If enabled, preserves duplicate classes when classes and templating syntax can’t be distinguished (e.g., in Fluid or Blade). If disabled, removes duplicate classes automatically for cleaner output.",
+            "link": "https://github.com/tailwindlabs/prettier-plugin-tailwindcss#preserving-duplicate-classes",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          }
+        ]
+      },
+      {
         "key": "prettier.plugins.prettier-plugin-liquid.section",
         "title": "prettier-plugin-liquid",
         "description": "Liquid formatter plugin for Prettier",

@@ -50,27 +50,37 @@ This extension can be used as a drop-in replacement for the original [Prettier E
 - ✅ **[@prettier/plugin-php](https://github.com/prettier/plugin-php)**
 - ✅ **[@prettier/plugin-xml](https://github.com/prettier/plugin-xml)**
 - ✅ **[prettier-plugin-sql](https://github.com/un-ts/prettier/tree/master/packages/sql)**
+- ➕ **[prettier-plugin-tailwindcss](https://github.com/tailwindlabs/prettier-plugin-tailwindcss)**
 - ⚠️ **[prettier-plugin-liquid](https://github.com/Shopify/theme-tools/tree/main/packages/prettier-plugin-liquid)**
 - ⚠️ **[prettier-plugin-java](https://www.jhipster.tech/prettier-java/)**
 - ⚠️ **[prettier-plugin-properties](https://github.com/eemeli/prettier-plugin-properties)**
 - ⚠️ **[prettier-plugin-nginx](https://github.com/jxddk/prettier-plugin-nginx)**
 
-✅ Enabled by default
+### Plugin Legend
 
-⚠️ **Note:** Before enabling any of the following plugins, make sure the corresponding
-Nova language extensions are installed:
+- ✅ **Enabled by default**
 
-- `prettier-plugin-liquid`
-  ➤ Requires the [Liquid](https://extensions.panic.com/extensions/me.arthr/me.arthr.Liquid/)
-  extension
+  These plugins are active out of the box—no setup required.
 
-- `prettier-plugin-java` and `prettier-plugin-properties`
-  ➤ Requires the [Java Language Definition](https://extensions.panic.com/extensions/me.frmr/me.frmr.JavaLanguage/)
-  extension
+- ➕ **Optional, self-contained**
 
-- `prettier-plugin-nginx`
-  ➤ Requires the [NGINX for Nova](https://extensions.panic.com/extensions/joncoole/joncoole.nginx)
-  extension
+  Not enabled by default, but can be used immediately without installing anything extra.
+
+- ⚠️ **Requires external extension**
+
+  Before enabling any of the following plugins, make sure the corresponding Nova language extensions are installed:
+
+  - `prettier-plugin-liquid`
+    ➤ Requires the [Liquid](https://extensions.panic.com/extensions/me.arthr/me.arthr.Liquid/)
+    extension
+
+  - `prettier-plugin-java` and `prettier-plugin-properties`
+    ➤ Requires the [Java Language Definition](https://extensions.panic.com/extensions/me.frmr/me.frmr.JavaLanguage/)
+    extension
+
+  - `prettier-plugin-nginx`
+    ➤ Requires the [NGINX for Nova](https://extensions.panic.com/extensions/joncoole/joncoole.nginx)
+    extension
 
 ## Using external plugins in your project
 
