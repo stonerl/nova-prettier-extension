@@ -964,6 +964,34 @@
         ]
       },
       {
+        "key": "prettier.plugins.prettier-plugin-ejs.section",
+        "title": "prettier-plugin-ejs",
+        "description": "EJS markup formatter plugin for Prettier",
+        "link": "https://github.com/ecmel/prettier-plugin-ejs",
+        "type": "section",
+        "children": [
+          {
+            "key": "prettier.plugins.prettier-plugin-ejs.enabled",
+            "config": {
+              "title": "Plugin Enabled",
+              "type": "boolean",
+              "default": true
+            },
+            "configWorkspace": {
+              "title": "Plugin Status",
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          }
+        ]
+      },
+      {
         "key": "prettier.plugins.prettier-plugin-java.section",
         "title": "prettier-plugin-java",
         "description": "Java formatter plugin for Prettier",

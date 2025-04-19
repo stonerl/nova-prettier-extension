@@ -16,6 +16,7 @@ const TESTS_DIR = path.join(__dirname, '..', 'tests')
 
 const mistakeInjectors = {
   '.css': simulateCssMistakes,
+  '.ejs': simulateEjsMistakes,
   '.js': simulateJsMistakes,
   '.jsx': simulateJsMistakes,
   '.ts': simulateTsMistakes,
@@ -83,6 +84,54 @@ function simulateCssMistakes(content) {
         .replace(/\s+/g, ' ')
     })
     .join('\n')
+}
+
+function simulateEjsMistakes(content) {
+  const lines = content.split('\n')
+  const result = []
+  let indentLevel = 0
+
+  for (let i = 0; i < lines.length; i++) {
+    const trimmed = lines[i].trim()
+
+    // Maintain blank lines between logic and HTML for readability
+    if (trimmed === '') {
+      result.push('')
+      continue
+    }
+
+    const isLogicLine = /^<%[^=]/.test(trimmed)
+    const isOutputLine = /^<%=/.test(trimmed)
+
+    // Adjust indentation for closing blocks
+    if (trimmed.startsWith('<% }') || trimmed === '<% } %>') {
+      indentLevel = Math.max(0, indentLevel - 1)
+    }
+
+    // Format EJS logic or output lines
+    if (isLogicLine || isOutputLine) {
+      const spaced = trimmed
+        .replace(/\s{2,}/g, ' ')
+        .replace(/^\s+/, '')
+        .replace(/%\>\s*$/, '%>')
+        .replace(/<%\s*/g, '<% ')
+        .replace(/\s*%>/g, ' %>')
+
+      result.push('  '.repeat(indentLevel) + spaced)
+
+      // Increase indent for opening logic blocks
+      if (trimmed.match(/<%.*{\s*%>$/)) {
+        indentLevel++
+      }
+
+      continue
+    }
+
+    // Standard HTML lines — keep structure but strip extra indent
+    result.push('  '.repeat(indentLevel) + trimmed)
+  }
+
+  return result.join('\n')
 }
 
 function simulateJsMistakes(content) {

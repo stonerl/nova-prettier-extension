@@ -127,6 +127,8 @@
   "You may want 'ignore' or 'preserve', see the info.": "",
   "prettier-plugin-java": "",
   "Java formatter plugin for Prettier": "",
+  "prettier-plugin-ejs": "",
+  "EJS markup formatter plugin for Prettier": "",
   "prettier-plugin-liquid": "",
   "Liquid formatter plugin for Prettier": "",
   "Liquid Single Quotes": "",
