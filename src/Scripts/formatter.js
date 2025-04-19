@@ -17,7 +17,7 @@ const {
 
 const pluginPaths = require('./prettier-plugins.js')
 
-const {
+/*const {
   PRETTIER_OPTIONS,
   PRETTIER_PHP_PLUGIN_OPTIONS,
   PRETTIER_XML_PLUGIN_OPTIONS,
@@ -26,7 +26,8 @@ const {
   PRETTIER_PROPERTIES_PLUGIN_OPTIONS,
   PRETTIER_NGINX_PLUGIN_OPTIONS,
   PRETTIER_LIQUID_PLUGIN_OPTIONS,
-} = require('./prettier-options.js')
+  PRETTIER_TAILWIND_PLUGIN_OPTIONS,
+} = require('./prettier-options.js')*/
 
 const {
   getDefaultConfig,
@@ -37,6 +38,7 @@ const {
   getPropertiesConfig,
   getNginxConfig,
   getLiquidConfig,
+  getTailwindConfig,
 } = require('./prettier-config.js')
 
 class Formatter {
@@ -66,6 +68,10 @@ class Formatter {
     return getSqlFormatterConfig()
   }
 
+  get nodeSqlParserConfig() {
+    return getNodeSqlParserConfig()
+  }
+
   get propertiesConfig() {
     return getPropertiesConfig()
   }
@@ -78,8 +84,8 @@ class Formatter {
     return getLiquidConfig()
   }
 
-  get nodeSqlParserConfig() {
-    return getNodeSqlParserConfig()
+  get tailwindConfig() {
+    return getTailwindConfig()
   }
 
   get isReady() {
@@ -325,6 +331,10 @@ class Formatter {
       'prettier.plugins.prettier-plugin-liquid.enabled',
     )
 
+    const tailwindPluginEnabled = getConfigWithWorkspaceOverride(
+      'prettier.plugins.prettier-plugin-tailwind.enabled',
+    )
+
     /// Retrieve the configured SQL formatter type
     const sqlFormatter = getConfigWithWorkspaceOverride(
       'prettier.plugins.prettier-plugin-sql.formatter',
@@ -357,6 +367,21 @@ class Formatter {
         liquidPluginEnabled
       ) {
         plugins.push(pluginPaths.liquid)
+      }
+
+      // prettier-plugin-tailwindcss must be added last.
+      // See: https://github.com/tailwindlabs/prettier-plugin-tailwindcss#compatibility-with-other-prettier-plugins
+      if (
+        (document.syntax === 'html' ||
+          document.syntax === 'html-erb' ||
+          document.syntax === 'liquid-html' ||
+          document.syntax === 'javascript' ||
+          document.syntax === 'jsx' ||
+          document.syntax === 'typescript' ||
+          document.syntax === 'tsx') &&
+        tailwindPluginEnabled
+      ) {
+        plugins.push(pluginPaths.tailwind)
       }
     }
 
@@ -417,6 +442,21 @@ class Formatter {
         document.syntax === 'liquid-md'
       ) {
         Object.assign(options, this.liquidConfig)
+      }
+
+      // Add TAILWIND plugin options if the document is of a supported type
+      // and the plugin is enabled
+      if (
+        (document.syntax === 'html' ||
+          document.syntax === 'html-erb' ||
+          document.syntax === 'liquid-html' ||
+          document.syntax === 'javascript' ||
+          document.syntax === 'jsx' ||
+          document.syntax === 'typescript' ||
+          document.syntax === 'tsx') &&
+        tailwindPluginEnabled
+      ) {
+        Object.assign(options, this.tailwindConfig)
       }
     }
 

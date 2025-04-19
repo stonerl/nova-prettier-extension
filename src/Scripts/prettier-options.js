@@ -97,4 +97,13 @@ module.exports = {
     'singleLineLinkTags',
     'indentSchema',
   ],
+
+  PRETTIER_TAILWIND_PLUGIN_OPTIONS: [
+    'tailwindConfig',
+    'tailwindStylesheet',
+    'tailwindAttributes',
+    'tailwindFunctions',
+    'tailwindPreserveWhitespace',
+    'tailwindPreserveDuplicates',
+  ],
 }

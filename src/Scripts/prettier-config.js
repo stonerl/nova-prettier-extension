@@ -18,6 +18,7 @@ const {
   PRETTIER_PROPERTIES_PLUGIN_OPTIONS,
   PRETTIER_NGINX_PLUGIN_OPTIONS,
   PRETTIER_LIQUID_PLUGIN_OPTIONS,
+  PRETTIER_TAILWIND_PLUGIN_OPTIONS,
 } = require('./prettier-options.js')
 
 function getDefaultConfig() {
@@ -106,6 +107,17 @@ function getLiquidConfig() {
   )
 }
 
+function getTailwindConfig() {
+  return Object.fromEntries(
+    PRETTIER_TAILWIND_PLUGIN_OPTIONS.map((option) => [
+      option,
+      getConfigWithWorkspaceOverride(
+        `prettier.plugins.prettier-plugin-tailwind.${option}`,
+      ),
+    ]),
+  )
+}
+
 module.exports = {
   getDefaultConfig,
   getPhpConfig,
@@ -115,4 +127,5 @@ module.exports = {
   getPropertiesConfig,
   getNginxConfig,
   getLiquidConfig,
+  getTailwindConfig,
 }

@@ -60,4 +60,11 @@ module.exports = {
     'dist',
     'index.js',
   ),
+  tailwind: nova.path.join(
+    nova.extension.path,
+    'node_modules',
+    'prettier-plugin-tailwindcss',
+    'dist',
+    'index.mjs',
+  ),
 }
