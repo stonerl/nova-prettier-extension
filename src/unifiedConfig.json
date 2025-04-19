@@ -1377,7 +1377,7 @@
       {
         "key": "prettier.plugins.prettier-plugin-tailwind.section",
         "title": "prettier-plugin-tailwindcss",
-        "description": "TailwindCSS CSS class sorting plugin for Prettier",
+        "description": "Tailwind CSS class sorting plugin for Prettier",
         "link": "https://github.com/tailwindlabs/prettier-plugin-tailwindcss",
         "type": "section",
         "children": [

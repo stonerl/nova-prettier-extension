@@ -186,7 +186,7 @@
   "table": "Tabelle",
   "column": "Spalte",
   "prettier-plugin-tailwindcss": "prettier-plugin-tailwindcss",
-  "TailwindCSS CSS class sorting plugin for Prettier": "Prettier-Plugin zur Sortierung von Tailwind-CSS-Klassen",
+  "Tailwind CSS class sorting plugin for Prettier": "Prettier-Plugin zur Sortierung von Tailwind-CSS-Klassen",
   "Tailwind Config": "Tailwind-Konfiguration",
   "Specifies the Tailwind JavaScript config path.": "Pfad zur Tailwind-JavaScript-Konfigurationsdatei.",
   "e.g. ./styles/tailwind.config.js": "z. B. ./styles/tailwind.config.js",
