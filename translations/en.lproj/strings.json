@@ -186,7 +186,7 @@
   "table": "table",
   "column": "column",
   "prettier-plugin-tailwindcss": "prettier-plugin-tailwindcss",
-  "TailwindCSS CSS class sorting plugin for Prettier": "TailwindCSS CSS class sorting plugin for Prettier",
+  "Tailwind CSS class sorting plugin for Prettier": "Tailwind CSS class sorting plugin for Prettier",
   "Tailwind Config": "Tailwind Config",
   "Specifies the Tailwind JavaScript config path.": "Specifies the Tailwind JavaScript config path.",
   "e.g. ./styles/tailwind.config.js": "e.g. ./styles/tailwind.config.js",
