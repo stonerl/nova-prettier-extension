@@ -130,79 +130,57 @@ const log = Object.fromEntries(
 // Sanitize Prettier Config Function using Nova's File API with correct mode strings
 async function sanitizePrettierConfig() {
   const configPath = nova.workspace.path + '/.nova/Configuration.json'
-  log.debug('Config Path:', configPath)
 
-  let rawConfig = ''
-  try {
-    // Open the file for reading using "r" mode
-    let file = await nova.fs.open(configPath, 'r')
-    rawConfig = await file.read()
-    file.close()
-    log.debug('Configuration file read successfully.')
-  } catch (error) {
-    log.warn(
-      'Prettier configuration file not found or cannot be read:',
-      configPath,
-      error,
-    )
+  const file = nova.fs.open(configPath)
+  if (!file) {
+    log.debug('Could not open .nova/Configuration.json')
     return
   }
 
-  try {
-    log.debug('Raw configuration:', rawConfig)
-    const config = JSON.parse(rawConfig)
-    let modified = false
+  const json = JSON.parse(await file.read())
+  file.close()
 
-    for (const key in config) {
-      if (key.startsWith('prettier.')) {
-        const value = config[key]
-        log.debug(`Processing key: ${key} with value: ${value}`)
-        if (value === 'Enable' || value === 'Enabled') {
-          config[key] = true
-          modified = true
-          log.debug(`Key ${key} set to true`)
-        } else if (value === 'Disable' || value === 'Disabled') {
-          config[key] = false
-          modified = true
-          log.debug(`Key ${key} set to false`)
-        } else if (value === 'Global Default' || value === 'Globale Setting') {
-          delete config[key]
-          modified = true
-          log.debug(`Key ${key} removed`)
-        }
-      }
+  let modified = false
+
+  for (const [key, value] of Object.entries(json)) {
+    if (!key.startsWith('prettier.')) continue
+
+    if (value === 'Enable' || value === 'Enabled') {
+      nova.workspace.config.set(key, true)
+      modified = true
+      log.debug(`Key ${key} set to true`)
+    } else if (value === 'Disable' || value === 'Disabled') {
+      nova.workspace.config.set(key, false)
+      modified = true
+      log.debug(`Key ${key} set to false`)
+    } else if (value === 'Global Default' || value === 'Globale Setting') {
+      nova.workspace.config.remove(key)
+      modified = true
+      log.debug(`Key ${key} removed`)
     }
+  }
 
-    if (modified) {
-      const newContent = JSON.stringify(config, null, 2)
-      // Open the file for writing using "w" mode (which truncates the file)
-      let file = await nova.fs.open(configPath, 'w')
-      await file.write(newContent)
-      file.close()
-      log.info('Prettier configuration sanitized successfully.')
-
-      // Send a notification if values have been changed.
-      let notification = new NotificationRequest('prettier-config-updated')
-      notification.title = nova.localize(
-        'prettier.notification.config.updated.title',
-        'Project Configuration Updated',
-        'notification',
-      )
-      notification.body = nova.localize(
-        'prettier.notification.config.updated.body',
-        'Your project’s Prettier configuration has been updated to the new config format.',
-        'notification',
-      )
-      notification.actions = [
-        nova.localize('prettier.notification.actions.ok', 'OK', 'notification'),
-      ]
-      await nova.notifications.add(notification)
-      log.info('Notification sent.')
-    } else {
-      log.debug('Prettier configuration is already sanitized.')
-    }
-  } catch (error) {
-    log.error('Error sanitizing Prettier configuration:', error)
+  if (modified) {
+    log.info('Prettier configuration sanitized successfully.')
+    // Send a notification if values have been changed.
+    let notification = new NotificationRequest('prettier-config-updated')
+    notification.title = nova.localize(
+      'prettier.notification.config.updated.title',
+      'Project Configuration Updated',
+      'notification',
+    )
+    notification.body = nova.localize(
+      'prettier.notification.config.updated.body',
+      'Your project’s Prettier configuration has been updated to the new config format.',
+      'notification',
+    )
+    notification.actions = [
+      nova.localize('prettier.notification.actions.ok', 'OK', 'notification'),
+    ]
+    await nova.notifications.add(notification)
+    log.info('Notification sent.')
+  } else {
+    log.debug('Prettier configuration is already sanitized.')
   }
 }
 
