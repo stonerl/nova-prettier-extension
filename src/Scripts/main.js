@@ -15,6 +15,7 @@ const {
   showError,
   getConfigWithWorkspaceOverride,
   observeConfigWithWorkspaceOverride,
+  observeEmptyArrayCleanup,
   log,
   sanitizePrettierConfig,
 } = require('./helpers.js')
@@ -73,6 +74,15 @@ class PrettierExtension {
         'prettier.module.preferBundled',
         this.modulePreferBundledDidChange,
       ),
+    )
+
+    observeEmptyArrayCleanup(
+      [
+        'prettier.plugins.prettier-plugin-tailwind.tailwindAttributes',
+        'prettier.plugins.prettier-plugin-tailwind.tailwindFunctions',
+        // future array‑valued keys here…
+      ],
+      this.configDisposables,
     )
   }
 

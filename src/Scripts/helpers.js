@@ -70,6 +70,27 @@ function observeConfigWithWorkspaceOverride(name, fn) {
   return [workspaceDisposable, extensionDisposable]
 }
 
+/**
+ * For each key in `keys`, observe both workspace & extension overrides.
+ * If the override ever becomes an empty array, remove it so Prettier
+ * falls back to its built‑in default.
+ *
+ * @param {string[]} keys
+ * @param {Disposable[]} disposables  — an array to collect the returned Disposables
+ */
+function observeEmptyArrayCleanup(keys, disposables) {
+  keys.forEach((key) => {
+    disposables.push(
+      ...observeConfigWithWorkspaceOverride(key, () => {
+        const val = getConfigWithWorkspaceOverride(key)
+        if (Array.isArray(val) && val.length === 0) {
+          nova.workspace.config.remove(key)
+        }
+      }),
+    )
+  })
+}
+
 function handleProcessResult(process, reject, resolve) {
   const errors = []
   process.onStderr((err) => {
@@ -191,6 +212,7 @@ module.exports = {
   log,
   getConfigWithWorkspaceOverride,
   observeConfigWithWorkspaceOverride,
+  observeEmptyArrayCleanup,
   ProcessError,
   handleProcessResult,
   sanitizePrettierConfig,
