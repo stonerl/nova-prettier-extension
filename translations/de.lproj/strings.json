@@ -127,6 +127,8 @@
   "You may want 'ignore' or 'preserve', see the info.": "Sie sollten „ignorieren“ oder „beibehalten“ wählen. Weitere Informationen finden Sie in der Dokumentation.",
   "prettier-plugin-java": "prettier-plugin-java",
   "Java formatter plugin for Prettier": "Java-Formatierungs-Plugin für Prettier",
+  "prettier-plugin-ejs": "prettier-plugin-ejs",
+  "EJS markup formatter plugin for Prettier": "EJS-Formatierungs-Plugin für Prettier",
   "prettier-plugin-liquid": "prettier-plugin-liquid",
   "Liquid formatter plugin for Prettier": "Liquid-Formatierungs-Plugin für Prettier",
   "Liquid Single Quotes": "Einfache Anführungszeichen in Liquid",

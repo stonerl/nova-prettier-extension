@@ -297,6 +297,9 @@ class Formatter {
     const original = editor.getTextInRange(documentRange)
 
     // Check if plugins are enabled
+    const ejsPluginEnabled = getConfigWithWorkspaceOverride(
+      'prettier.plugins.prettier-plugin-ejs.enabled',
+    )
     const phpPluginEnabled = getConfigWithWorkspaceOverride(
       'prettier.plugins.prettier-plugin-php.enabled',
     )
@@ -355,6 +358,9 @@ class Formatter {
         liquidPluginEnabled
       ) {
         plugins.push(pluginPaths.liquid)
+      }
+      if (document.syntax === 'html+ejs' && ejsPluginEnabled) {
+        plugins.push(pluginPaths.ejs)
       }
 
       // prettier-plugin-tailwindcss must be added last.

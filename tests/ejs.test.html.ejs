@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+  </head>
+  <body>
+    <h1>
+      Hello,
+      <% = user.name %>!
+    </h1>
+
+    <% if (user.isAdmin) { %>
+    <p>You have admin access.</p>
+    <% } else { %>
+    <p>Welcome, regular user.</p>
+    <% } %>
+
+    <ul>
+      <% items.forEach(function(item) { %>
+      <li><%= item %></li>
+      <% }) %>
+    </ul>
+  </body>
+</html>
