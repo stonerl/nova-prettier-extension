@@ -21,6 +21,17 @@ const {
   PRETTIER_TAILWIND_PLUGIN_OPTIONS,
 } = require('./prettier-options.js')
 
+function loadPluginConfig(optionsList, configKeyBase) {
+  return Object.fromEntries(
+    optionsList
+      .map((option) => [
+        option,
+        getConfigWithWorkspaceOverride(`${configKeyBase}.${option}`),
+      ])
+      .filter(([, value]) => value != null),
+  )
+}
+
 function getDefaultConfig() {
   return Object.fromEntries(
     PRETTIER_OPTIONS.map((option) => [
@@ -31,90 +42,58 @@ function getDefaultConfig() {
 }
 
 function getPhpConfig() {
-  return Object.fromEntries(
-    PRETTIER_PHP_PLUGIN_OPTIONS.map((option) => [
-      option,
-      getConfigWithWorkspaceOverride(
-        `prettier.plugins.prettier-plugin-php.${option}`,
-      ),
-    ]),
+  return loadPluginConfig(
+    PRETTIER_PHP_PLUGIN_OPTIONS,
+    'prettier.plugins.prettier-plugin-php',
   )
 }
 
 function getXmlConfig() {
-  return Object.fromEntries(
-    PRETTIER_XML_PLUGIN_OPTIONS.map((option) => [
-      option,
-      getConfigWithWorkspaceOverride(
-        `prettier.plugins.prettier-plugin-xml.${option}`,
-      ),
-    ]),
+  return loadPluginConfig(
+    PRETTIER_XML_PLUGIN_OPTIONS,
+    'prettier.plugins.prettier-plugin-xml',
   )
 }
 
 function getSqlFormatterConfig() {
-  return Object.fromEntries(
-    PRETTIER_SQL_PLUGIN_SQL_FORMATTER_OPTIONS.map((option) => [
-      option,
-      getConfigWithWorkspaceOverride(
-        `prettier.plugins.prettier-plugin-sql.sql-formatter.${option}`,
-      ),
-    ]),
+  return loadPluginConfig(
+    PRETTIER_SQL_PLUGIN_SQL_FORMATTER_OPTIONS,
+    'prettier.plugins.prettier-plugin-sql.sql-formatter',
   )
 }
 
 function getNodeSqlParserConfig() {
-  return Object.fromEntries(
-    PRETTIER_SQL_PLUGIN_NODE_SQL_PARSER_OPTIONS.map((option) => [
-      option,
-      getConfigWithWorkspaceOverride(
-        `prettier.plugins.prettier-plugin-sql.node-sql-parser.${option}`,
-      ),
-    ]),
+  return loadPluginConfig(
+    PRETTIER_SQL_PLUGIN_NODE_SQL_PARSER_OPTIONS,
+    'prettier.plugins.prettier-plugin-sql.node-sql-parser',
   )
 }
 
 function getPropertiesConfig() {
-  return Object.fromEntries(
-    PRETTIER_PROPERTIES_PLUGIN_OPTIONS.map((option) => [
-      option,
-      getConfigWithWorkspaceOverride(
-        `prettier.plugins.prettier-plugin-properties.${option}`,
-      ),
-    ]),
+  return loadPluginConfig(
+    PRETTIER_PROPERTIES_PLUGIN_OPTIONS,
+    'prettier.plugins.prettier-plugin-properties',
   )
 }
 
 function getNginxConfig() {
-  return Object.fromEntries(
-    PRETTIER_NGINX_PLUGIN_OPTIONS.map((option) => [
-      option,
-      getConfigWithWorkspaceOverride(
-        `prettier.plugins.prettier-plugin-nginx.${option}`,
-      ),
-    ]),
+  return loadPluginConfig(
+    PRETTIER_NGINX_PLUGIN_OPTIONS,
+    'prettier.plugins.prettier-plugin-nginx',
   )
 }
 
 function getLiquidConfig() {
-  return Object.fromEntries(
-    PRETTIER_LIQUID_PLUGIN_OPTIONS.map((option) => [
-      option,
-      getConfigWithWorkspaceOverride(
-        `prettier.plugins.prettier-plugin-liquid.${option}`,
-      ),
-    ]),
+  return loadPluginConfig(
+    PRETTIER_LIQUID_PLUGIN_OPTIONS,
+    'prettier.plugins.prettier-plugin-liquid',
   )
 }
 
 function getTailwindConfig() {
-  return Object.fromEntries(
-    PRETTIER_TAILWIND_PLUGIN_OPTIONS.map((option) => [
-      option,
-      getConfigWithWorkspaceOverride(
-        `prettier.plugins.prettier-plugin-tailwind.${option}`,
-      ),
-    ]),
+  return loadPluginConfig(
+    PRETTIER_TAILWIND_PLUGIN_OPTIONS,
+    'prettier.plugins.prettier-plugin-tailwind',
   )
 }
 
