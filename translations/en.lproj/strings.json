@@ -251,6 +251,8 @@
   "Flow": "Flow",
   "GraphQL": "GraphQL",
   "HTML": "HTML",
+  "HTML (EJS)": "HTML (EJS)",
+  "HTML (ERB)": "HTML (ERB)",
   "HTML (Liquid)": "HTML (Liquid)",
   "JavaScript": "JavaScript",
   "JSON": "JSON",

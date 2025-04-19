@@ -360,13 +360,14 @@ class Formatter {
       // prettier-plugin-tailwindcss must be added last.
       // See: https://github.com/tailwindlabs/prettier-plugin-tailwindcss#compatibility-with-other-prettier-plugins
       if (
-        (document.syntax === 'html' ||
-          document.syntax === 'html-erb' ||
-          document.syntax === 'liquid-html' ||
-          document.syntax === 'javascript' ||
-          document.syntax === 'jsx' ||
-          document.syntax === 'typescript' ||
-          document.syntax === 'tsx') &&
+        [
+          'html',
+          'liquid-html',
+          'javascript',
+          'jsx',
+          'typescript',
+          'tsx',
+        ].includes(document.syntax) &&
         tailwindPluginEnabled
       ) {
         plugins.push(pluginPaths.tailwind)
@@ -435,13 +436,14 @@ class Formatter {
       // Add TAILWIND plugin options if the document is of a supported type
       // and the plugin is enabled
       if (
-        (document.syntax === 'html' ||
-          document.syntax === 'html-erb' ||
-          document.syntax === 'liquid-html' ||
-          document.syntax === 'javascript' ||
-          document.syntax === 'jsx' ||
-          document.syntax === 'typescript' ||
-          document.syntax === 'tsx') &&
+        [
+          'html',
+          'liquid-html',
+          'javascript',
+          'jsx',
+          'typescript',
+          'tsx',
+        ].includes(document.syntax) &&
         tailwindPluginEnabled
       ) {
         Object.assign(options, this.tailwindConfig)
@@ -566,13 +568,14 @@ class Formatter {
         return 'typescript'
       case 'flow':
         return 'babel-flow'
-      case 'html+erb':
-        return 'erb'
       case 'java-properties':
         return 'dot-properties'
       case 'liquid-html':
       case 'liquid-md':
         return 'liquid-html-ast'
+      case 'html+erb':
+      case 'html+ejs':
+        return 'html'
       default:
         return syntax
     }

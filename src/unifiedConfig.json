@@ -2148,6 +2148,42 @@
             }
           },
           {
+            "key": "prettier.format-on-save.ignored-syntaxes.html+ejs",
+            "title": "HTML (EJS)",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [false, "Format on Save"],
+                [true, "Ignore"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.format-on-save.ignored-syntaxes.html+erb",
+            "title": "HTML (ERB)",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [false, "Format on Save"],
+                [true, "Ignore"]
+              ],
+              "default": null
+            }
+          },
+          {
             "key": "prettier.format-on-save.ignored-syntaxes.liquid-html",
             "title": "HTML (Liquid)",
             "config": {
