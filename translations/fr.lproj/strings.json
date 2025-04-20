@@ -279,7 +279,7 @@
   "Vue": "",
   "XML": "",
   "YAML": "",
-  "Prettier integration for Nova — format JavaScript, TypeScript, JSON, CSS, HTML, Markdown, and more, with built-in support for Java, Liquid, PHP, SQL, and XML — no extra setup required.": "",
+  "Prettier integration for Nova — format JavaScript, TypeScript, JSON, CSS, HTML, Markdown, and more, with built-in support for EJS, Java, Liquid, PHP, SQL, Tailwind CSS, and XML — no extra setup required.": "",
   "Format Document": "",
   "Format Selection": "",
   "Format Document (Forced)": "",

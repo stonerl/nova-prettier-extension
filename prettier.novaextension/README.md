@@ -50,6 +50,8 @@ This extension can be used as a drop-in replacement for the original [Prettier E
 - ✅ **[@prettier/plugin-php](https://github.com/prettier/plugin-php)**
 - ✅ **[@prettier/plugin-xml](https://github.com/prettier/plugin-xml)**
 - ✅ **[prettier-plugin-sql](https://github.com/un-ts/prettier/tree/master/packages/sql)**
+- ✅ **[prettier-plugin-ejs](https://github.com/ecmel/prettier-plugin-ejs)**
+- ✅ **[prettier-plugin-ejs-tailwindcss](https://github.com/janghye0k/prettier-plugin-ejs-tailwindcss)**
 - ➕ **[prettier-plugin-tailwindcss](https://github.com/tailwindlabs/prettier-plugin-tailwindcss)**
 - ⚠️ **[prettier-plugin-liquid](https://github.com/Shopify/theme-tools/tree/main/packages/prettier-plugin-liquid)**
 - ⚠️ **[prettier-plugin-java](https://www.jhipster.tech/prettier-java/)**
@@ -81,6 +83,8 @@ This extension can be used as a drop-in replacement for the original [Prettier E
   - `prettier-plugin-nginx`
     ➤ Requires the [NGINX for Nova](https://extensions.panic.com/extensions/joncoole/joncoole.nginx)
     extension
+
+If you want to see other plugins being integrated, head over to the [Discussions](https://github.com/stonerl/nova-prettier-extension/discussions).
 
 ## Using external plugins in your project
 
