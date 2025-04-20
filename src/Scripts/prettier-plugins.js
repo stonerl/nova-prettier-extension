@@ -15,6 +15,13 @@ module.exports = {
     'prettier-plugin-ejs',
     'index.js',
   ),
+  ejsTailwind: nova.path.join(
+    nova.extension.path,
+    'node_modules',
+    'prettier-plugin-ejs-tailwindcss',
+    'dist',
+    'index.cjs',
+  ),
   java: nova.path.join(
     nova.extension.path,
     'node_modules',
