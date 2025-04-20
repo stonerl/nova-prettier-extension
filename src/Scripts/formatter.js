@@ -300,6 +300,9 @@ class Formatter {
     const ejsPluginEnabled = getConfigWithWorkspaceOverride(
       'prettier.plugins.prettier-plugin-ejs.enabled',
     )
+    const ejsTailwindPluginEnabled = getConfigWithWorkspaceOverride(
+      'prettier.plugins.prettier-plugin-ejs-tailwindcss.enabled',
+    )
     const phpPluginEnabled = getConfigWithWorkspaceOverride(
       'prettier.plugins.prettier-plugin-php.enabled',
     )
@@ -322,6 +325,10 @@ class Formatter {
       'prettier.plugins.prettier-plugin-liquid.enabled',
     )
 
+    const tailwindSyntaxesEnabled = getConfigWithWorkspaceOverride(
+      `prettier.plugins.prettier-plugin-tailwind.syntaxes.${document.syntax}`,
+    )
+
     const tailwindPluginEnabled = getConfigWithWorkspaceOverride(
       'prettier.plugins.prettier-plugin-tailwind.enabled',
     )
@@ -337,21 +344,27 @@ class Formatter {
       if (document.syntax === 'php' && phpPluginEnabled) {
         plugins.push(pluginPaths.php)
       }
+
       if (document.syntax === 'sql' && sqlPluginEnabled) {
         plugins.push(pluginPaths.sql)
       }
+
       if (document.syntax === 'xml' && xmlPluginEnabled) {
         plugins.push(pluginPaths.xml)
       }
+
       if (document.syntax === 'nginx' && nginxPluginEnabled) {
         plugins.push(pluginPaths.nginx)
       }
+
       if (document.syntax === 'java' && javaPluginEnabled) {
         plugins.push(pluginPaths.java)
       }
+
       if (document.syntax === 'java-properties' && propertiesPluginEnabled) {
         plugins.push(pluginPaths.properties)
       }
+
       if (
         (document.syntax === 'liquid-html' ||
           document.syntax === 'liquid-md') &&
@@ -359,24 +372,26 @@ class Formatter {
       ) {
         plugins.push(pluginPaths.liquid)
       }
-      if (document.syntax === 'html+ejs' && ejsPluginEnabled) {
-        plugins.push(pluginPaths.ejs)
+
+      // prettier-plugin-tailwindcss must be loaded last.
+      // See: https://github.com/tailwindlabs/prettier-plugin-tailwindcss#compatibility-with-other-prettier-plugins
+      if (tailwindSyntaxesEnabled && tailwindPluginEnabled) {
+        plugins.push(pluginPaths.tailwind)
       }
 
-      // prettier-plugin-tailwindcss must be added last.
-      // See: https://github.com/tailwindlabs/prettier-plugin-tailwindcss#compatibility-with-other-prettier-plugins
-      if (
-        [
-          'html',
-          'liquid-html',
-          'javascript',
-          'jsx',
-          'typescript',
-          'tsx',
-        ].includes(document.syntax) &&
-        tailwindPluginEnabled
-      ) {
-        plugins.push(pluginPaths.tailwind)
+      // Pick the right ejs plugin
+      // When using prettier-plugin-ejs-tailwindcss it must be loaded after prettier-plugin-tailwindcss.
+      if (document.syntax === 'html+ejs') {
+        const useTailwindEJS =
+          tailwindPluginEnabled &&
+          tailwindSyntaxesEnabled &&
+          ejsTailwindPluginEnabled
+
+        if (useTailwindEJS) {
+          plugins.push(pluginPaths.ejsTailwind)
+        } else if (ejsPluginEnabled) {
+          plugins.push(pluginPaths.ejs)
+        }
       }
     }
 
@@ -441,17 +456,7 @@ class Formatter {
 
       // Add TAILWIND plugin options if the document is of a supported type
       // and the plugin is enabled
-      if (
-        [
-          'html',
-          'liquid-html',
-          'javascript',
-          'jsx',
-          'typescript',
-          'tsx',
-        ].includes(document.syntax) &&
-        tailwindPluginEnabled
-      ) {
+      if (tailwindSyntaxesEnabled && tailwindPluginEnabled) {
         Object.assign(options, this.tailwindConfig)
       }
     }
