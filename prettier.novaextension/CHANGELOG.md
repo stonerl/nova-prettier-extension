@@ -1,3 +1,43 @@
+## 3.5.26 – 2025‑04‑20
+
+### Added
+
+- **Added plugin: `prettier-plugin-tailwindcss`**
+
+  Supports Tailwind class sorting in the following syntaxes:
+
+  - HTML
+  - HTML (EJS)
+  - HTML (Liquid)
+  - JavaScript
+  - JSX
+  - TSX
+  - TypeScript
+
+  Each language can be enabled or disabled individually in the extension or project settings.
+
+- **Added plugin: `prettier-plugin-ejs`**
+- **Added plugin: `prettier-plugin-ejs-tailwindcss`**
+- **Ignore list updated**
+  - Added `HTML (EJS)`, `HTML (ERB)` and `TSX` to the ignored syntaxes
+
+### Changed
+
+- **Prettier plugin list now sorted alphabetically**
+  - Improves discoverability and consistency across plugin menus
+- **Refactored Prettier config sanitization**
+  - Replaced manual JSON editing with Nova’s `Config` API
+  - Workspace settings are now safely updated using `config.set()`/`config.remove()`
+    instead of modifying files directly
+
+### Refactored
+
+- **Prettier config loading logic**
+  - Introduced `loadPluginConfig()` helper
+  - All plugin-specific config getters (`getDefaultConfig`, `getPhpConfig`, etc.)
+    now use this helper
+  - Automatically filters out `null`/`undefined` options from config
+
 ## 3.5.25 – 2025‑04‑19
 
 ### Added
