@@ -32,10 +32,12 @@ Experience seamless code formatting with Prettier directly in Nova.
   `Vue`, and
   `YAML` —
   plus additional ones via bundled plugins, such as
+  `EJS`,
   `Java`,
   `Liquid`,
   `PHP`,
-  `SQL`, and
+  `SQL`,
+  `Tailwind CSS`,and
   `XML`.
 
 - **Configuration Support:** Compatible with [standard Prettier configuration](https://prettier.io/docs/configuration),
