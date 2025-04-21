@@ -9,6 +9,14 @@
  */
 
 module.exports = {
+  blade: nova.path.join(
+    nova.extension.path,
+    'node_modules',
+    '@shufo',
+    'prettier-plugin-blade',
+    'dist',
+    'index.cjs',
+  ),
   ejs: nova.path.join(
     nova.extension.path,
     'node_modules',
