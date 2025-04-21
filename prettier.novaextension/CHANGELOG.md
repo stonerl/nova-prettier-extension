@@ -1,3 +1,10 @@
+## 3.5.27 - 2025-04-21
+
+### Added
+
+- Added plugin: `prettier-plugin-blade`
+  Enables formatting support for Laravel Blade templates.
+
 ## 3.5.26 – 2025‑04‑20
 
 ### Added
