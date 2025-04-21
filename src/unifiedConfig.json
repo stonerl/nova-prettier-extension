@@ -964,6 +964,382 @@
         ]
       },
       {
+        "key": "prettier.plugins.prettier-plugin-blade.section",
+        "title": "prettier-plugin-blade",
+        "description": "Blade formatter plugin for Prettier",
+        "link": "https://github.com/shufo/prettier-plugin-blade",
+        "type": "section",
+        "children": [
+          {
+            "key": "prettier.plugins.prettier-plugin-blade.enabled",
+            "config": {
+              "title": "Plugin Enabled",
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "title": "Plugin Status",
+              "description": "Select whether to use global settings, enable, or disable the plugin.",
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-blade.printWidth",
+            "title": "Print Width",
+            "description": "Same as in Prettier.",
+            "link": "https://prettier.io/docs/options#print-width",
+            "type": "number",
+            "min": 0,
+            "config": {
+              "placeholder": "120",
+              "default": 120,
+              "required": true
+            },
+            "configWorkspace": {
+              "placeholder": "Global Setting",
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-blade.tabWidth",
+            "title": "Tab Width",
+            "description": "Same as in Prettier.",
+            "link": "https://prettier.io/docs/options#tab-width",
+            "type": "number",
+            "min": 0,
+            "config": {
+              "placeholder": "4",
+              "default": 4,
+              "required": true
+            },
+            "configWorkspace": {
+              "placeholder": "Global Setting",
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-blade.singleQuote",
+            "title": "Single Quotes",
+            "description": "Same as in Prettier.",
+            "link": "https://prettier.io/docs/options#quotes",
+            "config": {
+              "type": "boolean",
+              "default": true
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-blade.wrapAttributes",
+            "title": "Attribute Wrapping",
+            "description": "Controls how attributes in Blade templates are wrapped across lines.",
+            "link": "https://github.com/shufo/prettier-plugin-blade/blob/559f3b9d015c724bb6ccd030dc185dac24b69a0a/src/options.ts#L43",
+            "type": "enum",
+            "radio": false,
+            "config": {
+              "default": "auto",
+              "values": [
+                ["auto", "auto"],
+                ["force", "force"],
+                ["force-aligned", "force-aligned"],
+                ["force-expand-multiline", "force-expand-multiline"],
+                ["aligned-multiple", "aligned-multiple"],
+                ["preserve", "preserve"],
+                ["preserve-aligned", "preserve-aligned"]
+              ]
+            },
+            "configWorkspace": {
+              "default": null,
+              "values": [
+                [null, "Global Setting"],
+                ["auto", "auto"],
+                ["force", "force"],
+                ["force-aligned", "force-aligned"],
+                ["force-expand-multiline", "force-expand-multiline"],
+                ["aligned-multiple", "aligned-multiple"],
+                ["preserve", "preserve"],
+                ["preserve-aligned", "preserve-aligned"]
+              ]
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-blade.wrapAttributesMinAttrs",
+            "title": "Minimum Attributes to Wrap",
+            "description": "Minimum number of html tag attributes for force wrap attribute options. Wrap the first attribute only if 'force-expand-multiline' is specified in wrap attributes.",
+            "link": "https://github.com/shufo/prettier-plugin-blade/blob/559f3b9d015c724bb6ccd030dc185dac24b69a0a/src/options.ts#L51",
+            "type": "number",
+            "min": 0,
+            "config": {
+              "placeholder": "2",
+              "default": 2,
+              "required": true
+            },
+            "configWorkspace": {
+              "placeholder": "Global Setting",
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-blade.endWithNewLine",
+            "title": "End with Newline",
+            "description": "Adds a newline at the end of the formatted output.",
+            "link": "https://github.com/shufo/prettier-plugin-blade/blob/559f3b9d015c724bb6ccd030dc185dac24b69a0a/src/options.ts#L59",
+            "config": {
+              "type": "boolean",
+              "default": true
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-blade.sortTailwindcssClasses",
+            "title": "Sort Tailwind Classes",
+            "description": "Sort Tailwind CSS classes automatically.",
+            "link": "https://github.com/shufo/prettier-plugin-blade/blob/559f3b9d015c724bb6ccd030dc185dac24b69a0a/src/options.ts#L66",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-blade.tailwindcssConfigPath",
+            "title": "Tailwind Config",
+            "description": "Path to a custom Tailwind CSS config file. Only used when 'Sort Tailwind Classes' is enabled.",
+            "link": "https://github.com/shufo/prettier-plugin-blade/blob/559f3b9d015c724bb6ccd030dc185dac24b69a0a/src/options.ts#L74",
+            "type": "path",
+            "allowFiles": true,
+            "allowFolders": false,
+            "config": {
+              "placeholder": "e.g. ./styles/tailwind.config.js"
+            },
+            "configWorkspace": {
+              "placeholder": "Global Setting"
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-blade.sortHtmlAttributes",
+            "title": "HTML Attribute Sorting",
+            "description": "Controls the order in which HTML attributes are sorted.",
+            "link": "https://github.com/shufo/prettier-plugin-blade/blob/559f3b9d015c724bb6ccd030dc185dac24b69a0a/src/options.ts#L82",
+            "type": "enum",
+            "radio": false,
+            "config": {
+              "default": "none",
+              "values": [
+                ["none", "none"],
+                ["alphabetical", "alphabetical"],
+                ["code-guide", "code-guide"],
+                ["idiomatic", "idiomatic"],
+                ["vuejs", "vuejs"],
+                ["custom", "custom"]
+              ]
+            },
+            "configWorkspace": {
+              "default": null,
+              "values": [
+                [null, "Global Setting"],
+                ["none", "none"],
+                ["alphabetical", "alphabetical"],
+                ["code-guide", "code-guide"],
+                ["idiomatic", "idiomatic"],
+                ["vuejs", "vuejs"],
+                ["custom", "custom"]
+              ]
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-blade.customHtmlAttributesOrder",
+            "title": "Custom Attribute Order",
+            "description": "Comma-separated list defining the custom order of HTML attributes. Only applies when 'HTML Attribute Sorting' is set to 'custom'. Regex patterns are supported.",
+            "link": "https://github.com/shufo/prettier-plugin-blade/blob/559f3b9d015c724bb6ccd030dc185dac24b69a0a/src/options.ts#L90",
+            "type": "string",
+            "config": {
+              "placeholder": "e.g. id, aria-.+, class, src"
+            },
+            "configWorkspace": {
+              "placeholder": "Global Setting",
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-blade.noPhpSyntaxCheck",
+            "title": "Disable PHP Syntax Check",
+            "description": "Skips running a PHP syntax check before formatting Blade templates.",
+            "link": "https://github.com/shufo/prettier-plugin-blade/blob/559f3b9d015c724bb6ccd030dc185dac24b69a0a/src/options.ts#L98",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-blade.indentInnerHtml",
+            "title": "Indent Inner HTML",
+            "description": "Indents the content inside <head> and <body> tags.",
+            "link": "https://github.com/shufo/prettier-plugin-blade/blob/559f3b9d015c724bb6ccd030dc185dac24b69a0a/src/options.ts#L105",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-blade.extraLiners",
+            "title": "Extra Newlines Before Tags",
+            "description": "Comma-separated list of tag names that should be preceded by an extra newline.",
+            "link": "https://github.com/shufo/prettier-plugin-blade/blob/559f3b9d015c724bb6ccd030dc185dac24b69a0a/src/options.ts#L112",
+            "type": "string",
+            "config": {
+              "placeholder": "head,body,/html",
+              "default": "head,body,/html"
+            },
+            "configWorkspace": {
+              "placeholder": "Global Setting",
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-blade.trailingCommaPHP",
+            "title": "PHP Trailing Commas",
+            "description": "Adds trailing commas in PHP expressions where possible. If disabled, no trailing commas will be printed.",
+            "link": "https://github.com/shufo/prettier-plugin-blade/blob/559f3b9d015c724bb6ccd030dc185dac24b69a0a/src/options.ts#L120",
+            "config": {
+              "type": "boolean",
+              "default": true
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-blade.phpVersion",
+            "title": "PHP Version",
+            "description": "Specifies the PHP version used for parsing Blade expressions. Affects syntax compatibility and formatting behavior.",
+            "link": "https://github.com/shufo/prettier-plugin-blade/blob/559f3b9d015c724bb6ccd030dc185dac24b69a0a/src/options.ts#L128",
+            "type": "enum",
+            "radio": false,
+            "config": {
+              "default": "8.1",
+              "values": [
+                ["5.0", "5.0"],
+                ["5.1", "5.1"],
+                ["5.2", "5.2"],
+                ["5.3", "5.3"],
+                ["5.4", "5.4"],
+                ["5.5", "5.5"],
+                ["5.6", "5.6"],
+                ["7.0", "7.0"],
+                ["7.1", "7.1"],
+                ["7.2", "7.2"],
+                ["7.3", "7.3"],
+                ["7.4", "7.4"],
+                ["8.0", "8.0"],
+                ["8.1", "8.1"],
+                ["8.2", "8.2"],
+                ["8.3", "8.3"],
+                ["8.4", "8.4"]
+              ]
+            },
+            "configWorkspace": {
+              "default": null,
+              "values": [
+                [null, "Global Setting"],
+                ["5.0", "5.0"],
+                ["5.1", "5.1"],
+                ["5.2", "5.2"],
+                ["5.3", "5.3"],
+                ["5.4", "5.4"],
+                ["5.5", "5.5"],
+                ["5.6", "5.6"],
+                ["7.0", "7.0"],
+                ["7.1", "7.1"],
+                ["7.2", "7.2"],
+                ["7.3", "7.3"],
+                ["7.4", "7.4"],
+                ["8.0", "8.0"],
+                ["8.1", "8.1"],
+                ["8.2", "8.2"],
+                ["8.3", "8.3"],
+                ["8.4", "8.4"]
+              ]
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-blade.componentPrefix",
+            "title": "Component Prefixes",
+            "description": "Comma-separated list of component prefixes used to preserve attribute formatting.",
+            "link": "https://github.com/shufo/prettier-plugin-blade/blob/559f3b9d015c724bb6ccd030dc185dac24b69a0a/src/options.ts#L135",
+            "type": "string",
+            "config": {
+              "placeholder": "x-,livewire:",
+              "default": "x-,livewire:"
+            },
+            "configWorkspace": {
+              "placeholder": "Global Setting",
+              "default": null
+            }
+          }
+        ]
+      },
+      {
         "key": "prettier.plugins.prettier-plugin-ejs.section",
         "title": "prettier-plugin-ejs",
         "description": "EJS markup formatter plugin for Prettier",
@@ -2272,6 +2648,24 @@
         "description": "Documents that are set to an ignored syntax will not be formatted when saved.",
         "type": "section",
         "children": [
+          {
+            "key": "prettier.format-on-save.ignored-syntaxes.blade",
+            "title": "Blade",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [false, "Format on Save"],
+                [true, "Ignore"]
+              ],
+              "default": null
+            }
+          },
           {
             "key": "prettier.format-on-save.ignored-syntaxes.css",
             "title": "CSS",

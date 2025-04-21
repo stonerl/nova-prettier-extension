@@ -19,14 +19,15 @@ const pluginPaths = require('./prettier-plugins.js')
 
 const {
   getDefaultConfig,
-  getPhpConfig,
-  getXmlConfig,
-  getSqlFormatterConfig,
-  getNodeSqlParserConfig,
-  getPropertiesConfig,
-  getNginxConfig,
+  getBladeConfig,
   getLiquidConfig,
+  getNginxConfig,
+  getNodeSqlParserConfig,
+  getPhpConfig,
+  getPropertiesConfig,
+  getSqlFormatterConfig,
   getTailwindConfig,
+  getXmlConfig,
 } = require('./prettier-config.js')
 
 class Formatter {
@@ -44,36 +45,40 @@ class Formatter {
     return getDefaultConfig()
   }
 
-  get phpConfig() {
-    return getPhpConfig()
-  }
-
-  get xmlConfig() {
-    return getXmlConfig()
-  }
-
-  get sqlFormatterConfig() {
-    return getSqlFormatterConfig()
-  }
-
-  get nodeSqlParserConfig() {
-    return getNodeSqlParserConfig()
-  }
-
-  get propertiesConfig() {
-    return getPropertiesConfig()
-  }
-
-  get nginxConfig() {
-    return getNginxConfig()
+  get bladeConfig() {
+    return getBladeConfig()
   }
 
   get liquidConfig() {
     return getLiquidConfig()
   }
 
+  get nginxConfig() {
+    return getNginxConfig()
+  }
+
+  get nodeSqlParserConfig() {
+    return getNodeSqlParserConfig()
+  }
+
+  get phpConfig() {
+    return getPhpConfig()
+  }
+
+  get propertiesConfig() {
+    return getPropertiesConfig()
+  }
+
+  get sqlFormatterConfig() {
+    return getSqlFormatterConfig()
+  }
+
   get tailwindConfig() {
     return getTailwindConfig()
+  }
+
+  get xmlConfig() {
+    return getXmlConfig()
   }
 
   get isReady() {
@@ -297,32 +302,45 @@ class Formatter {
     const original = editor.getTextInRange(documentRange)
 
     // Check if plugins are enabled
+    const bladePluginEnabled = getConfigWithWorkspaceOverride(
+      'prettier.plugins.prettier-plugin-blade.enabled',
+    )
+
     const ejsPluginEnabled = getConfigWithWorkspaceOverride(
       'prettier.plugins.prettier-plugin-ejs.enabled',
     )
+
     const ejsTailwindPluginEnabled = getConfigWithWorkspaceOverride(
       'prettier.plugins.prettier-plugin-ejs-tailwindcss.enabled',
     )
-    const phpPluginEnabled = getConfigWithWorkspaceOverride(
-      'prettier.plugins.prettier-plugin-php.enabled',
-    )
-    const sqlPluginEnabled = getConfigWithWorkspaceOverride(
-      'prettier.plugins.prettier-plugin-sql.enabled',
-    )
-    const xmlPluginEnabled = getConfigWithWorkspaceOverride(
-      'prettier.plugins.prettier-plugin-xml.enabled',
-    )
-    const nginxPluginEnabled = getConfigWithWorkspaceOverride(
-      'prettier.plugins.prettier-plugin-nginx.enabled',
-    )
+
     const javaPluginEnabled = getConfigWithWorkspaceOverride(
       'prettier.plugins.prettier-plugin-java.enabled',
     )
+
+    const liquidPluginEnabled = getConfigWithWorkspaceOverride(
+      'prettier.plugins.prettier-plugin-liquid.enabled',
+    )
+
+    const nginxPluginEnabled = getConfigWithWorkspaceOverride(
+      'prettier.plugins.prettier-plugin-nginx.enabled',
+    )
+
+    const phpPluginEnabled = getConfigWithWorkspaceOverride(
+      'prettier.plugins.prettier-plugin-php.enabled',
+    )
+
     const propertiesPluginEnabled = getConfigWithWorkspaceOverride(
       'prettier.plugins.prettier-plugin-properties.enabled',
     )
-    const liquidPluginEnabled = getConfigWithWorkspaceOverride(
-      'prettier.plugins.prettier-plugin-liquid.enabled',
+
+    /// Retrieve the configured SQL formatter type
+    const sqlFormatter = getConfigWithWorkspaceOverride(
+      'prettier.plugins.prettier-plugin-sql.formatter',
+    )
+
+    const sqlPluginEnabled = getConfigWithWorkspaceOverride(
+      'prettier.plugins.prettier-plugin-sql.enabled',
     )
 
     const tailwindSyntaxesEnabled = getConfigWithWorkspaceOverride(
@@ -333,28 +351,18 @@ class Formatter {
       'prettier.plugins.prettier-plugin-tailwind.enabled',
     )
 
-    /// Retrieve the configured SQL formatter type
-    const sqlFormatter = getConfigWithWorkspaceOverride(
-      'prettier.plugins.prettier-plugin-sql.formatter',
+    const xmlPluginEnabled = getConfigWithWorkspaceOverride(
+      'prettier.plugins.prettier-plugin-xml.enabled',
     )
 
     // Initialize plugins array and conditionally load plugins if enabled
     let plugins = []
     if (this.modulePath.includes(nova.extension.path)) {
-      if (document.syntax === 'php' && phpPluginEnabled) {
-        plugins.push(pluginPaths.php)
-      }
-
-      if (document.syntax === 'sql' && sqlPluginEnabled) {
-        plugins.push(pluginPaths.sql)
-      }
-
-      if (document.syntax === 'xml' && xmlPluginEnabled) {
-        plugins.push(pluginPaths.xml)
-      }
-
-      if (document.syntax === 'nginx' && nginxPluginEnabled) {
-        plugins.push(pluginPaths.nginx)
+      if (
+        (document.syntax === 'blade' || document.uri?.endsWith('.blade.php')) &&
+        bladePluginEnabled
+      ) {
+        plugins.push(pluginPaths.blade)
       }
 
       if (document.syntax === 'java' && javaPluginEnabled) {
@@ -371,6 +379,26 @@ class Formatter {
         liquidPluginEnabled
       ) {
         plugins.push(pluginPaths.liquid)
+      }
+
+      if (document.syntax === 'nginx' && nginxPluginEnabled) {
+        plugins.push(pluginPaths.nginx)
+      }
+
+      if (
+        document.syntax === 'php' &&
+        !document.uri?.endsWith('.blade.php') &&
+        phpPluginEnabled
+      ) {
+        plugins.push(pluginPaths.php)
+      }
+
+      if (document.syntax === 'sql' && sqlPluginEnabled) {
+        plugins.push(pluginPaths.sql)
+      }
+
+      if (document.syntax === 'xml' && xmlPluginEnabled) {
+        plugins.push(pluginPaths.xml)
       }
 
       // prettier-plugin-tailwindcss must be loaded last.
@@ -396,7 +424,7 @@ class Formatter {
     }
 
     const options = {
-      parser: this.getParserForSyntax(document.syntax),
+      parser: this.getParserForSyntax(document.syntax, document.uri),
       ...(plugins.length > 0 ? { plugins } : {}),
       ...(document.path ? { filepath: document.path } : {}),
       ...(customConfigFile
@@ -417,14 +445,32 @@ class Formatter {
 
     // Only load the plugins options if no prettier config file exists.
     if (!customConfigFile && (ignoreConfigFile || shouldApplyDefaultConfig)) {
-      // Add PHP plugin options if the document is PHP
-      if (document.syntax === 'php') {
-        Object.assign(options, this.phpConfig)
+      // Add BLADE plugin options if the document is BLADE
+      if (document.syntax === 'blade' || document.uri?.endsWith('.blade.php')) {
+        Object.assign(options, this.bladeConfig)
       }
 
-      // Add XML plugin options if the document is XML
-      if (document.syntax === 'xml') {
-        Object.assign(options, this.xmlConfig)
+      // Add PROPERTIES plugin options if the document is JAVA-PROPERTIES
+      if (document.syntax === 'java-properties') {
+        Object.assign(options, this.propertiesConfig)
+      }
+
+      // Add LIQUID plugin options if the document is LIQUID
+      if (
+        document.syntax === 'liquid-html' ||
+        document.syntax === 'liquid-md'
+      ) {
+        Object.assign(options, this.liquidConfig)
+      }
+
+      // Add NGINX plugin options if the document is NGINX
+      if (document.syntax === 'nginx') {
+        Object.assign(options, this.nginxConfig)
+      }
+
+      // Add PHP plugin options if the document is PHP
+      if (document.syntax === 'php' && !document.uri?.endsWith('.blade.php')) {
+        Object.assign(options, this.phpConfig)
       }
 
       // Add SQL plugin options if the document is SQL
@@ -436,28 +482,15 @@ class Formatter {
         }
       }
 
-      // Add PROPERTIES plugin options if the document is JAVA-PROPERTIES
-      if (document.syntax === 'java-properties') {
-        Object.assign(options, this.propertiesConfig)
-      }
-
-      // Add NGINX plugin options if the document is NGINX
-      if (document.syntax === 'nginx') {
-        Object.assign(options, this.nginxConfig)
-      }
-
-      // Add LIQUID plugin options if the document is LIQUID
-      if (
-        document.syntax === 'liquid-html' ||
-        document.syntax === 'liquid-md'
-      ) {
-        Object.assign(options, this.liquidConfig)
-      }
-
       // Add TAILWIND plugin options if the document is of a supported type
       // and the plugin is enabled
       if (tailwindSyntaxesEnabled && tailwindPluginEnabled) {
         Object.assign(options, this.tailwindConfig)
+      }
+
+      // Add XML plugin options if the document is XML
+      if (document.syntax === 'xml') {
+        Object.assign(options, this.xmlConfig)
       }
     }
 
@@ -570,7 +603,7 @@ class Formatter {
     return nova.path.join(expectedIgnoreDir, '.prettierignore')
   }
 
-  getParserForSyntax(syntax) {
+  getParserForSyntax(syntax, uri) {
     switch (syntax) {
       case 'javascript':
       case 'jsx':
@@ -587,6 +620,11 @@ class Formatter {
       case 'html+erb':
       case 'html+ejs':
         return 'html'
+      case 'php':
+        if (uri.endsWith('.blade.php')) {
+          return 'blade'
+        }
+        return 'php'
       default:
         return syntax
     }

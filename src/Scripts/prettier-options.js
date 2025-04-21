@@ -32,6 +32,49 @@ module.exports = {
     'vueIndentScriptAndStyle',
   ],
 
+  PRETTIER_BLADE_PLUGIN_OPTIONS: [
+    'printWidth',
+    'tabWidth',
+    'singleQuote',
+    'wrapAttributes',
+    'wrapAttributesMinAttrs',
+    'endWithNewLine',
+    'sortTailwindcssClasses',
+    'tailwindcssConfigPath',
+    'sortHtmlAttributes',
+    'customHtmlAttributesOrder',
+    'noPhpSyntaxCheck',
+    'indentInnerHtml',
+    'extraLiners',
+    'trailingCommaPHP',
+    'phpVersion',
+    'componentPrefix',
+  ],
+
+  PRETTIER_LIQUID_PLUGIN_OPTIONS: [
+    'printWidth',
+    'tabWidth',
+    'useTabs',
+    'singleQuote',
+    'bracketSameLine',
+    'liquidSingleQuote',
+    'embeddedSingleQuote',
+    'htmlWhitespaceSensitivity',
+    'captureWhitespaceSensitivity',
+    'singleLineLinkTags',
+    'indentSchema',
+  ],
+
+  PRETTIER_NGINX_PLUGIN_OPTIONS: [
+    'printWidth',
+    'tabWidth',
+    'useTabs',
+    'alignDirectives',
+    'alignUniversally',
+    'wrapParameters',
+    'continuationIndent',
+  ],
+
   PRETTIER_PHP_PLUGIN_OPTIONS: [
     'phpVersion',
     'printWidth',
@@ -44,16 +87,7 @@ module.exports = {
     'insertPragma',
   ],
 
-  PRETTIER_XML_PLUGIN_OPTIONS: [
-    'bracketSameLine',
-    'printWidth',
-    'singleAttributePerLine',
-    'tabWidth',
-    'xmlQuoteAttributes',
-    'xmlSelfClosingSpace',
-    'xmlSortAttributesByKey',
-    'xmlWhitespaceSensitivity',
-  ],
+  PRETTIER_PROPERTIES_PLUGIN_OPTIONS: ['escapeNonLatin1', 'keySeparator'],
 
   PRETTIER_SQL_PLUGIN_SQL_FORMATTER_OPTIONS: [
     'language',
@@ -72,32 +106,6 @@ module.exports = {
 
   PRETTIER_SQL_PLUGIN_NODE_SQL_PARSER_OPTIONS: ['database', 'type'],
 
-  PRETTIER_PROPERTIES_PLUGIN_OPTIONS: ['escapeNonLatin1', 'keySeparator'],
-
-  PRETTIER_NGINX_PLUGIN_OPTIONS: [
-    'printWidth',
-    'tabWidth',
-    'useTabs',
-    'alignDirectives',
-    'alignUniversally',
-    'wrapParameters',
-    'continuationIndent',
-  ],
-
-  PRETTIER_LIQUID_PLUGIN_OPTIONS: [
-    'printWidth',
-    'tabWidth',
-    'useTabs',
-    'singleQuote',
-    'bracketSameLine',
-    'liquidSingleQuote',
-    'embeddedSingleQuote',
-    'htmlWhitespaceSensitivity',
-    'captureWhitespaceSensitivity',
-    'singleLineLinkTags',
-    'indentSchema',
-  ],
-
   PRETTIER_TAILWIND_PLUGIN_OPTIONS: [
     'tailwindConfig',
     'tailwindStylesheet',
@@ -105,5 +113,16 @@ module.exports = {
     'tailwindFunctions',
     'tailwindPreserveWhitespace',
     'tailwindPreserveDuplicates',
+  ],
+
+  PRETTIER_XML_PLUGIN_OPTIONS: [
+    'bracketSameLine',
+    'printWidth',
+    'singleAttributePerLine',
+    'tabWidth',
+    'xmlQuoteAttributes',
+    'xmlSelfClosingSpace',
+    'xmlSortAttributesByKey',
+    'xmlWhitespaceSensitivity',
   ],
 }
