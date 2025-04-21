@@ -335,18 +335,21 @@ class PrettierExtension {
   }
 
   async didInvokeFormatSelectionCommand(editor) {
+    // 1) Ask the formatter what the real syntax key is
+    const syntaxKey = this.formatter.getSyntaxKey(editor)
+
+    // 2) Which keys we support selection for:
     const supported = new Set([
       'javascript',
-      'javascriptreact',
+      'jsx',
       'typescript',
-      'typescriptreact',
+      'tsx',
       'graphql',
       'handlebars',
     ])
 
-    const syntax = editor.document.syntax
-
-    if (!supported.has(syntax)) {
+    // 3) Bail out if this syntax isn’t in our set
+    if (!supported.has(syntaxKey)) {
       const suppressionKey = 'prettier.selection-unsupported.dismissed'
       const dismissed = nova.config.get(suppressionKey)
       if (dismissed === true) return

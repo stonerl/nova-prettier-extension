@@ -30,6 +30,8 @@ const {
   getXmlConfig,
 } = require('./prettier-config.js')
 
+const { detectSyntax } = require('./syntax.js')
+
 class Formatter {
   constructor() {
     this.prettierServiceDidExit = this.prettierServiceDidExit.bind(this)
@@ -79,6 +81,17 @@ class Formatter {
 
   get xmlConfig() {
     return getXmlConfig()
+  }
+
+  /**
+   * Returns the “true” syntax key by combining Nova’s
+   * document.syntax with our extension‑based fallback.
+   */
+  getSyntaxKey(editor) {
+    return detectSyntax({
+      syntax: editor.document.syntax,
+      uri: editor.document.uri,
+    })
   }
 
   get isReady() {
@@ -255,6 +268,10 @@ class Formatter {
 
   async formatEditor(editor, saving, selectionOnly, flags = {}) {
     const { document } = editor
+
+    const syntaxKey = this.getSyntaxKey(editor)
+    log.debug(`Resolved Syntax Key: ${syntaxKey}`)
+
     nova.notifications.cancel('prettier-unsupported-syntax')
 
     // Read the custom config file path from settings.
@@ -284,6 +301,7 @@ class Formatter {
 
     const pathForConfig = document.path || nova.workspace.path
     const shouldApplyDefaultConfig = await this.shouldApplyDefaultConfig(
+      syntaxKey,
       document,
       saving,
       pathForConfig,
@@ -296,7 +314,8 @@ class Formatter {
     )
 
     log.debug(`[Forced=${flags.force}] Formatting ${document.path}`)
-    log.debug(`Document Syntax: ${document.syntax}`)
+    log.debug(`Document Syntax: ${syntaxKey}`)
+    log.debug(`Document URI: ${document.uri}`)
 
     const documentRange = new Range(0, document.length)
     const original = editor.getTextInRange(documentRange)
@@ -344,7 +363,7 @@ class Formatter {
     )
 
     const tailwindSyntaxesEnabled = getConfigWithWorkspaceOverride(
-      `prettier.plugins.prettier-plugin-tailwind.syntaxes.${document.syntax}`,
+      `prettier.plugins.prettier-plugin-tailwind.syntaxes.${syntaxKey}`,
     )
 
     const tailwindPluginEnabled = getConfigWithWorkspaceOverride(
@@ -358,46 +377,38 @@ class Formatter {
     // Initialize plugins array and conditionally load plugins if enabled
     let plugins = []
     if (this.modulePath.includes(nova.extension.path)) {
-      if (
-        (document.syntax === 'blade' || document.uri?.endsWith('.blade.php')) &&
-        bladePluginEnabled
-      ) {
+      if (syntaxKey === 'blade' && bladePluginEnabled) {
         plugins.push(pluginPaths.blade)
       }
 
-      if (document.syntax === 'java' && javaPluginEnabled) {
+      if (syntaxKey === 'java' && javaPluginEnabled) {
         plugins.push(pluginPaths.java)
       }
 
-      if (document.syntax === 'java-properties' && propertiesPluginEnabled) {
+      if (syntaxKey === 'java-properties' && propertiesPluginEnabled) {
         plugins.push(pluginPaths.properties)
       }
 
       if (
-        (document.syntax === 'liquid-html' ||
-          document.syntax === 'liquid-md') &&
+        (syntaxKey === 'liquid-html' || syntaxKey === 'liquid-md') &&
         liquidPluginEnabled
       ) {
         plugins.push(pluginPaths.liquid)
       }
 
-      if (document.syntax === 'nginx' && nginxPluginEnabled) {
+      if (syntaxKey === 'nginx' && nginxPluginEnabled) {
         plugins.push(pluginPaths.nginx)
       }
 
-      if (
-        document.syntax === 'php' &&
-        !document.uri?.endsWith('.blade.php') &&
-        phpPluginEnabled
-      ) {
+      if (syntaxKey === 'php' && phpPluginEnabled) {
         plugins.push(pluginPaths.php)
       }
 
-      if (document.syntax === 'sql' && sqlPluginEnabled) {
+      if (syntaxKey === 'sql' && sqlPluginEnabled) {
         plugins.push(pluginPaths.sql)
       }
 
-      if (document.syntax === 'xml' && xmlPluginEnabled) {
+      if (syntaxKey === 'xml' && xmlPluginEnabled) {
         plugins.push(pluginPaths.xml)
       }
 
@@ -409,7 +420,7 @@ class Formatter {
 
       // Pick the right ejs plugin
       // When using prettier-plugin-ejs-tailwindcss it must be loaded after prettier-plugin-tailwindcss.
-      if (document.syntax === 'html+ejs') {
+      if (syntaxKey === 'html+ejs') {
         const useTailwindEJS =
           tailwindPluginEnabled &&
           tailwindSyntaxesEnabled &&
@@ -424,7 +435,7 @@ class Formatter {
     }
 
     const options = {
-      parser: this.getParserForSyntax(document.syntax, document.uri),
+      parser: this.getParserForSyntax(syntaxKey),
       ...(plugins.length > 0 ? { plugins } : {}),
       ...(document.path ? { filepath: document.path } : {}),
       ...(customConfigFile
@@ -446,35 +457,32 @@ class Formatter {
     // Only load the plugins options if no prettier config file exists.
     if (!customConfigFile && (ignoreConfigFile || shouldApplyDefaultConfig)) {
       // Add BLADE plugin options if the document is BLADE
-      if (document.syntax === 'blade' || document.uri?.endsWith('.blade.php')) {
+      if (syntaxKey === 'blade') {
         Object.assign(options, this.bladeConfig)
       }
 
       // Add PROPERTIES plugin options if the document is JAVA-PROPERTIES
-      if (document.syntax === 'java-properties') {
+      if (syntaxKey === 'java-properties') {
         Object.assign(options, this.propertiesConfig)
       }
 
       // Add LIQUID plugin options if the document is LIQUID
-      if (
-        document.syntax === 'liquid-html' ||
-        document.syntax === 'liquid-md'
-      ) {
+      if (syntaxKey === 'liquid-html' || syntaxKey === 'liquid-md') {
         Object.assign(options, this.liquidConfig)
       }
 
       // Add NGINX plugin options if the document is NGINX
-      if (document.syntax === 'nginx') {
+      if (syntaxKey === 'nginx') {
         Object.assign(options, this.nginxConfig)
       }
 
       // Add PHP plugin options if the document is PHP
-      if (document.syntax === 'php' && !document.uri?.endsWith('.blade.php')) {
+      if (syntaxKey === 'php') {
         Object.assign(options, this.phpConfig)
       }
 
       // Add SQL plugin options if the document is SQL
-      if (document.syntax === 'sql') {
+      if (syntaxKey === 'sql') {
         if (sqlFormatter === 'sql-formatter') {
           Object.assign(options, this.sqlFormatterConfig)
         } else if (sqlFormatter === 'node-sql-parser') {
@@ -489,7 +497,7 @@ class Formatter {
       }
 
       // Add XML plugin options if the document is XML
-      if (document.syntax === 'xml') {
+      if (syntaxKey === 'xml') {
         Object.assign(options, this.xmlConfig)
       }
     }
@@ -554,17 +562,15 @@ class Formatter {
     await this.applyResult(editor, original, formatted)
   }
 
-  async shouldApplyDefaultConfig(document, saving, pathForConfig) {
+  async shouldApplyDefaultConfig(syntaxKey, document, saving, pathForConfig) {
     // Don't format-on-save ignore syntaxes.
     if (
       saving &&
       getConfigWithWorkspaceOverride(
-        `prettier.format-on-save.ignored-syntaxes.${document.syntax}`,
+        `prettier.format-on-save.ignored-syntaxes.${syntaxKey}`,
       ) === true
     ) {
-      log.debug(
-        `Not formatting (${document.syntax} syntax ignored) ${document.path}`,
-      )
+      log.debug(`Not formatting (${syntaxKey} syntax ignored) ${document.path}`)
       return null
     }
 
@@ -603,7 +609,7 @@ class Formatter {
     return nova.path.join(expectedIgnoreDir, '.prettierignore')
   }
 
-  getParserForSyntax(syntax, uri) {
+  getParserForSyntax(syntax) {
     switch (syntax) {
       case 'javascript':
       case 'jsx':
@@ -620,11 +626,6 @@ class Formatter {
       case 'html+erb':
       case 'html+ejs':
         return 'html'
-      case 'php':
-        if (uri.endsWith('.blade.php')) {
-          return 'blade'
-        }
-        return 'php'
       default:
         return syntax
     }
