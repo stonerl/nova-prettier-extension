@@ -34,6 +34,7 @@ Experience seamless code formatting with Prettier directly in Nova.
   plus additional ones via bundled plugins, such as
   `EJS`,
   `Java`,
+  `Laravel Blade`,
   `Liquid`,
   `PHP`,
   `SQL`,
@@ -54,6 +55,7 @@ This extension can be used as a drop-in replacement for the original [Prettier E
 - ✅ **[prettier-plugin-sql](https://github.com/un-ts/prettier/tree/master/packages/sql)**
 - ✅ **[prettier-plugin-ejs](https://github.com/ecmel/prettier-plugin-ejs)**
 - ✅ **[prettier-plugin-ejs-tailwindcss](https://github.com/janghye0k/prettier-plugin-ejs-tailwindcss)**
+- ➕ **[prettier-plugin-blade](https://github.com/shufo/prettier-plugin-blade)**
 - ➕ **[prettier-plugin-tailwindcss](https://github.com/tailwindlabs/prettier-plugin-tailwindcss)**
 - ⚠️ **[prettier-plugin-liquid](https://github.com/Shopify/theme-tools/tree/main/packages/prettier-plugin-liquid)**
 - ⚠️ **[prettier-plugin-java](https://www.jhipster.tech/prettier-java/)**
