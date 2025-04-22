@@ -17,6 +17,9 @@ const { getConfigWithWorkspaceOverride } = require('./helpers.js')
 
 // 1) Map file‑name suffixes (longest first) to your internal language keys
 const extToSyntax = {
+  // Astro
+  '.astro': 'astro',
+
   // Blade templates
   '.blade.php': 'blade',
 
@@ -89,6 +92,7 @@ const extToSyntax = {
 
 // 2) Nova’s built‑in syntax keys we explicitly support
 const knownSyntaxKeys = new Set([
+  'astro',
   'blade',
   'liquid-md',
   'liquid-html',
@@ -147,8 +151,12 @@ function detectSyntax({ syntax, uri }) {
     return syntax
   }
 
-  // 0) Liquid exception: if Nova already says liquid‑md/html, honor it
-  if (syntax === 'liquid-md' || syntax === 'liquid-html') {
+  // 0) Astro and Liquid exceptions: if Nova got it right, trust it immediately
+  if (
+    syntax === 'astro' ||
+    syntax === 'liquid-md' ||
+    syntax === 'liquid-html'
+  ) {
     return syntax
   }
 

@@ -32,6 +32,11 @@ module.exports = {
     'vueIndentScriptAndStyle',
   ],
 
+  PRETTIER_ASTRO_PLUGIN_OPTIONS: [
+    'astroAllowShorthand',
+    'astroSkipFrontmatter',
+  ],
+
   PRETTIER_BLADE_PLUGIN_OPTIONS: [
     'printWidth',
     'tabWidth',

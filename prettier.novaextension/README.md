@@ -1,6 +1,8 @@
 # Prettier⁺ for Nova
 
-The Swiss Army knife for code formatting — seamlessly format JavaScript, TypeScript, JSON, CSS, HTML, Markdown, and more in Nova, with built-in support for Blade, EJS, Java, Liquid, PHP, SQL, Tailwind CSS, and XML — no extra setup required.
+The Swiss Army knife for code formatting — seamlessly format JavaScript, TypeScript,
+JSON, CSS, HTML, Markdown, and more in Nova, with built-in support for Astro, EJS,
+Java, Laravel Blade, Liquid, PHP, SQL, Tailwind CSS, and XML — no extra setup required.
 
 > ⚠️ **Prettier⁺** is a drop-in replacement for the original [Prettier Extension](https://extensions.panic.com/extensions/alexanderweiss/alexanderweiss.prettier/).
 > To avoid conflicts, make sure to disable the original before installing or activating Prettier⁺.
@@ -38,6 +40,7 @@ The Swiss Army knife for code formatting — seamlessly format JavaScript, TypeS
   `Vue`, and
   `YAML` —
   plus additional ones via bundled plugins, such as
+  `Astro`,
   `EJS`,
   `Java`,
   `Laravel Blade`,
@@ -58,15 +61,16 @@ The Swiss Army knife for code formatting — seamlessly format JavaScript, TypeS
 | ---------------------------------------------------------------------------------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------- |
 | [@prettier/plugin-php](https://github.com/prettier/plugin-php)                                             | ✅ Enabled  | –                                                                                                                 |
 | [@prettier/plugin-xml](https://github.com/prettier/plugin-xml)                                             | ✅ Enabled  | –                                                                                                                 |
-| [prettier-plugin-sql](https://github.com/un-ts/prettier/tree/master/packages/sql)                          | ✅ Enabled  | –                                                                                                                 |
-| [prettier-plugin-ejs](https://github.com/ecmel/prettier-plugin-ejs)                                        | ✅ Enabled  | –                                                                                                                 |
-| [prettier-plugin-ejs-tailwindcss](https://github.com/janghye0k/prettier-plugin-ejs-tailwindcss)            | ✅ Enabled  | Requires: `prettier-plugin-tailwindcss`                                                                           |
-| [prettier-plugin-tailwindcss](https://github.com/tailwindlabs/prettier-plugin-tailwindcss)                 | ➕ Optional | ⚠️ Recommended: [Tailwind CSS](https://extensions.panic.com/extensions/jasonplatts/jasonplatts.tailwindcss/)      |
+| [prettier-plugin-astro](https://github.com/withastro/prettier-plugin-astro)                                | ✅ Enabled  | ⚠️ Recommended: [Astro](https://extensions.panic.com/extensions/com.johnlindop/com.johnlindop.nova-astro/)        |
 | [prettier-plugin-blade](https://github.com/shufo/prettier-plugin-blade)                                    | ✅ Enabled  | ⚠️ Recommended: [Laravel Suite](https://extensions.panic.com/extensions/emran-mr/emran-mr.laravel/)               |
-| [prettier-plugin-liquid](https://github.com/Shopify/theme-tools/tree/main/packages/prettier-plugin-liquid) | ✅ Enabled  | ⚠️ Recommended: [Liquid](https://extensions.panic.com/extensions/me.arthr/me.arthr.Liquid/)                       |
+| [prettier-plugin-ejs](https://github.com/ecmel/prettier-plugin-ejs)                                        | ✅ Enabled  | –                                                                                                                 |
+| [prettier-plugin-ejs-tailwindcss](https://github.com/janghye0k/prettier-plugin-ejs-tailwindcss)            | ✅ Enabled  | ⚠️ Requires: `prettier-plugin-tailwindcss`                                                                        |
 | [prettier-plugin-java](https://www.jhipster.tech/prettier-java/)                                           | ✅ Enabled  | ⚠️ Recommended: [Java Language Definition](https://extensions.panic.com/extensions/me.frmr/me.frmr.JavaLanguage/) |
-| [prettier-plugin-properties](https://github.com/eemeli/prettier-plugin-properties)                         | ✅ Enabled  | ⚠️ Recommended: [Java Language Definition](https://extensions.panic.com/extensions/me.frmr/me.frmr.JavaLanguage/) |
+| [prettier-plugin-liquid](https://github.com/Shopify/theme-tools/tree/main/packages/prettier-plugin-liquid) | ✅ Enabled  | ⚠️ Recommended: [Liquid](https://extensions.panic.com/extensions/me.arthr/me.arthr.Liquid/)                       |
 | [prettier-plugin-nginx](https://github.com/jxddk/prettier-plugin-nginx)                                    | ✅ Enabled  | ⚠️ Recommended: [NGINX for Nova](https://extensions.panic.com/extensions/joncoole/joncoole.nginx)                 |
+| [prettier-plugin-properties](https://github.com/eemeli/prettier-plugin-properties)                         | ✅ Enabled  | ⚠️ Recommended: [Java Language Definition](https://extensions.panic.com/extensions/me.frmr/me.frmr.JavaLanguage/) |
+| [prettier-plugin-sql](https://github.com/un-ts/prettier/tree/master/packages/sql)                          | ✅ Enabled  | –                                                                                                                 |
+| [prettier-plugin-tailwindcss](https://github.com/tailwindlabs/prettier-plugin-tailwindcss)                 | ➕ Optional | ⚠️ Recommended: [Tailwind CSS](https://extensions.panic.com/extensions/jasonplatts/jasonplatts.tailwindcss/)      |
 
 ### Plugin Legend
 
