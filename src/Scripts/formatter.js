@@ -19,6 +19,7 @@ const pluginPaths = require('./prettier-plugins.js')
 
 const {
   getDefaultConfig,
+  getAstroConfig,
   getBladeConfig,
   getLiquidConfig,
   getNginxConfig,
@@ -45,6 +46,10 @@ class Formatter {
 
   get defaultConfig() {
     return getDefaultConfig()
+  }
+
+  get astroConfig() {
+    return getAstroConfig()
   }
 
   get bladeConfig() {
@@ -321,6 +326,10 @@ class Formatter {
     const original = editor.getTextInRange(documentRange)
 
     // Check if plugins are enabled
+    const astroPluginEnabled = getConfigWithWorkspaceOverride(
+      'prettier.plugins.prettier-plugin-astro.enabled',
+    )
+
     const bladePluginEnabled = getConfigWithWorkspaceOverride(
       'prettier.plugins.prettier-plugin-blade.enabled',
     )
@@ -377,6 +386,10 @@ class Formatter {
     // Initialize plugins array and conditionally load plugins if enabled
     let plugins = []
     if (this.modulePath.includes(nova.extension.path)) {
+      if (syntaxKey === 'astro' && astroPluginEnabled) {
+        plugins.push(pluginPaths.astro)
+      }
+
       if (syntaxKey === 'blade' && bladePluginEnabled) {
         plugins.push(pluginPaths.blade)
       }
@@ -420,7 +433,7 @@ class Formatter {
 
       // Pick the right ejs plugin
       // When using prettier-plugin-ejs-tailwindcss it must be loaded after prettier-plugin-tailwindcss.
-      if (syntaxKey === 'html+ejs') {
+      if (syntaxKey === 'html+ejs' || syntaxKey === 'html') {
         const useTailwindEJS =
           tailwindPluginEnabled &&
           tailwindSyntaxesEnabled &&
@@ -454,34 +467,39 @@ class Formatter {
       _customConfigFile: customConfigFile,
     }
 
-    // Only load the plugins options if no prettier config file exists.
+    // Apply plugin options only if no config is found or it’s intentionally ignored.
     if (!customConfigFile && (ignoreConfigFile || shouldApplyDefaultConfig)) {
-      // Add BLADE plugin options if the document is BLADE
+      // Add ASTRO plugin options if the document syntax is ASTRO
+      if (syntaxKey === 'astro') {
+        Object.assign(options, this.astroConfig)
+      }
+
+      // Add BLADE plugin options if the document syntax is BLADE
       if (syntaxKey === 'blade') {
         Object.assign(options, this.bladeConfig)
       }
 
-      // Add PROPERTIES plugin options if the document is JAVA-PROPERTIES
+      // Add PROPERTIES plugin options if the document syntax is JAVA-PROPERTIES
       if (syntaxKey === 'java-properties') {
         Object.assign(options, this.propertiesConfig)
       }
 
-      // Add LIQUID plugin options if the document is LIQUID
+      // Add LIQUID plugin options if the document syntax is LIQUID
       if (syntaxKey === 'liquid-html' || syntaxKey === 'liquid-md') {
         Object.assign(options, this.liquidConfig)
       }
 
-      // Add NGINX plugin options if the document is NGINX
+      // Add NGINX plugin options if the document syntax is NGINX
       if (syntaxKey === 'nginx') {
         Object.assign(options, this.nginxConfig)
       }
 
-      // Add PHP plugin options if the document is PHP
+      // Add PHP plugin options if the document syntax is PHP
       if (syntaxKey === 'php') {
         Object.assign(options, this.phpConfig)
       }
 
-      // Add SQL plugin options if the document is SQL
+      // Add SQL plugin options if the document syntax is SQL
       if (syntaxKey === 'sql') {
         if (sqlFormatter === 'sql-formatter') {
           Object.assign(options, this.sqlFormatterConfig)
@@ -490,13 +508,13 @@ class Formatter {
         }
       }
 
-      // Add TAILWIND plugin options if the document is of a supported type
+      // Add TAILWIND plugin options if the document syntax is of a supported type
       // and the plugin is enabled
       if (tailwindSyntaxesEnabled && tailwindPluginEnabled) {
         Object.assign(options, this.tailwindConfig)
       }
 
-      // Add XML plugin options if the document is XML
+      // Add XML plugin options if the document syntax is XML
       if (syntaxKey === 'xml') {
         Object.assign(options, this.xmlConfig)
       }

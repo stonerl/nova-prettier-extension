@@ -983,6 +983,75 @@
         ]
       },
       {
+        "key": "prettier.plugins.prettier-plugin-astro.section",
+        "title": "prettier-plugin-astro",
+        "description": "Astro formatter plugin for Prettier",
+        "link": "https://github.com/withastro/prettier-plugin-astro",
+        "type": "section",
+        "children": [
+          {
+            "key": "prettier.plugins.prettier-plugin-astro.enabled",
+            "config": {
+              "title": "Plugin Enabled",
+              "type": "boolean",
+              "default": true
+            },
+            "configWorkspace": {
+              "title": "Plugin Status",
+              "description": "Select whether to use global settings, enable, or disable the plugin.",
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-astro.astroAllowShorthand",
+            "title": "Allow Shorthand",
+            "description": "Enable/disable attribute shorthand if attribute name and expression are the same.",
+            "link": "https://github.com/withastro/prettier-plugin-astro#astro-allow-shorthand",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-astro.astroSkipFrontmatter",
+            "title": "Skip Frontmatter",
+            "description": "Skips the formatting of the frontmatter.",
+            "link": "https://github.com/withastro/prettier-plugin-astro#astro-skip-frontmatter",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          }
+        ]
+      },
+      {
         "key": "prettier.plugins.prettier-plugin-blade.section",
         "title": "prettier-plugin-blade",
         "description": "Blade formatter plugin for Prettier",
@@ -2468,6 +2537,24 @@
             "type": "section",
             "children": [
               {
+                "key": "prettier.plugins.prettier-plugin-tailwind.syntaxes.astro",
+                "title": "Astro",
+                "config": {
+                  "type": "boolean",
+                  "default": true
+                },
+                "configWorkspace": {
+                  "type": "enum",
+                  "radio": false,
+                  "values": [
+                    [null, "Global Setting"],
+                    [true, "Enabled"],
+                    [false, "Disabled"]
+                  ],
+                  "default": null
+                }
+              },
+              {
                 "key": "prettier.plugins.prettier-plugin-tailwind.syntaxes.html",
                 "title": "HTML",
                 "config": {
@@ -2667,6 +2754,24 @@
         "description": "Documents that are set to an ignored syntax will not be formatted when saved.",
         "type": "section",
         "children": [
+          {
+            "key": "prettier.format-on-save.ignored-syntaxes.astro",
+            "title": "Astro",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [false, "Format on Save"],
+                [true, "Ignore"]
+              ],
+              "default": null
+            }
+          },
           {
             "key": "prettier.format-on-save.ignored-syntaxes.blade",
             "title": "Blade",

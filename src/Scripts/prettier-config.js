@@ -11,6 +11,7 @@
 const { getConfigWithWorkspaceOverride } = require('./helpers.js')
 const {
   PRETTIER_OPTIONS,
+  PRETTIER_ASTRO_PLUGIN_OPTIONS,
   PRETTIER_BLADE_PLUGIN_OPTIONS,
   PRETTIER_LIQUID_PLUGIN_OPTIONS,
   PRETTIER_NGINX_PLUGIN_OPTIONS,
@@ -39,6 +40,13 @@ function getDefaultConfig() {
       option,
       getConfigWithWorkspaceOverride(`prettier.default-config.${option}`),
     ]),
+  )
+}
+
+function getAstroConfig() {
+  return loadPluginConfig(
+    PRETTIER_ASTRO_PLUGIN_OPTIONS,
+    'prettier.plugins.prettier-plugin-astro',
   )
 }
 
@@ -107,6 +115,7 @@ function getXmlConfig() {
 
 module.exports = {
   getDefaultConfig,
+  getAstroConfig,
   getBladeConfig,
   getLiquidConfig,
   getNginxConfig,

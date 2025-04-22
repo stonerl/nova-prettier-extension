@@ -1,0 +1,15 @@
+diff --git a/node_modules/prettier-plugin-astro/dist/index.js b/node_modules/prettier-plugin-astro/dist/index.js
+index 6b9f37e..02687d5 100644
+--- a/node_modules/prettier-plugin-astro/dist/index.js
++++ b/node_modules/prettier-plugin-astro/dist/index.js
+@@ -805,8 +805,8 @@ const parsers = {
+     astro: {
+         parse: (source) => parse(source, { position: true }).ast,
+         astFormat: 'astro',
+-        locStart: (node) => node.position.start.offset,
+-        locEnd: (node) => node.position.end.offset,
++        locStart: (node) => node?.position?.start?.offset ?? 0,
++        locEnd: (node) => node?.position?.end?.offset ?? 0,
+     },
+     astroExpressionParser: {
+         ...babelParser,

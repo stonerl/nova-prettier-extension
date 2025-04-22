@@ -9,6 +9,13 @@
  */
 
 module.exports = {
+  astro: nova.path.join(
+    nova.extension.path,
+    'node_modules',
+    'prettier-plugin-astro',
+    'dist',
+    'index.js',
+  ),
   blade: nova.path.join(
     nova.extension.path,
     'node_modules',
