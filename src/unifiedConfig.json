@@ -72,6 +72,25 @@
         }
       },
       {
+        "key": "prettier.syntax.advancedDetection",
+        "title": "Advanced Syntax Detection",
+        "description": "When enabled, Prettier⁺ will supplement Nova’s syntax detection with file‑extension fallback to choose the correct syntax. When disabled, it trusts Nova’s syntax detection only.",
+        "config": {
+          "type": "boolean",
+          "default": true
+        },
+        "configWorkspace": {
+          "type": "enum",
+          "radio": false,
+          "values": [
+            [null, "Global Setting"],
+            [true, "Enabled"],
+            [false, "Disabled"]
+          ],
+          "default": null
+        }
+      },
+      {
         "key": "prettier.debug.logging",
         "title": "Log Debug Information",
         "description": "Send debug information to the Extension Console.",
@@ -2777,6 +2796,42 @@
           {
             "key": "prettier.format-on-save.ignored-syntaxes.liquid-html",
             "title": "HTML (Liquid)",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [false, "Format on Save"],
+                [true, "Ignore"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.format-on-save.ignored-syntaxes.java",
+            "title": "Java",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [false, "Format on Save"],
+                [true, "Ignore"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.format-on-save.ignored-syntaxes.java-properties",
+            "title": "Java Properties",
             "config": {
               "type": "boolean",
               "default": false
