@@ -994,7 +994,7 @@
             "config": {
               "title": "Plugin Enabled",
               "type": "boolean",
-              "default": false
+              "default": true
             },
             "configWorkspace": {
               "title": "Plugin Status",
@@ -1430,7 +1430,7 @@
             "config": {
               "title": "Plugin Enabled",
               "type": "boolean",
-              "default": false
+              "default": true
             },
             "configWorkspace": {
               "title": "Plugin Status",
@@ -1459,7 +1459,7 @@
             "config": {
               "title": "Plugin Enabled",
               "type": "boolean",
-              "default": false
+              "default": true
             },
             "configWorkspace": {
               "title": "Plugin Status",
@@ -1710,7 +1710,7 @@
             "config": {
               "title": "Plugin Enabled",
               "type": "boolean",
-              "default": false
+              "default": true
             },
             "configWorkspace": {
               "title": "Plugin Status",
@@ -1865,7 +1865,7 @@
             "config": {
               "title": "Plugin Enabled",
               "type": "boolean",
-              "default": false
+              "default": true
             },
             "configWorkspace": {
               "title": "Plugin Status",

@@ -1,3 +1,19 @@
+## 3.5.28 – 2025‑04‑22
+
+### Added
+
+- **Advanced Syntax Detection**
+
+  Prettier⁺ no longer relies solely on Nova's reported syntax.
+  It now intelligently determines the correct syntax based on file extensions—ensuring accurate
+  formatting even when language extensions are not installed.
+  This behavior can be disabled via the `Advanced Syntax Detection` setting.
+  ⚠️ Language extensions are still recommended for best results.
+
+### Changed
+
+- All bundled plugins are now **enabled by default**, except for `prettier-plugin-tailwindcss`, which remains optional.
+
 ## 3.5.27 - 2025-04-21
 
 ### Added

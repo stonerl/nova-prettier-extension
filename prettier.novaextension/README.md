@@ -1,6 +1,9 @@
 # Prettier⁺ for Nova
 
-Experience seamless code formatting with Prettier directly in Nova.
+The Swiss Army knife for code formatting — seamlessly format JavaScript, TypeScript, JSON, CSS, HTML, Markdown, and more in Nova, with built-in support for Blade, EJS, Java, Liquid, PHP, SQL, Tailwind CSS, and XML — no extra setup required.
+
+> ⚠️ **Prettier⁺** is a drop-in replacement for the original [Prettier Extension](https://extensions.panic.com/extensions/alexanderweiss/alexanderweiss.prettier/).
+> To avoid conflicts, make sure to disable the original before installing or activating Prettier⁺.
 
 ![GitHub Release](https://img.shields.io/github/v/release/stonerl/nova-prettier-extension)
 [![Install in Nova](https://img.shields.io/badge/install%20in-nova-blueviolet?style=flat)](https://extensions.panic.com/extensions/stonerl/stonerl.prettier)
@@ -16,6 +19,9 @@ Experience seamless code formatting with Prettier directly in Nova.
   formatting anyway via `Editor > Prettier⁺ > Format Document (Forced)`.
 - **Format Selection:** Precisely formats only the highlighted portion of your code
   (currently supports JavaScript, TypeScript, GraphQL, and Handlebars).
+- **Advanced Syntax Detection:** Reliably detects the correct syntax based on file extension —
+  even when Nova misidentifies it. Blade, Liquid, Java, and more are correctly handled
+  out of the box.
 - **Language Support:** Supports all Prettier-supported languages, including
   `Angular`,
   `CSS`,
@@ -46,47 +52,29 @@ Experience seamless code formatting with Prettier directly in Nova.
 - **Plugin Usage:** Utilizes Prettier and any plugins installed in your project,
   or defaults to the bundled Prettier and plugins if none are installed.
 
-This extension can be used as a drop-in replacement for the original [Prettier Extension](https://extensions.panic.com/extensions/alexanderweiss/alexanderweiss.prettier/).
+## Bundled Plugins
 
-## Bundled plugins
-
-- ✅ **[@prettier/plugin-php](https://github.com/prettier/plugin-php)**
-- ✅ **[@prettier/plugin-xml](https://github.com/prettier/plugin-xml)**
-- ✅ **[prettier-plugin-sql](https://github.com/un-ts/prettier/tree/master/packages/sql)**
-- ✅ **[prettier-plugin-ejs](https://github.com/ecmel/prettier-plugin-ejs)**
-- ✅ **[prettier-plugin-ejs-tailwindcss](https://github.com/janghye0k/prettier-plugin-ejs-tailwindcss)**
-- ➕ **[prettier-plugin-blade](https://github.com/shufo/prettier-plugin-blade)**
-- ➕ **[prettier-plugin-tailwindcss](https://github.com/tailwindlabs/prettier-plugin-tailwindcss)**
-- ⚠️ **[prettier-plugin-liquid](https://github.com/Shopify/theme-tools/tree/main/packages/prettier-plugin-liquid)**
-- ⚠️ **[prettier-plugin-java](https://www.jhipster.tech/prettier-java/)**
-- ⚠️ **[prettier-plugin-properties](https://github.com/eemeli/prettier-plugin-properties)**
-- ⚠️ **[prettier-plugin-nginx](https://github.com/jxddk/prettier-plugin-nginx)**
+| Plugin                                                                                                     | Status      | Notes                                                                                                             |
+| ---------------------------------------------------------------------------------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------- |
+| [@prettier/plugin-php](https://github.com/prettier/plugin-php)                                             | ✅ Enabled  | –                                                                                                                 |
+| [@prettier/plugin-xml](https://github.com/prettier/plugin-xml)                                             | ✅ Enabled  | –                                                                                                                 |
+| [prettier-plugin-sql](https://github.com/un-ts/prettier/tree/master/packages/sql)                          | ✅ Enabled  | –                                                                                                                 |
+| [prettier-plugin-ejs](https://github.com/ecmel/prettier-plugin-ejs)                                        | ✅ Enabled  | –                                                                                                                 |
+| [prettier-plugin-ejs-tailwindcss](https://github.com/janghye0k/prettier-plugin-ejs-tailwindcss)            | ✅ Enabled  | Requires: `prettier-plugin-tailwindcss`                                                                           |
+| [prettier-plugin-tailwindcss](https://github.com/tailwindlabs/prettier-plugin-tailwindcss)                 | ➕ Optional | ⚠️ Recommended: [Tailwind CSS](https://extensions.panic.com/extensions/jasonplatts/jasonplatts.tailwindcss/)      |
+| [prettier-plugin-blade](https://github.com/shufo/prettier-plugin-blade)                                    | ✅ Enabled  | ⚠️ Recommended: [Laravel Suite](https://extensions.panic.com/extensions/emran-mr/emran-mr.laravel/)               |
+| [prettier-plugin-liquid](https://github.com/Shopify/theme-tools/tree/main/packages/prettier-plugin-liquid) | ✅ Enabled  | ⚠️ Recommended: [Liquid](https://extensions.panic.com/extensions/me.arthr/me.arthr.Liquid/)                       |
+| [prettier-plugin-java](https://www.jhipster.tech/prettier-java/)                                           | ✅ Enabled  | ⚠️ Recommended: [Java Language Definition](https://extensions.panic.com/extensions/me.frmr/me.frmr.JavaLanguage/) |
+| [prettier-plugin-properties](https://github.com/eemeli/prettier-plugin-properties)                         | ✅ Enabled  | ⚠️ Recommended: [Java Language Definition](https://extensions.panic.com/extensions/me.frmr/me.frmr.JavaLanguage/) |
+| [prettier-plugin-nginx](https://github.com/jxddk/prettier-plugin-nginx)                                    | ✅ Enabled  | ⚠️ Recommended: [NGINX for Nova](https://extensions.panic.com/extensions/joncoole/joncoole.nginx)                 |
 
 ### Plugin Legend
 
-- ✅ **Enabled by default**
+- ✅ **Enabled by Default** — All plugins are active out of the box.
 
-  These plugins are active out of the box—no setup required.
+- ➕ **Tailwind (Optional)** — Tailwind CSS support is included but disabled by default. Enable it via the extension or project settings.
 
-- ➕ **Optional, self-contained**
-
-  Not enabled by default, but can be used immediately without installing anything extra.
-
-- ⚠️ **Requires external extension**
-
-  Before enabling any of the following plugins, make sure the corresponding Nova language extensions are installed:
-
-  - `prettier-plugin-liquid`
-    ➤ Requires the [Liquid](https://extensions.panic.com/extensions/me.arthr/me.arthr.Liquid/)
-    extension
-
-  - `prettier-plugin-java` and `prettier-plugin-properties`
-    ➤ Requires the [Java Language Definition](https://extensions.panic.com/extensions/me.frmr/me.frmr.JavaLanguage/)
-    extension
-
-  - `prettier-plugin-nginx`
-    ➤ Requires the [NGINX for Nova](https://extensions.panic.com/extensions/joncoole/joncoole.nginx)
-    extension
+- ⚠️ **Extension Recommended** — These plugins work best when the corresponding Nova syntax extension is installed.
 
 If you want to see other plugins being integrated, head over to the [Discussions](https://github.com/stonerl/nova-prettier-extension/discussions).
 
