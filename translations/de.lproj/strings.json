@@ -325,7 +325,7 @@
   "Vue": "Vue",
   "XML": "XML",
   "YAML": "YAML",
-  "Prettier integration for Nova — format JavaScript, TypeScript, JSON, CSS, HTML, Markdown, and more, with built-in support for EJS, Java, Laravel Blade, Liquid, PHP, SQL, Tailwind CSS, and XML — no extra setup required.": "Prettier-Integration für Nova — formatiert JavaScript, TypeScript, JSON, CSS, HTML, Markdown und mehr, mit integrierter Unterstützung für EJS, Java, Laravel Blade, Liquid, PHP, SQL, Tailwind CSS und XML — keine zusätzliche Einrichtung erforderlich.",
+  "The Swiss Army knife for formatting — fast, reliable, and built on Prettier.": "",
   "Format Document": "Dokument formatieren",
   "Format Selection": "Auswahl formatieren",
   "Format Document (Forced)": "Dokument formatieren (erzwingen)",
