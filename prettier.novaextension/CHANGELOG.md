@@ -1,3 +1,17 @@
+## 3.5.29 – 2025‑04‑23
+
+### Added
+
+- **Added plugin: `prettier-plugin-astro`**
+  Enables formatting support for `.astro` files using the official Astro plugin.
+
+- **Expanded SQL extension detection**
+  Added more file extensions that trigger SQL formatting in Advanced Syntax Detection.
+
+### Changed
+
+- Updated German translations
+
 ## 3.5.28 – 2025‑04‑22
 
 ### Added
