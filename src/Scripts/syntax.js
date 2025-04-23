@@ -134,7 +134,6 @@ const extToSyntax = {
   '.rss': 'xml',
 
   // Nginx
-  '.conf': 'nginx',
   '.nginx': 'nginx',
   '.nginxconf': 'nginx',
 
