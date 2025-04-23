@@ -15,7 +15,7 @@
 
 const { getConfigWithWorkspaceOverride } = require('./helpers.js')
 
-// 1) Map file‑name suffixes (longest first) to your internal language keys
+// 1) Map file‑name suffixes (longest first) to internal language keys
 const extToSyntax = {
   // Astro
   '.astro': 'astro',
@@ -72,12 +72,23 @@ const extToSyntax = {
   '.yaml': 'yaml',
   '.yml': 'yaml',
 
-  // SQL / XML / Nginx
-  '.sql': 'sql',
+  // SQL
+  '.sql': 'sql', // Standard SQL files
+  '.ddl': 'sql', // Data Definition Language
+  '.dml': 'sql', // Data Manipulation Language
+  '.tsql': 'sql', // Transact-SQL (SQL Server)
+  '.psql': 'sql', // PostgreSQL SQL scripts
+  '.pgsql': 'sql', // Alternative PostgreSQL naming
+  '.mysql': 'sql', // MySQL-specific scripts
+  '.hqsql': 'sql', // Hive Query Language
+
+  // XML
   '.xml': 'xml',
   '.xsd': 'xml',
   '.xsl': 'xml',
   '.rss': 'xml',
+
+  // Nginx
   '.conf': 'nginx',
   '.nginx': 'nginx',
   '.nginxconf': 'nginx',
@@ -170,7 +181,7 @@ function detectSyntax({ syntax, uri }) {
     }
   }
 
-  // 2) If Nova’s syntax matches one you support, use that
+  // 2) If Nova’s syntax matches one we support, use that
   if (knownSyntaxKeys.has(syntax)) {
     return syntax
   }
