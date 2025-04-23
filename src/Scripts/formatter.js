@@ -33,6 +33,8 @@ const {
 
 const { detectSyntax } = require('./syntax.js')
 
+const { getSqlDialectFromUri, getSqlParserDialect } = require('./sql.js')
+
 class Formatter {
   constructor() {
     this.prettierServiceDidExit = this.prettierServiceDidExit.bind(this)
@@ -502,9 +504,23 @@ class Formatter {
       // Add SQL plugin options if the document syntax is SQL
       if (syntaxKey === 'sql') {
         if (sqlFormatter === 'sql-formatter') {
-          Object.assign(options, this.sqlFormatterConfig)
+          const config = { ...this.sqlFormatterConfig }
+
+          if (config.language === 'auto') {
+            config.language = getSqlDialectFromUri(document.uri)
+            log.debug(`Auto-detected SQL dialect: ${config.language}`)
+          }
+
+          Object.assign(options, config)
         } else if (sqlFormatter === 'node-sql-parser') {
-          Object.assign(options, this.nodeSqlParserConfig)
+          const config = { ...this.nodeSqlParserConfig }
+
+          if (config.database === 'auto') {
+            config.database = getSqlParserDialect(document.uri)
+            log.debug(`Using node-sql-parser dialect: ${config.database}`)
+          }
+
+          Object.assign(options, config)
         }
       }
 

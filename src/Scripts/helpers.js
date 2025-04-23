@@ -15,6 +15,21 @@ class ProcessError extends Error {
   }
 }
 
+/**
+ * Extract a filesystem‑style path from any Nova Document URI.
+ * Supports file://, sftp://, ssh://, etc.; falls back to raw URI if parsing fails.
+ *
+ * @param {string} uri  Nova document URI
+ * @returns {string}    Extracted file path
+ */
+function extractPath(uri) {
+  try {
+    return new URL(uri).pathname
+  } catch {
+    return uri
+  }
+}
+
 function showError(id, title, body) {
   let request = new NotificationRequest(id)
 
@@ -185,6 +200,7 @@ async function sanitizePrettierConfig() {
 }
 
 module.exports = {
+  extractPath,
   showError,
   showActionableError,
   log,

@@ -13,7 +13,7 @@
  * false, will simply return Nova’s `document.syntax` unchanged.
  */
 
-const { getConfigWithWorkspaceOverride } = require('./helpers.js')
+const { extractPath, getConfigWithWorkspaceOverride } = require('./helpers.js')
 
 // 1) Map file‑name suffixes (longest first) to internal language keys
 const extToSyntax = {
@@ -29,11 +29,22 @@ const extToSyntax = {
   '.liquid.html': 'liquid-html', // Liquid in HTML
 
   // Embedded HTML templates
+  '.html.ejs': 'html+ejs',
   '.html.erb': 'html+erb',
   '.ejs': 'html+ejs',
   '.erb': 'html+erb',
   '.html': 'html',
   '.htm': 'html',
+
+  // Flow (optional suffix cases)
+  '.flow.js': 'flow',
+  '.flow.jsx': 'flow',
+
+  // GraphQL
+  '.graphql': 'graphql',
+  '.gql': 'graphql',
+  '.gqls': 'graphql', // GraphQL schema (unofficial, rare)
+  '.graphqls': 'graphql', // GraphQL schema files (rare)
 
   // JS / TS ecosystem
   '.tsx': 'tsx',
@@ -44,14 +55,6 @@ const extToSyntax = {
   '.cjs': 'javascript',
   '.mjs': 'javascript',
   '.js': 'javascript',
-
-  // Flow (optional suffix cases)
-  '.flow.js': 'flow',
-  '.flow.jsx': 'flow',
-
-  // GraphQL
-  '.graphql': 'graphql',
-  '.gql': 'graphql',
 
   // Styling
   '.css': 'css',
@@ -71,16 +74,58 @@ const extToSyntax = {
   '.json': 'json',
   '.yaml': 'yaml',
   '.yml': 'yaml',
+  '.yaml.tmpl': 'yaml', // Helm templates, commonly used in Kubernetes
 
-  // SQL
+  // SQL – Standard and extended dialects
   '.sql': 'sql', // Standard SQL files
   '.ddl': 'sql', // Data Definition Language
-  '.dml': 'sql', // Data Manipulation Language
   '.tsql': 'sql', // Transact-SQL (SQL Server)
-  '.psql': 'sql', // PostgreSQL SQL scripts
-  '.pgsql': 'sql', // Alternative PostgreSQL naming
-  '.mysql': 'sql', // MySQL-specific scripts
-  '.hqsql': 'sql', // Hive Query Language
+  '.psql': 'sql', // PostgreSQL SQL scripts (alias)
+  '.pgsql': 'sql', // PostgreSQL (PLpgSQL)
+  '.mysql': 'sql', // MySQL scripts
+  '.hqsql': 'sql', // Hive Query Language (non-standard alias)
+  '.hql': 'sql', // HiveQL standard extension
+  '.q': 'sql', // HiveQL query files
+
+  // PLSQL – Oracle PL/SQL
+  '.pls': 'sql', // PL/SQL source file
+  '.bdy': 'sql', // Package body
+  '.fnc': 'sql', // Function
+  '.pck': 'sql', // Package
+  '.pkb': 'sql', // Package body
+  '.pks': 'sql', // Package specification
+  '.plb': 'sql', // Library
+  '.plsql': 'sql', // Generic PL/SQL file
+  '.prc': 'sql', // Procedure
+  '.spc': 'sql', // Specification
+  '.tpb': 'sql', // Trigger body
+  '.tps': 'sql', // Trigger spec
+  '.trg': 'sql', // Trigger
+  '.vw': 'sql', // View
+
+  // SQLPL – DB2 SQL Procedural Language
+  '.db2': 'sql', // IBM DB2 SQL
+  '.cql': 'sql', // Cassandra Query Language
+  '.inc': 'sql', // SQL include files
+  '.tab': 'sql', // Table definitions
+  '.udf': 'sql', // User-defined function
+  '.viw': 'sql', // View
+
+  // Extended dialects – for full support
+  '.sqlite': 'sql', // SQLite
+  '.sqlite3': 'sql', // SQLite v3
+  '.bq': 'sql', // BigQuery shorthand
+  '.bigquery': 'sql', // BigQuery
+  '.sf.sql': 'sql', // Snowflake
+  '.rs.sql': 'sql', // Redshift
+  '.trino.sql': 'sql', // Trino
+  '.singlestore.sql': 'sql', // SingleStoreDB (formerly MemSQL)
+  '.spark.sql': 'sql', // Spark SQL
+  '.n1ql': 'sql', // Couchbase N1QL
+  '.mariadb.sql': 'sql', // MariaDB
+  '.db2i': 'sql', // IBM DB2i (experimental)
+  '.flink.sql': 'sql', //FlinkSQL
+  '.flinksql': 'sql', //FlinkSQL
 
   // XML
   '.xml': 'xml',
@@ -101,7 +146,13 @@ const extToSyntax = {
   '.vue': 'vue',
 }
 
-// 2) Nova’s built‑in syntax keys we explicitly support
+// 2) Pre‑sorted list of extensions by length (descending), so longest match wins first.
+//    Prevents false positives like ".php" matching ".blade.php" files.
+const sortedExtensions = Object.keys(extToSyntax).sort(
+  (a, b) => b.length - a.length,
+)
+
+// 3) Nova’s built‑in syntax keys we explicitly support
 const knownSyntaxKeys = new Set([
   'astro',
   'blade',
@@ -130,18 +181,6 @@ const knownSyntaxKeys = new Set([
   'nginx',
   'vue',
 ])
-
-/**
- * Extract a filesystem‑style path from any Nova Document URI.
- * Supports file://, sftp://, ssh://, etc.; falls back to raw URI if parsing fails.
- */
-function extractPath(uri) {
-  try {
-    return new URL(uri).pathname
-  } catch {
-    return uri
-  }
-}
 
 /**
  * Determine the true syntax key for a document.
@@ -173,9 +212,7 @@ function detectSyntax({ syntax, uri }) {
 
   // 1) Extension‑based detection (longest suffix first)
   const path = extractPath(uri).toLowerCase()
-  for (const ext of Object.keys(extToSyntax).sort(
-    (a, b) => b.length - a.length,
-  )) {
+  for (const ext of sortedExtensions) {
     if (path.endsWith(ext)) {
       return extToSyntax[ext]
     }
