@@ -2063,13 +2063,14 @@
               {
                 "key": "prettier.plugins.prettier-plugin-sql.sql-formatter.language",
                 "title": "Language",
-                "description": "Specifies the SQL dialect to use.",
+                "description": "Sets the SQL dialect used for formatting. Choose 'Auto-Detect' to infer the dialect from the file extension (e.g., .pgsql → PostgreSQL, .sqlite → SQLite). Defaults to 'Standard SQL' if detection fails or the dialect is unsupported.",
                 "link": "https://github.com/sql-formatter-org/sql-formatter/blob/master/docs/language.md",
                 "type": "enum",
                 "radio": false,
                 "config": {
-                  "default": "sql",
+                  "default": "auto",
                   "values": [
+                    ["auto", "Auto-Detect"],
                     ["bigquery", "GCP BigQuery"],
                     ["db2", "IBM DB2"],
                     ["db2i", "IBM DB2i (experimental)"],
@@ -2094,6 +2095,7 @@
                   "default": null,
                   "values": [
                     [null, "Global Setting"],
+                    ["auto", "Auto-Detect"],
                     ["bigquery", "GCP BigQuery"],
                     ["db2", "IBM DB2"],
                     ["db2i", "IBM DB2i (experimental)"],
@@ -2356,12 +2358,13 @@
               {
                 "key": "prettier.plugins.prettier-plugin-sql.node-sql-parser.database",
                 "title": "Language",
-                "description": "Specifies the SQL dialect to use.",
+                "description": "Sets the SQL dialect used for parsing. Choose 'Auto-Detect' to infer the dialect from the file extension (e.g., .pgsql → PostgreSQL). Defaults to 'MySQL' if detection fails or the dialect is unsupported.",
                 "type": "enum",
                 "radio": false,
                 "config": {
-                  "default": "mysql",
+                  "default": "auto",
                   "values": [
+                    ["auto", "Auto-Detect"],
                     ["bigquery", "GCP BigQuery"],
                     ["db2", "IBM DB2"],
                     ["flinksql", "FlinkSQL"],
@@ -2377,6 +2380,7 @@
                   "default": null,
                   "values": [
                     [null, "Global Setting"],
+                    ["auto", "Auto-Detect"],
                     ["bigquery", "GCP BigQuery"],
                     ["db2", "IBM DB2"],
                     ["flinksql", "FlinkSQL"],
