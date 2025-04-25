@@ -69,7 +69,7 @@ Java, Laravel Blade, Liquid, PHP, SQL, Tailwind CSS, and XML — no extra setup 
 | [prettier-plugin-liquid](https://github.com/Shopify/theme-tools/tree/main/packages/prettier-plugin-liquid) | ✅ Enabled  | ⚠️ Recommended: [Liquid](https://extensions.panic.com/extensions/me.arthr/me.arthr.Liquid/)                       |
 | [prettier-plugin-nginx](https://github.com/jxddk/prettier-plugin-nginx)                                    | ✅ Enabled  | ⚠️ Recommended: [NGINX for Nova](https://extensions.panic.com/extensions/joncoole/joncoole.nginx)                 |
 | [prettier-plugin-properties](https://github.com/eemeli/prettier-plugin-properties)                         | ✅ Enabled  | ⚠️ Recommended: [Java Language Definition](https://extensions.panic.com/extensions/me.frmr/me.frmr.JavaLanguage/) |
-| [prettier-plugin-sql](https://github.com/un-ts/prettier/tree/master/packages/sql)                          | ✅ Enabled  | –                                                                                                                 |
+| [prettier-plugin-sql](https://github.com/un-ts/prettier/tree/master/packages/sql)                          | ✅ Enabled  | ⚠️ Recommended: [SQL](https://extensions.panic.com/extensions/stonerl/stonerl.sql/)                               |
 | [prettier-plugin-tailwindcss](https://github.com/tailwindlabs/prettier-plugin-tailwindcss)                 | ➕ Optional | ⚠️ Recommended: [Tailwind CSS](https://extensions.panic.com/extensions/jasonplatts/jasonplatts.tailwindcss/)      |
 
 ### Plugin Legend

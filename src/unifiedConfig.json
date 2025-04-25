@@ -2063,7 +2063,7 @@
               {
                 "key": "prettier.plugins.prettier-plugin-sql.sql-formatter.language",
                 "title": "Language",
-                "description": "Sets the SQL dialect used for formatting. Choose 'Auto-Detect' to infer the dialect from the file extension (e.g., .pgsql → PostgreSQL, .sqlite → SQLite). Defaults to 'Standard SQL' if detection fails or the dialect is unsupported.",
+                "description": "Sets the SQL dialect used for formatting. Choose 'Auto-Detect' to infer the dialect from the file extension (e.g., .pgsql → PostgreSQL, .sqlite → SQLite). Defaults to 'Generic SQL' if detection fails or the dialect is unsupported.",
                 "link": "https://github.com/sql-formatter-org/sql-formatter/blob/master/docs/language.md",
                 "type": "enum",
                 "radio": false,
@@ -2085,7 +2085,7 @@
                     ["singlestoredb", "SingleStoreDB"],
                     ["snowflake", "Snowflake"],
                     ["spark", "Spark"],
-                    ["sql", "Standard SQL"],
+                    ["sql", "Generic SQL"],
                     ["sqlite", "SQLite"],
                     ["transactsql", "SQL Server Transact-SQL"],
                     ["trino", "Trino / Presto"]
@@ -2110,7 +2110,7 @@
                     ["singlestoredb", "SingleStoreDB"],
                     ["snowflake", "Snowflake"],
                     ["spark", "Spark"],
-                    ["sql", "Standard SQL"],
+                    ["sql", "Generic SQL"],
                     ["sqlite", "SQLite"],
                     ["transactsql", "SQL Server Transact-SQL"],
                     ["trino", "Trino / Presto"]
