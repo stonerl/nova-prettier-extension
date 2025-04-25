@@ -76,7 +76,7 @@ const sqlExtensionSyntaxMap = {
   postgresql: 'postgresql',
   plsql: 'plsql',
   mysql: 'mysql',
-  hivesql: 'hive',
+  hiveql: 'hive',
   flinksql: 'flinksql',
   bigquery: 'bigquery',
   tsql: 'tsql',

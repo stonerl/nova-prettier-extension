@@ -165,7 +165,7 @@ const sqlAliases = new Set([
   'postgresql',
   'plsql',
   'mysql',
-  'hivesql',
+  'hiveql',
   'flinksql',
   'bigquery',
   'tsql',
