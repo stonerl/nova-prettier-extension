@@ -67,26 +67,64 @@ const sortedSqlExtensions = Object.keys(extToSqlDialect).sort(
   (a, b) => b.length - a.length,
 )
 
+// Maps the SQL syntax reported by the SQL extension to the internal dialect names
+const sqlExtensionSyntaxMap = {
+  sparksql: 'spark',
+  snowflake: 'snowflake',
+  singlestore: 'singlestoredb',
+  redshift: 'redshift',
+  postgresql: 'postgresql',
+  plsql: 'plsql',
+  mysql: 'mysql',
+  hivesql: 'hive',
+  flinksql: 'flinksql',
+  bigquery: 'bigquery',
+  tsql: 'tsql',
+  trino: 'trino',
+  sqlpl: 'db2',
+  sqlite: 'sqlite',
+  'sql-generic': 'sql', // maps sql-generic to sql
+}
+
+// Use this map for syntax detection or processing
+function getMappedSqlDialect(dialect) {
+  return sqlExtensionSyntaxMap[dialect] || 'sql' // fallback to 'sql' if not found
+}
+
 /**
- * Determines the appropriate SQL dialect for sql-formatter based on file extension.
+ * Determines the appropriate SQL dialect for sql-formatter based on the file extension
+ * or the provided syntax.
+ *
+ * If a valid `syntax` is provided, it will be mapped directly to the corresponding SQL dialect.
+ * If no valid `syntax` is provided, the function will resolve the dialect based on the file extension.
  *
  * @param {string} uri  The document URI (e.g., editor.document.uri)
- * @returns {string}    One of the supported sql-formatter dialects (e.g. 'postgresql', 'sqlite', 'tsql')
+ * @param {string} [syntax=null] The SQL syntax detected by the SQL extension, if available.
+ *                               If provided, the function will map it directly to the appropriate SQL dialect.
+ * @returns {string}    One of the supported sql-formatter dialects (e.g., 'postgresql', 'sqlite', 'tsql')
  *
- * Falls back to 'sql' if no specific dialect match is found.
- * Uses the longest matching extension to ensure precision (e.g. '.mariadb.sql' before '.sql').
+ * If a valid syntax is provided, it will be mapped directly.
+ * If no syntax is provided or the syntax is 'sql' (default), the function will resolve the dialect based on the file extension,
+ * using the longest matching extension (e.g., '.mariadb.sql' before '.sql').
  */
-function getSqlDialectFromUri(uri) {
+function getSqlDialectFromUriOrSyntax(uri, syntax = null) {
+  if (syntax && sqlExtensionSyntaxMap[syntax]) {
+    // If a valid mapped syntax is provided, return it directly
+    return sqlExtensionSyntaxMap[syntax]
+  }
+
+  // If no valid syntax provided, resolve based on URI
   const path = extractPath(uri).toLowerCase()
   for (const ext of sortedSqlExtensions) {
     if (path.endsWith(ext)) {
       return extToSqlDialect[ext]
     }
   }
+
   log.debug(
     `No matching SQL dialect found for URI: ${uri}, falling back to 'sql'`,
   )
-  return 'sql' // fallback default
+  return 'sql' // Fallback to 'sql' if no match is found
 }
 
 // Dialects supported by node-sql-parser (used to validate dialect compatibility)
@@ -125,14 +163,19 @@ function normalizeForSqlParser(dialect) {
 }
 
 /**
- * Resolves the SQL dialect to use with node-sql-parser based on file extension.
- * Falls back to 'mysql' if the detected dialect is not supported.
+ * Resolves the SQL dialect to use with node-sql-parser based on file extension or provided syntax.
+ * Falls back to 'mysql' if the detected dialect is not supported by node-sql-parser.
  *
- * @param {string} uri  The document URI
- * @returns {string}    A safe dialect for node-sql-parser
+ * If a valid `syntax` is provided, it will be mapped directly to the corresponding SQL dialect.
+ * If no valid `syntax` is provided, the function will resolve the dialect based on the file extension.
+ *
+ * @param {string} uri    The document URI (e.g., editor.document.uri)
+ * @param {string} [syntax=null]  The SQL syntax detected by the SQL extension, if available.
+ *                                If provided, the function will map it directly to the appropriate SQL dialect.
+ * @returns {string}      A safe dialect for node-sql-parser, either a supported SQL dialect or 'mysql' as a fallback
  */
-function getSqlParserDialect(uri) {
-  let dialect = getSqlDialectFromUri(uri)
+function getSqlParserDialect(uri, syntax = null) {
+  let dialect = getSqlDialectFromUriOrSyntax(uri, syntax)
   dialect = normalizeForSqlParser(dialect)
 
   if (!isSqlParserDialect(dialect)) {
@@ -146,6 +189,6 @@ function getSqlParserDialect(uri) {
 }
 
 module.exports = {
-  getSqlDialectFromUri,
+  getSqlDialectFromUriOrSyntax,
   getSqlParserDialect,
 }

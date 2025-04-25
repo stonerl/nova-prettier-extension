@@ -151,6 +151,26 @@ const sortedExtensions = Object.keys(extToSyntax).sort(
   (a, b) => b.length - a.length,
 )
 
+// 2.5) If Nova reports a SQL-dialect-specific syntax, normalize it to "sql"
+//      These are only reported when the SQL Language Extension is installed.
+const sqlAliases = new Set([
+  'sparksql',
+  'snowflake',
+  'singlestore',
+  'redshift',
+  'postgresql',
+  'plsql',
+  'mysql',
+  'hivesql',
+  'flinksql',
+  'bigquery',
+  'tsql',
+  'trino',
+  'sqlpl',
+  'sqlite',
+  'sql-generic',
+])
+
 // 3) Nova’s built‑in syntax keys we explicitly support
 const knownSyntaxKeys = new Set([
   'astro',
@@ -207,6 +227,10 @@ function detectSyntax({ syntax, uri }) {
     syntax === 'liquid-html'
   ) {
     return syntax
+  }
+  // 0) SQLexceptions: if Nova got it right, trust it immediately
+  if (sqlAliases.has(syntax)) {
+    return 'sql'
   }
 
   // 1) Extension‑based detection (longest suffix first)
