@@ -1,3 +1,22 @@
+## 3.5.30 - 2025-04-25
+
+### Added
+
+- **SQL Dialect Detection Based on File Extension**
+
+  - Maps known SQL-related extensions to supported sql-formatter dialects.
+  - Prioritizes longest-match extension resolution for accuracy (e.g., `.mariadb.sql` over `.sql`).
+  - Falls back to a generic 'sql' dialect when no match is found.
+  - Extracted `extractPath` into shared helpers for reuse across modules.
+  - Adds support for node-sql-parser dialect detection and compatibility.
+  - Normalizes incompatible dialects (e.g., 'tsql' → 'transactsql') before parser invocation.
+  - Falls back to 'sql' if the dialect is unsupported by node-sql-parser to ensure safe parsing.
+  - Centralizes dialect validation and normalization logic in `sql.js` for a clean formatter integration.
+
+- **Support for Nova's SQL Language Extension**
+
+  - When Nova's SQL Language extension is installed, the provided syntax is now used for dialect detection instead of resolving via the URI.
+
 ## 3.5.29 – 2025‑04‑23
 
 ### Added
