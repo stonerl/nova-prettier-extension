@@ -2687,6 +2687,133 @@
             ]
           }
         ]
+      },
+      {
+        "key": "prettier.plugins.prettier-plugin-twig.section",
+        "title": "prettier-plugin-twig",
+        "description": "Twig formatter plugin for Prettier",
+        "link": "https://github.com/zackad/prettier-plugin-twig",
+        "type": "section",
+        "children": [
+          {
+            "key": "prettier.plugins.prettier-plugin-twig.enabled",
+            "config": {
+              "title": "Plugin Enabled",
+              "type": "boolean",
+              "default": true
+            },
+            "configWorkspace": {
+              "title": "Plugin Status",
+              "description": "Select whether to use global settings, enable, or disable the plugin.",
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-twig.twigSingleQuote",
+            "title": "Single Quotes",
+            "description": "Use single quotes in Twig files.",
+            "link": "https://github.com/zackad/prettier-plugin-twig#twigsinglequote-default-true",
+            "config": {
+              "type": "boolean",
+              "default": true
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-twig.twigAlwaysBreakObjects",
+            "title": "Break Objects",
+            "description": "Should objects always break in Twig files.",
+            "link": "https://github.com/zackad/prettier-plugin-twig#twigalwaysbreakobjects-default-true",
+            "config": {
+              "type": "boolean",
+              "default": true
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-twig.twigFollowOfficialCodingStandards",
+            "title": "Follow Official Coding Standards",
+            "description": "Follow the offical coding standards exactly. If disabled, some slight deviations might occur, such as spaces around the filter operator (e.g. 's | upper' instead of 's|upper').",
+            "link": "https://github.com/zackad/prettier-plugin-twig#twigfollowofficialcodingstandards-default-true",
+            "config": {
+              "type": "boolean",
+              "default": true
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-twig.twigOutputEndblockName",
+            "title": "Output Endblock Name",
+            "description": "Choose whether to output the block name in {% endblock %} tags (e.g., {% endblock content %}) or not.",
+            "link": "https://github.com/zackad/prettier-plugin-twig#twigoutputendblockname-default-false",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-twig.twigMultiTags",
+            "title": "Multi Tags",
+            "description": "A sequences of non-standard Twig tags that should be treated as belonging together",
+            "link": "https://github.com/zackad/prettier-plugin-twig#twigmultitags-default-",
+            "type": "stringArray",
+            "config": {},
+            "configWorkspace": {}
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-twig.twigTestExpressions",
+            "title": "Test Expressions",
+            "description": "Make custom Twig tests known to the parser.",
+            "link": "https://github.com/zackad/prettier-plugin-twig#twigtestexpressions-default-",
+            "type": "stringArray",
+            "config": {},
+            "configWorkspace": {}
+          }
+        ]
       }
     ]
   },
@@ -3157,6 +3284,24 @@
           {
             "key": "prettier.format-on-save.ignored-syntaxes.typescript",
             "title": "TypeScript",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [false, "Format on Save"],
+                [true, "Ignore"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.format-on-save.ignored-syntaxes.twig",
+            "title": "Twig",
             "config": {
               "type": "boolean",
               "default": false

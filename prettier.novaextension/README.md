@@ -2,7 +2,7 @@
 
 The Swiss Army knife for code formatting — seamlessly format JavaScript, TypeScript,
 JSON, CSS, HTML, Markdown, and more in Nova, with built-in support for Astro, EJS,
-Java, Laravel Blade, Liquid, PHP, SQL, Tailwind CSS, and XML — no extra setup required.
+Java, Laravel Blade, Liquid, PHP, SQL, Tailwind CSS, Twig, and XML — no extra setup required.
 
 > ⚠️ **Prettier⁺** is a drop-in replacement for the original [Prettier Extension](https://extensions.panic.com/extensions/alexanderweiss/alexanderweiss.prettier/).
 > To avoid conflicts, make sure to disable the original before installing or activating Prettier⁺.
@@ -22,7 +22,7 @@ Java, Laravel Blade, Liquid, PHP, SQL, Tailwind CSS, and XML — no extra setup 
 - **Format Selection:** Precisely formats only the highlighted portion of your code
   (currently supports JavaScript, TypeScript, GraphQL, and Handlebars).
 - **Advanced Syntax Detection:** Reliably detects the correct syntax based on file extension —
-  even when Nova misidentifies it. Blade, Liquid, Java, and more are correctly handled
+  even when Nova misidentifies it. Blade, Java, SQL, and more are correctly handled
   out of the box.
 - **Language Support:** Supports all Prettier-supported languages, including
   `Angular`,
@@ -47,7 +47,8 @@ Java, Laravel Blade, Liquid, PHP, SQL, Tailwind CSS, and XML — no extra setup 
   `Liquid`,
   `PHP`,
   `SQL`,
-  `Tailwind CSS`,and
+  `Tailwind CSS`,
+  `Twig`, and
   `XML`.
 
 - **Configuration Support:** Compatible with [standard Prettier configuration](https://prettier.io/docs/configuration),
@@ -71,6 +72,7 @@ Java, Laravel Blade, Liquid, PHP, SQL, Tailwind CSS, and XML — no extra setup 
 | [prettier-plugin-properties](https://github.com/eemeli/prettier-plugin-properties)                         | ✅ Enabled  | ⚠️ Recommended: [Java Language Definition](https://extensions.panic.com/extensions/me.frmr/me.frmr.JavaLanguage/) |
 | [prettier-plugin-sql](https://github.com/un-ts/prettier/tree/master/packages/sql)                          | ✅ Enabled  | ⚠️ Recommended: [SQL](https://extensions.panic.com/extensions/stonerl/stonerl.sql/)                               |
 | [prettier-plugin-tailwindcss](https://github.com/tailwindlabs/prettier-plugin-tailwindcss)                 | ➕ Optional | ⚠️ Recommended: [Tailwind CSS](https://extensions.panic.com/extensions/jasonplatts/jasonplatts.tailwindcss/)      |
+| [prettier-plugin-twig](https://github.com/zackad/prettier-plugin-twig)                                     | ✅ Enabled  | ⚠️ Recommended: [Twig](https://extensions.panic.com/extensions/tpmatthes/tpmatthes.Twig/)                         |
 
 ### Plugin Legend
 
