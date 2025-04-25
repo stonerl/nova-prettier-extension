@@ -2797,8 +2797,8 @@
           },
           {
             "key": "prettier.plugins.prettier-plugin-twig.twigMultiTags",
-            "title": "Multi Tags",
-            "description": "A sequences of non-standard Twig tags that should be treated as belonging together",
+            "title": "Multi-Tags",
+            "description": "A sequences of non-standard Twig tags that should be treated as belonging together.",
             "link": "https://github.com/zackad/prettier-plugin-twig#twigmultitags-default-",
             "type": "stringArray",
             "config": {},
