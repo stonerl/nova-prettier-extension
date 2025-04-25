@@ -80,7 +80,8 @@ class PrettierExtension {
       [
         'prettier.plugins.prettier-plugin-tailwind.tailwindAttributes',
         'prettier.plugins.prettier-plugin-tailwind.tailwindFunctions',
-        // future array‑valued keys here…
+        'prettier.plugins.prettier-plugin-twig.twigTestExpressions',
+        'prettier.plugins.prettier-plugin-twig.twigMultiTags',
       ],
       this.configDisposables,
     )

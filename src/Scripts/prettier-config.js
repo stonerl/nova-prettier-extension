@@ -20,6 +20,7 @@ const {
   PRETTIER_SQL_PLUGIN_SQL_FORMATTER_OPTIONS,
   PRETTIER_SQL_PLUGIN_NODE_SQL_PARSER_OPTIONS,
   PRETTIER_TAILWIND_PLUGIN_OPTIONS,
+  PRETTIER_TWIG_PLUGIN_OPTIONS,
   PRETTIER_XML_PLUGIN_OPTIONS,
 } = require('./prettier-options.js')
 
@@ -106,6 +107,13 @@ function getTailwindConfig() {
   )
 }
 
+function getTwigConfig() {
+  return loadPluginConfig(
+    PRETTIER_TWIG_PLUGIN_OPTIONS,
+    'prettier.plugins.prettier-plugin-twig',
+  )
+}
+
 function getXmlConfig() {
   return loadPluginConfig(
     PRETTIER_XML_PLUGIN_OPTIONS,
@@ -124,5 +132,6 @@ module.exports = {
   getPropertiesConfig,
   getSqlFormatterConfig,
   getTailwindConfig,
+  getTwigConfig,
   getXmlConfig,
 }

@@ -127,6 +127,10 @@ const extToSyntax = {
   '.flink.sql': 'sql', //FlinkSQL
   '.flinksql': 'sql', //FlinkSQL
 
+  // Twig
+  '.twig': 'twig',
+  '.html.twig': 'twig',
+
   // XML
   '.xml': 'xml',
   '.xsd': 'xml',
@@ -220,11 +224,12 @@ function detectSyntax({ syntax, uri }) {
     return syntax
   }
 
-  // 0) Astro and Liquid exceptions: if Nova got it right, trust it immediately
+  // 0) Astro, Liquid and Twig exceptions: if Nova got it right, trust it immediately
   if (
     syntax === 'astro' ||
     syntax === 'liquid-md' ||
-    syntax === 'liquid-html'
+    syntax === 'liquid-html' ||
+    syntax === 'twig'
   ) {
     return syntax
   }

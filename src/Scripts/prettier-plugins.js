@@ -87,6 +87,14 @@ module.exports = {
     'dist',
     'index.mjs',
   ),
+  twig: nova.path.join(
+    nova.extension.path,
+    'node_modules',
+    '@zackad',
+    'prettier-plugin-twig',
+    'src',
+    'index.js',
+  ),
   xml: nova.path.join(
     nova.extension.path,
     'node_modules',

@@ -28,6 +28,7 @@ const {
   getPropertiesConfig,
   getSqlFormatterConfig,
   getTailwindConfig,
+  getTwigConfig,
   getXmlConfig,
 } = require('./prettier-config.js')
 
@@ -87,6 +88,10 @@ class Formatter {
 
   get tailwindConfig() {
     return getTailwindConfig()
+  }
+
+  get twigConfig() {
+    return getTwigConfig()
   }
 
   get xmlConfig() {
@@ -384,6 +389,10 @@ class Formatter {
       'prettier.plugins.prettier-plugin-tailwind.enabled',
     )
 
+    const twigPluginEnabled = getConfigWithWorkspaceOverride(
+      'prettier.plugins.prettier-plugin-twig.enabled',
+    )
+
     const xmlPluginEnabled = getConfigWithWorkspaceOverride(
       'prettier.plugins.prettier-plugin-xml.enabled',
     )
@@ -428,6 +437,10 @@ class Formatter {
 
       if (syntaxKey === 'xml' && xmlPluginEnabled) {
         plugins.push(pluginPaths.xml)
+      }
+
+      if (syntaxKey === 'twig' && twigPluginEnabled) {
+        plugins.push(pluginPaths.twig)
       }
 
       // prettier-plugin-tailwindcss must be loaded last.
@@ -534,6 +547,10 @@ class Formatter {
       // and the plugin is enabled
       if (tailwindSyntaxesEnabled && tailwindPluginEnabled) {
         Object.assign(options, this.tailwindConfig)
+      }
+
+      if (syntaxKey === 'twig') {
+        Object.assign(options, this.twigConfig)
       }
 
       // Add XML plugin options if the document syntax is XML

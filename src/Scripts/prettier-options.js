@@ -120,6 +120,15 @@ module.exports = {
     'tailwindPreserveDuplicates',
   ],
 
+  PRETTIER_TWIG_PLUGIN_OPTIONS: [
+    'twigSingleQuote',
+    'twigAlwaysBreakObjects',
+    'twigFollowOfficialCodingStandards',
+    'twigOutputEndblockName',
+    'twigMultiTags',
+    'twigTestExpressions',
+  ],
+
   PRETTIER_XML_PLUGIN_OPTIONS: [
     'bracketSameLine',
     'printWidth',
