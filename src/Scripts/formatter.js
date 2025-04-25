@@ -33,7 +33,10 @@ const {
 
 const { detectSyntax } = require('./syntax.js')
 
-const { getSqlDialectFromUri, getSqlParserDialect } = require('./sql.js')
+const {
+  getSqlDialectFromUriOrSyntax,
+  getSqlParserDialect,
+} = require('./sql.js')
 
 class Formatter {
   constructor() {
@@ -507,7 +510,10 @@ class Formatter {
           const config = { ...this.sqlFormatterConfig }
 
           if (config.language === 'auto') {
-            config.language = getSqlDialectFromUri(document.uri)
+            config.language = getSqlDialectFromUriOrSyntax(
+              document.uri,
+              document.syntax,
+            )
             log.debug(`Auto-detected SQL dialect: ${config.language}`)
           }
 
@@ -516,7 +522,7 @@ class Formatter {
           const config = { ...this.nodeSqlParserConfig }
 
           if (config.database === 'auto') {
-            config.database = getSqlParserDialect(document.uri)
+            config.database = getSqlParserDialect(document.uri, document.syntax)
             log.debug(`Using node-sql-parser dialect: ${config.database}`)
           }
 
