@@ -1,3 +1,10 @@
+## 3.5.31 - 2025-04-26
+
+### Added
+
+- **Added plugin: `prettier-plugin-twig`**
+  Enables formatting support for `.twig` files.
+
 ## 3.5.30 - 2025-04-25
 
 ### Added
