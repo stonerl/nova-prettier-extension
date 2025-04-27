@@ -1,3 +1,10 @@
+## 3.5.32 — 2025-04-27
+
+### Removed
+
+- Eliminated the now-redundant `write` entitlement,
+  since migrations fully leverage Nova’s config APIs.
+
 ## 3.5.31 - 2025-04-26
 
 ### Added
