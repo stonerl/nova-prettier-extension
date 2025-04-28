@@ -199,6 +199,26 @@ async function sanitizePrettierConfig() {
   }
 }
 
+function debouncePromise(fn, timeoutMs) {
+  let timer = null
+
+  const debounced = (...args) => {
+    clearTimeout(timer)
+    timer = setTimeout(() => {
+      Promise.resolve(fn(...args)).finally(() => {
+        timer = null
+      })
+    }, timeoutMs)
+  }
+
+  debounced.cancel = () => {
+    clearTimeout(timer)
+    timer = null
+  }
+
+  return debounced
+}
+
 module.exports = {
   extractPath,
   showError,
@@ -210,4 +230,5 @@ module.exports = {
   ProcessError,
   handleProcessResult,
   sanitizePrettierConfig,
+  debouncePromise,
 }

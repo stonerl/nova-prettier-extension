@@ -18,6 +18,7 @@ const {
   observeEmptyArrayCleanup,
   log,
   sanitizePrettierConfig,
+  debouncePromise,
 } = require('./helpers.js')
 const { Formatter } = require('./formatter.js')
 
@@ -32,6 +33,7 @@ class PrettierExtension {
       this.moduleProjectPrettierDidChange.bind(this)
     this.prettierConfigFileDidChange =
       this.prettierConfigFileDidChange.bind(this)
+    this.npmPackageFileDidChange = this.npmPackageFileDidChange.bind(this)
     this.editorWillSave = this.editorWillSave.bind(this)
     this.didInvokeFormatCommand = this.didInvokeFormatCommand.bind(this)
     this.didInvokeFormatSelectionCommand =
@@ -49,10 +51,35 @@ class PrettierExtension {
     this.commandDisposables = []
     this.configDisposables = []
     this.saveListeners = new Map()
-    this.nodeModulesChangeTimeout = null
+
+    // debouncers
+    this.debouncedProjectPrettierModulePathDidChange = debouncePromise(
+      this.modulePathDidChange,
+      5000,
+    )
+    this.debouncedNpmPackageFileDidChange = debouncePromise(
+      this.modulePathDidChange,
+      5000,
+    )
+    this.debouncedConfigFileDidChange = debouncePromise(
+      this.modulePathDidChange,
+      2000,
+    )
+    this.debouncedModulePathOrPreferBundledDidChangeFast = debouncePromise(
+      this.modulePathDidChange,
+      1000,
+    )
 
     this.formatter = new Formatter()
     this.hasStarted = false
+  }
+
+  get preferBundled() {
+    return getConfigWithWorkspaceOverride('prettier.module.preferBundled')
+  }
+
+  get modulePath() {
+    return getConfigWithWorkspaceOverride('prettier.module.path')
   }
 
   setupConfiguration() {
@@ -68,7 +95,7 @@ class PrettierExtension {
       ),
       ...observeConfigWithWorkspaceOverride(
         'prettier.module.path',
-        this.modulePathDidChange,
+        this.debouncedModulePathOrPreferBundledDidChangeFast,
       ),
       ...observeConfigWithWorkspaceOverride(
         'prettier.module.preferBundled',
@@ -120,8 +147,6 @@ class PrettierExtension {
         '**/prettier.config.ts',
         '**/prettier.config.cts',
         '**/prettier.config.mts',
-        '**/package.json',
-        '**/package.yaml',
         '**/.prettierignore',
       ]
 
@@ -130,8 +155,15 @@ class PrettierExtension {
         this.fsWatchers.push(watcher)
       }
 
+      const npmFilesToWatch = ['package.json', 'package.yaml']
+
+      for (const pattern of npmFilesToWatch) {
+        const watcher = nova.fs.watch(pattern, this.npmPackageFileDidChange)
+        this.fsWatchers.push(watcher)
+      }
+
       const nodeModulesWatcher = nova.fs.watch(
-        'node_modules/**',
+        'node_modules/prettier/**',
         this.moduleProjectPrettierDidChange,
       )
       this.fsWatchers.push(nodeModulesWatcher)
@@ -185,9 +217,11 @@ class PrettierExtension {
   }
 
   async startFormatter() {
-    const path =
-      getConfigWithWorkspaceOverride('prettier.module.path') ||
-      (await findPrettier())
+    let path = this.modulePath
+    if (!path) {
+      log.info('Resolving Prettier installation…')
+      path = await findPrettier()
+    }
 
     log.info(`Loading prettier at ${path}`)
     await this.formatter
@@ -212,28 +246,30 @@ class PrettierExtension {
 
   async prettierConfigFileDidChange() {
     log.debug('prettierConfigFileDidChange invoked')
-    await this.modulePathDidChange()
+    this.debouncedConfigFileDidChange()
+  }
+
+  async npmPackageFileDidChange() {
+    if (this.preferBundled || this.modulePath) return
+
+    log.debug('npmPackageFileDidChange invoked')
+    this.debouncedNpmPackageFileDidChange()
   }
 
   async modulePreferBundledDidChange() {
     if (!this.hasStarted) return
     log.debug(
-      `modulePreferBundledDidChange invoked — preferBundled: ${getConfigWithWorkspaceOverride('prettier.module.preferBundled')}`,
+      'modulePreferBundledDidChange invoked — preferBundled: ',
+      this.preferBundled,
     )
-    await this.modulePathDidChange()
+    this.debouncedModulePathOrPreferBundledDidChangeFast()
   }
 
   async moduleProjectPrettierDidChange() {
-    // Debounce the event so we only call modulePathDidChange() once per bulk update,
-    // instead of triggering it for each module installation event.
+    if (this.preferBundled || this.modulePath) return
+
     log.debug('moduleProjectPrettierDidChange invoked')
-    if (this.nodeModulesChangeTimeout) {
-      clearTimeout(this.nodeModulesChangeTimeout)
-    }
-    this.nodeModulesChangeTimeout = setTimeout(async () => {
-      await this.modulePathDidChange()
-      this.nodeModulesChangeTimeout = null
-    }, 1000)
+    this.debouncedProjectPrettierModulePathDidChange()
   }
 
   async modulePathDidChange() {
@@ -459,8 +495,10 @@ class PrettierExtension {
     this.saveListeners.clear()
 
     // 6) clear debounce timer
-    clearTimeout(this.nodeModulesChangeTimeout)
-    this.nodeModulesChangeTimeout = null
+    this.debouncedProjectPrettierModulePathDidChange.cancel()
+    this.debouncedModulePathOrPreferBundledDidChangeFast.cancel()
+    this.debouncedConfigFileDidChange.cancel()
+    this.debouncedNpmPackageFileDidChange.cancel()
 
     // 7) tear down config observers
     for (const d of this.configDisposables) d.dispose()
