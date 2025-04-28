@@ -34,6 +34,8 @@ class PrettierExtension {
     this.prettierConfigFileDidChange =
       this.prettierConfigFileDidChange.bind(this)
     this.npmPackageFileDidChange = this.npmPackageFileDidChange.bind(this)
+    this.handleCustomConfigPathChange =
+      this.handleCustomConfigPathChange.bind(this)
     this.editorWillSave = this.editorWillSave.bind(this)
     this.didInvokeFormatCommand = this.didInvokeFormatCommand.bind(this)
     this.didInvokeFormatSelectionCommand =
@@ -52,6 +54,8 @@ class PrettierExtension {
     this.configDisposables = []
     this.saveListeners = new Map()
 
+    this.customConfigWatcher = null
+
     // debouncers
     this.debouncedProjectPrettierModulePathDidChange = debouncePromise(
       this.modulePathDidChange,
@@ -61,8 +65,8 @@ class PrettierExtension {
       this.modulePathDidChange,
       5000,
     )
-    this.debouncedConfigFileDidChange = debouncePromise(
-      this.modulePathDidChange,
+    this.debouncedProjectConfigDidChange = debouncePromise(
+      this.prettierConfigFileDidChange,
       2000,
     )
     this.debouncedModulePathOrPreferBundledDidChangeFast = debouncePromise(
@@ -80,6 +84,47 @@ class PrettierExtension {
 
   get modulePath() {
     return getConfigWithWorkspaceOverride('prettier.module.path')
+  }
+
+  get configIgnore() {
+    return getConfigWithWorkspaceOverride('prettier.config.ignore')
+  }
+
+  get configFile() {
+    return getConfigWithWorkspaceOverride('prettier.config.file')
+  }
+
+  /**
+   * Watch the user’s external config-file (prettier.config.file),
+   * tear down any old watcher, set up a new one, then trigger a restart.
+   */
+  handleCustomConfigPathChange() {
+    if (this.customConfigWatcher) {
+      this.customConfigWatcher.dispose()
+      this.fsWatchers = this.fsWatchers.filter(
+        (watcher) => watcher !== this.customConfigWatcher,
+      )
+      this.customConfigWatcher = null
+    }
+
+    if (this.configFile) {
+      const watchPath = nova.workspace.path
+        ? nova.path.join(nova.workspace.path, this.configFile)
+        : this.configFile
+
+      try {
+        this.customConfigWatcher = nova.fs.watch(
+          watchPath,
+          this.prettierConfigFileDidChange,
+        )
+        this.fsWatchers.push(this.customConfigWatcher)
+      } catch (err) {
+        log.error('Failed to watch custom Prettier config file', err)
+      }
+    }
+
+    // kick off a restart after debounce
+    this.debouncedProjectConfigDidChange()
   }
 
   setupConfiguration() {
@@ -101,6 +146,11 @@ class PrettierExtension {
         'prettier.module.preferBundled',
         this.modulePreferBundledDidChange,
       ),
+      // restart when the user changes the external config-file path
+      ...observeConfigWithWorkspaceOverride(
+        'prettier.config.file',
+        this.handleCustomConfigPathChange,
+      ),
     )
 
     observeEmptyArrayCleanup(
@@ -112,6 +162,9 @@ class PrettierExtension {
       ],
       this.configDisposables,
     )
+
+    // immediately wire up the custom‐config watcher on load
+    this.handleCustomConfigPathChange()
   }
 
   syncSelectionUnsupportedContext() {
@@ -245,8 +298,10 @@ class PrettierExtension {
   }
 
   async prettierConfigFileDidChange() {
+    if (this.configIgnore && !this.configFile) return
+
     log.debug('prettierConfigFileDidChange invoked')
-    this.debouncedConfigFileDidChange()
+    this.debouncedProjectConfigDidChange()
   }
 
   async npmPackageFileDidChange() {
@@ -494,11 +549,11 @@ class PrettierExtension {
     }
     this.saveListeners.clear()
 
-    // 6) clear debounce timer
+    // 6) clear debounce timers
     this.debouncedProjectPrettierModulePathDidChange.cancel()
-    this.debouncedModulePathOrPreferBundledDidChangeFast.cancel()
-    this.debouncedConfigFileDidChange.cancel()
     this.debouncedNpmPackageFileDidChange.cancel()
+    this.debouncedProjectConfigDidChange.cancel()
+    this.debouncedModulePathOrPreferBundledDidChangeFast.cancel()
 
     // 7) tear down config observers
     for (const d of this.configDisposables) d.dispose()
