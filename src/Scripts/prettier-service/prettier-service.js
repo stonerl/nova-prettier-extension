@@ -158,23 +158,16 @@ try {
   process.exit()
 }
 
-const shutdown = async () => {
-  // if dispose() returns a promise, wait for it (swallow any errors)
+// at the very bottom of prettier-service.js
+process.once('SIGTERM', async () => {
   try {
     await jsonRpcService.dispose?.()
-  } catch (_) {}
-
-  // ensure stdio pipes don’t keep Node alive
+  } catch {}
   try {
     process.stdin.destroy()
-  } catch (_) {}
+  } catch {}
   try {
     process.stdout.destroy()
-  } catch (_) {}
-
-  // force exit
+  } catch {}
   process.exit(0)
-}
-
-// bind it once for each signal
-;['SIGTERM', 'SIGINT'].forEach((signal) => process.once(signal, shutdown))
+})
