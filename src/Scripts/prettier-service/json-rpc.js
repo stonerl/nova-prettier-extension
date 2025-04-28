@@ -100,17 +100,17 @@ class JsonRpcBuffer extends EventEmitter {
 
 class JsonRpcService {
   constructor(readStream, writeStream) {
-    this.processRequest = this.processRequest.bind(this)
-    this.readFromStream = this.readFromStream.bind(this)
-
     this.readStream = readStream
     this.writeStream = writeStream
-
     this.requestHandlers = new Map()
-
     this.buffer = new JsonRpcBuffer()
-    this.buffer.on('request', this.processRequest)
-    this.readStream.on('readable', this.readFromStream)
+
+    // bind once and store the exact handler references
+    this.bufferHandler = this.processRequest.bind(this)
+    this.readableHandler = this.readFromStream.bind(this)
+
+    this.buffer.on('request', this.bufferHandler)
+    this.readStream.on('readable', this.readableHandler)
   }
 
   onRequest(method, handler) {
@@ -186,6 +186,18 @@ class JsonRpcService {
     )
     this.writeStream.write(headerBuffer)
     this.writeStream.write(responseBuffer)
+  }
+
+  /** Tear down all attached listeners so this service can be GC’d cleanly */
+  dispose() {
+    // Stop listening for incoming chunks
+    this.readStream.off('readable', this.readableHandler)
+
+    // Stop parsing any buffered data
+    this.buffer.off('request', this.bufferHandler)
+
+    // Clear out any registered RPC handlers
+    this.requestHandlers.clear()
   }
 }
 
