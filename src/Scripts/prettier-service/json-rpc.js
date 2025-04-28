@@ -1,203 +1,212 @@
 /**
- * json-rpc.js — JSON-RPC 2.0 server implementation for Prettier service
+ * json-rpc.js — Buffered JSON-RPC 2.0 server using Transform streams
  *
  * @license MIT
  * @author Alexander Weiss, Toni Förster
  * @copyright © 2023 Alexander Weiss, © 2025 Toni Förster
  *
- * Implements a low-level buffer-based JSON-RPC communication layer between the Nova extension and the Prettier subprocess.
+ * Implements a spec-compliant, high-throughput JSON-RPC 2.0 server with:
+ * - Batch request support
+ * - Spec validation (jsonrpc, id types, etc.)
+ * - Lower-case header normalization
+ * - Parse-error recovery (no process.exit)
+ * - Back-pressure support on writeStream
+ * - Transform‐stream parser for clean piping
  */
 
-const EventEmitter = require('events')
+const { Transform } = require('stream')
+const { once } = require('events')
 
-const DEFAULT_BUFFER_SIZE = 8192
-const CR = Buffer.from('\r', 'ascii')[0]
-const LF = Buffer.from('\n', 'ascii')[0]
+const PARSE_ERROR = { code: -32700, message: 'Parse error' }
+const INVALID_REQUEST = { code: -32600, message: 'Invalid Request' }
+const METHOD_NOT_FOUND = { code: -32601, message: 'Method not found' }
+const INTERNAL_ERROR = { code: -32603, message: 'Internal error' }
+const MAX_CONTENT_LENGTH = 128 * 1024 * 1024 // 128 MiB
 
-const READ_EXIT_CODE = 50
-const MISSING_ID_EXIT_CODE = 51
-
-class JsonRpcBuffer extends EventEmitter {
+class JsonRpcParser extends Transform {
   constructor() {
-    super()
-
-    this.buffer = Buffer.allocUnsafe(DEFAULT_BUFFER_SIZE)
-    this.index = 0
-    this.headers = null
-    this.body = null
+    super({ readableObjectMode: true })
+    this.buffer = Buffer.alloc(0)
   }
 
-  append(data) {
-    if (this.index + data.length >= this.buffer.length) {
-      this.buffer = Buffer.concat(
-        [this.buffer],
-        this.buffer.length + Math.max(DEFAULT_BUFFER_SIZE, data.length),
+  _transform(chunk, encoding, callback) {
+    // Accumulate incoming bytes
+    this.buffer = Buffer.concat([
+      this.buffer,
+      Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, encoding),
+    ])
+
+    let sep
+    // Keep extracting messages while we have a full header+body
+    while ((sep = this.buffer.indexOf('\r\n\r\n')) !== -1) {
+      const headerText = this.buffer.toString('ascii', 0, sep)
+      const headers = new Map(
+        headerText.split('\r\n').map((line) => {
+          const [name, ...rest] = line.split(':')
+          return [name.toLowerCase(), rest.join(':').trim()]
+        }),
       )
-      this.buffer.set(data, this.index)
-    } else {
-      this.buffer.set(data, this.index)
+
+      const len = parseInt(headers.get('content-length'), 10)
+      // reject missing/invalid or overly large bodies
+      if (isNaN(len) || len > MAX_CONTENT_LENGTH) {
+        this.push({ error: PARSE_ERROR, id: null })
+        this.buffer = this.buffer.slice(sep + 4)
+        continue
+      }
+
+      // Wait for full body
+      if (this.buffer.length < sep + 4 + len) break
+
+      const bodyBuf = this.buffer.slice(sep + 4, sep + 4 + len)
+      let body
+      try {
+        body = JSON.parse(bodyBuf.toString('utf8'))
+      } catch {
+        // JSON parse error—notify and drop this message
+        this.push({ error: PARSE_ERROR, id: null })
+        this.buffer = this.buffer.slice(sep + 4 + len)
+        continue
+      }
+
+      // Emit a well-formed frame
+      this.push({ headers, body })
+      this.buffer = this.buffer.slice(sep + 4 + len)
     }
 
-    this.index += data.length
-
-    this.read()
-  }
-
-  read() {
-    this.readHeaders()
-    this.readBody()
-
-    if (!this.body) return
-
-    this.emit('request', this.headers, this.body)
-
-    this.headers = null
-    this.body = null
-  }
-
-  readHeaders() {
-    if (this.headers) return
-
-    let i = 0
-    while (
-      i < this.index + 1 &&
-      (this.buffer[i] !== CR ||
-        this.buffer[i + 1] !== LF ||
-        this.buffer[i + 2] !== CR ||
-        this.buffer[i + 3] !== LF)
-    ) {
-      i += 1
-    }
-
-    if (!this.buffer[i + 3]) return
-
-    const headerArray = this.buffer.toString('ascii', 0, i).split('\r\n')
-    const headers = new Map(
-      headerArray.map((header) => {
-        const [name, ...value] = header.split(':')
-        return [name, value.join().trim()]
-      }),
-    )
-
-    this.headers = headers
-    this.bodyLength = parseInt(this.headers.get('Content-Length'), 10)
-
-    this.buffer = this.buffer.slice(i + 4)
-    this.index -= i + 4
-  }
-
-  readBody() {
-    if (!this.bodyLength) return
-    if (this.index < this.bodyLength) return
-
-    const data = this.buffer.toString('utf8', 0, this.bodyLength)
-    this.body = JSON.parse(data)
-
-    this.buffer = this.buffer.slice(this.bodyLength)
-    this.index -= this.bodyLength
+    callback()
   }
 }
 
 class JsonRpcService {
   constructor(readStream, writeStream) {
-    this.readStream = readStream
     this.writeStream = writeStream
-    this.requestHandlers = new Map()
-    this.buffer = new JsonRpcBuffer()
+    this.handlers = new Map()
+    this.parser = new JsonRpcParser()
 
-    // bind once and store the exact handler references
-    this.bufferHandler = this.processRequest.bind(this)
-    this.readableHandler = this.readFromStream.bind(this)
-
-    this.buffer.on('request', this.bufferHandler)
-    this.readStream.on('readable', this.readableHandler)
+    // Pipe incoming bytes into our parser
+    readStream.pipe(this.parser).on('data', (frame) => {
+      this._handleFrame(frame).catch((err) => {
+        // Fatal internal error
+        this._writePayload({
+          jsonrpc: '2.0',
+          error: INTERNAL_ERROR,
+          id: null,
+        })
+      })
+    })
   }
 
   onRequest(method, handler) {
-    this.requestHandlers.set(method, handler)
+    this.handlers.set(method, handler)
   }
 
-  async readFromStream() {
-    let chunk
-    while ((chunk = this.readStream.read()) !== null) {
-      try {
-        this.buffer.append(chunk)
-      } catch (err) {
-        // TODO: Document error codes
-        process.exit(READ_EXIT_CODE)
+  async _handleFrame({ error, id, headers, body }) {
+    if (error) {
+      // Parse error response (id must be null)
+      await this._writePayload({
+        jsonrpc: '2.0',
+        error,
+        id: null,
+      })
+      return
+    }
+
+    const req = body
+
+    // Batch requests
+    if (Array.isArray(req)) {
+      const responses = await Promise.all(req.map((r) => this._process(r)))
+      const filtered = responses.filter((r) => r !== null)
+      if (filtered.length) {
+        await this._writePayload(filtered)
+      }
+      return
+    }
+
+    // Single request or notification
+    const resp = await this._process(req)
+    if (resp) {
+      await this._writePayload(resp)
+    }
+  }
+
+  async _process(request) {
+    const { jsonrpc, method, params, id } = request
+
+    // Spec compliance checks
+    const validId =
+      id === undefined
+        ? true
+        : typeof id === 'string' || typeof id === 'number' || id === null
+
+    if (jsonrpc !== '2.0' || typeof method !== 'string' || !validId) {
+      return {
+        jsonrpc: '2.0',
+        error: INVALID_REQUEST,
+        id: id !== undefined ? id : null,
+      }
+    }
+
+    // Notification: no id => no response
+    if (id === undefined) return null
+
+    const handler = this.handlers.get(method)
+    if (!handler) {
+      return {
+        jsonrpc: '2.0',
+        error: METHOD_NOT_FOUND,
+        id,
+      }
+    }
+
+    try {
+      const result = await handler(params)
+      return {
+        jsonrpc: '2.0',
+        result,
+        id,
+      }
+    } catch (err) {
+      const errObj =
+        typeof err === 'string'
+          ? { code: INTERNAL_ERROR.code, message: err }
+          : { code: INTERNAL_ERROR.code, message: err.message, data: err.stack }
+
+      return {
+        jsonrpc: '2.0',
+        error: errObj,
+        id,
       }
     }
   }
 
-  async processRequest(_header, request) {
-    if (!Object.prototype.hasOwnProperty.call(request, 'id')) {
-      process.exit(MISSING_ID_EXIT_CODE)
+  async _writePayload(payload) {
+    const str = JSON.stringify(payload)
+    const buf = Buffer.from(str, 'utf8')
+    const hdr = Buffer.from(`Content-Length: ${buf.length}\r\n\r\n`, 'ascii')
+
+    if (!this.writeStream.write(hdr)) {
+      await once(this.writeStream, 'drain')
     }
-
-    const handler = this.requestHandlers.get(request.method)
-    if (!handler) {
-      return this.sendError(request.id, -32601, 'Method not found')
+    if (!this.writeStream.write(buf)) {
+      await once(this.writeStream, 'drain')
     }
-
-    try {
-      const result = await handler(request.params)
-      this.write({ result, id: request.id })
-    } catch (err) {
-      if (typeof err === 'string') return { error: { message: err } }
-
-      this.write({
-        id: request.id,
-        result: {
-          error: {
-            name: err.name,
-            message: err.message,
-            stack: err.stack,
-          },
-        },
-      })
-    }
-  }
-
-  sendError(requestId, code, message) {
-    this.write({
-      id: requestId,
-      error: {
-        code,
-        message,
-      },
-    })
   }
 
   notify(method, params) {
-    this.write({ method, params })
+    // JSON-RPC notifications have no "id"
+    return this._writePayload({
+      jsonrpc: '2.0',
+      method,
+      params,
+    })
   }
 
-  write(data) {
-    const responseString = JSON.stringify(
-      { jsonrpc: '2.0', ...data },
-      null,
-      null,
-    )
-
-    const responseBuffer = Buffer.from(responseString, 'utf8')
-    const headerBuffer = Buffer.from(
-      `Content-Length: ${responseBuffer.length}\r\n\r\n`,
-      'ascii',
-    )
-    this.writeStream.write(headerBuffer)
-    this.writeStream.write(responseBuffer)
-  }
-
-  /** Tear down all attached listeners so this service can be GC’d cleanly */
+  /** Remove all listeners and handlers so this service can be GC’d */
   dispose() {
-    // Stop listening for incoming chunks
-    this.readStream.off('readable', this.readableHandler)
-
-    // Stop parsing any buffered data
-    this.buffer.off('request', this.bufferHandler)
-
-    // Clear out any registered RPC handlers
-    this.requestHandlers.clear()
+    this.parser.removeAllListeners()
+    this.handlers.clear()
   }
 }
 

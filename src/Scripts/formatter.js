@@ -598,16 +598,32 @@ class Formatter {
     // Log the options being used
     log.debug('Prettier options:', JSON.stringify(options, null, 2))
 
-    const result = await this.prettierService.request('format', {
-      original,
-      pathForConfig,
-      ignorePath: flags.force ? null : this.getIgnorePath(pathForConfig),
-      options: {
-        ...options,
-        cursorOffset: editor.selectedRange.start, // send cursor position
-      },
-      withCursor: true, // signal that we want formatWithCursor
-    })
+    // 1) Ensure the JSON-RPC service is ready
+    const ready = await this.isReady
+    if (!ready) {
+      log.error(
+        'Prettier service never started or is not running, skipping format',
+      )
+      return []
+    }
+
+    // 2) Fire the format request, catching any IPC failure
+    let result
+    try {
+      result = await this.prettierService.request('format', {
+        original,
+        pathForConfig,
+        ignorePath: flags.force ? null : this.getIgnorePath(pathForConfig),
+        options: {
+          ...options,
+          cursorOffset: editor.selectedRange.start, // send cursor position
+        },
+        withCursor: true, // signal that we want formatWithCursor
+      })
+    } catch (err) {
+      log.error('Prettier IPC error in format:', err)
+      return []
+    }
 
     const {
       formatted,
@@ -679,9 +695,21 @@ class Formatter {
       }
     } else {
       // Try to resolve configuration using Prettier for non-remote documents.
-      hasConfig = await this.prettierService.request('hasConfig', {
-        pathForConfig,
-      })
+      // 1) Wait for didStart handshake
+      const ready = await this.isReady
+      if (ready) {
+        try {
+          hasConfig = await this.prettierService.request('hasConfig', {
+            pathForConfig,
+          })
+        } catch (err) {
+          log.error('Prettier IPC error in hasConfig:', err)
+          hasConfig = false
+        }
+      } else {
+        log.error('Prettier service never started, assuming no config')
+        hasConfig = false
+      }
 
       if (
         !hasConfig &&
