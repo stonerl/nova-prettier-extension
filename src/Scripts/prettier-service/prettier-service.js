@@ -22,11 +22,15 @@ class FormattingService {
   }
 
   async format({ original, pathForConfig, ignorePath, options }) {
-    throw new Error('Implementation missing')
+    throw new Error(
+      'FormattingService.format() must be implemented by subclass',
+    )
   }
 
   async hasConfig({ pathForConfig }) {
-    throw new Error('Implementation missing')
+    throw new Error(
+      'FormattingService.hasConfig() must be implemented by subclass',
+    )
   }
 }
 
@@ -64,10 +68,9 @@ class PrettierService extends FormattingService {
         return { formatted: await this.prettier.format(original, config) }
       }
     } catch (err) {
-      if (err.message.includes(`Couldn't resolve parser`)) {
-        return { missingParser: true }
+      return {
+        error: { name: err.name, message: err.message, stack: err.stack },
       }
-      throw err
     }
   }
 
