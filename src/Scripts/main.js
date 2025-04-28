@@ -208,7 +208,13 @@ class PrettierExtension {
         this.fsWatchers.push(watcher)
       }
 
-      const npmFilesToWatch = ['package.json', 'package.yaml']
+      const npmFilesToWatch = [
+        'package.json',
+        'package.yaml',
+        'package-lock.json',
+        'yarn.lock',
+        'pnpm-lock.yaml',
+      ]
 
       for (const pattern of npmFilesToWatch) {
         const watcher = nova.fs.watch(pattern, this.npmPackageFileDidChange)
