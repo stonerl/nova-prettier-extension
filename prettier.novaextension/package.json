@@ -15,7 +15,7 @@
   "dependencies": {
     "@prettier/plugin-php": "^0.22.4",
     "@prettier/plugin-xml": "^3.4.1",
-    "@shopify/prettier-plugin-liquid": "^1.9.2",
+    "@shopify/prettier-plugin-liquid": "^1.9.3",
     "@shufo/prettier-plugin-blade": "^1.15.3",
     "@zackad/prettier-plugin-twig": "^0.16.0",
     "patch-package": "^8.0.0",

@@ -227,11 +227,11 @@ module.exports = async function () {
     }
 
     if (installReason) {
-      log.info(`Running npm install due to: ${installReason}`)
+      log.info('Running npm install due to: ', installReason)
       await installPackages(nova.extension.path)
     }
 
-    log.info(`Loading bundled prettier from ${prettierPath}`)
+    log.info('Using bundled Prettier.')
     return prettierPath
   } catch (err) {
     if (err.status === 127) throw err

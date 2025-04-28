@@ -157,3 +157,24 @@ try {
   })
   process.exit()
 }
+
+const shutdown = async () => {
+  // if dispose() returns a promise, wait for it (swallow any errors)
+  try {
+    await jsonRpcService.dispose?.()
+  } catch (_) {}
+
+  // ensure stdio pipes don’t keep Node alive
+  try {
+    process.stdin.destroy()
+  } catch (_) {}
+  try {
+    process.stdout.destroy()
+  } catch (_) {}
+
+  // force exit
+  process.exit(0)
+}
+
+// bind it once for each signal
+;['SIGTERM', 'SIGINT'].forEach((signal) => process.once(signal, shutdown))

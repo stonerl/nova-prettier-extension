@@ -128,7 +128,7 @@ class Formatter {
     }
 
     if (this.prettierService) return
-    log.info('Starting Prettier service')
+    log.info('Starting Prettier service…')
 
     this.prettierService = new Process('/usr/bin/env', {
       args: [
@@ -146,6 +146,7 @@ class Formatter {
     })
     this.prettierService.onDidExit(this.prettierServiceDidExit)
     this.prettierService.onNotify('didStart', () => {
+      log.info('Prettier service started successfully')
       this._resolveIsReadyPromise(true)
     })
     this.prettierService.onNotify(
@@ -160,19 +161,38 @@ class Formatter {
     if (!this._isReadyPromise || !this.prettierService) return
     if (this._isStoppedPromise) return
 
-    log.info('Stopping Prettier service')
+    const startTs = Date.now()
+    const proc = this.prettierService
 
+    log.info('Stopping Prettier service…')
+
+    // Create a promise that we’ll resolve either on exit or on timeout
     this._isStoppedPromise = new Promise((resolve) => {
-      this._resolveIsStoppedPromise = resolve
+      // wrap the original resolve so we can log duration
+      this._resolveIsStoppedPromise = () => {
+        const delta = Date.now() - startTs
+        log.debug(`Prettier exited in ${delta}ms`)
+        resolve()
+      }
     })
 
-    // Stop processing things
+    // Signal “not ready” immediately
     if (this._resolveIsReadyPromise) this._resolveIsReadyPromise(false)
     this._isReadyPromise = null
-    // Actually terminate
-    this.prettierService.terminate()
-    this.prettierService = null
 
+    // Politely ask for termination
+    proc.terminate()
+
+    // If it hasn’t exited in 5s, force it
+    setTimeout(() => {
+      // still pending?
+      if (this._isStoppedPromise) {
+        log.error('Prettier did NOT exit in 5000ms, forcing stop.')
+        this._resolveIsStoppedPromise()
+      }
+    }, 5000)
+
+    // Don’t clear `this.prettierService` here—wait for onDidExit to do it
     return this._isStoppedPromise
   }
 
@@ -183,25 +203,41 @@ class Formatter {
   }
 
   prettierServiceDidExit(exitCode) {
+    // 1) Wake up anyone awaiting stop()
     if (this._resolveIsStoppedPromise) {
       this._resolveIsStoppedPromise()
       this._isStoppedPromise = null
     }
+
+    // 2) If the service object is already gone, bail out
     if (!this.prettierService) return
 
-    log.error(`Prettier service exited with code ${exitCode}`)
+    log.debug('Prettier service exited with code:', exitCode)
 
+    // 3) Mark “not ready” so calls to isReady will error
     if (this._resolveIsReadyPromise) this._resolveIsReadyPromise(false)
     this._isReadyPromise = null
+
+    // 4) Clear out the old service handle
     this.prettierService = null
 
+    // 5) If exitCode is 0 → clean stop → do nothing further
+    if (exitCode === 0) {
+      return
+    }
+
+    // 6) Non-zero exit → unexpected crash.
+    //    If we’ve already crashed recently, show an error instead of restarting forever.
     if (this.prettierServiceCrashedRecently) {
       return this.showServiceNotRunningError()
     }
 
+    // 7) First crash in a short window → mark it and schedule a reset
     this.prettierServiceCrashedRecently = true
     setTimeout(() => (this.prettierServiceCrashedRecently = false), 5000)
 
+    // 8) Now restart the service
+    log.debug('Restarting Prettier…')
     this.start()
   }
 
