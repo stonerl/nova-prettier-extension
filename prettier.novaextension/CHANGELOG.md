@@ -1,3 +1,23 @@
+## 3.5.33 – 2025‑04‑28
+
+### Improved
+
+- **Prettier service lifecycle and stability**
+
+  - Optimized startup, shutdown, and crash recovery behavior
+  - Faster, more reliable restarts when configuration or project dependencies change
+  - Reduced unnecessary restarts on clean exits
+
+- **Debouncing and file watching**
+
+  - Smarter debouncing with separate timing for file and settings changes
+  - Improved handling of external Prettier config files and custom config paths
+  - All watchers and listeners are now properly cleaned up on extension shutdown
+
+- **Logging**
+  - Added detailed logs for service startup, shutdown timing, and crash detection
+  - Improved visibility into module loading failures
+
 ## 3.5.32 — 2025-04-27
 
 ### Removed
