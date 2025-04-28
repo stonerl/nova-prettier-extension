@@ -19,7 +19,6 @@ class FormattingService {
 
     this.jsonRpc.onRequest('format', this.format)
     this.jsonRpc.onRequest('hasConfig', this.hasConfig)
-    this.jsonRpc.notify('didStart')
   }
 
   async format({ original, pathForConfig, ignorePath, options }) {
@@ -42,7 +41,6 @@ class PrettierService extends FormattingService {
 
   constructor(jsonRpc, prettier) {
     super(jsonRpc)
-
     this.prettier = prettier
   }
 
@@ -115,7 +113,6 @@ class PrettierEslintService extends FormattingService {
 
   constructor(jsonRpc, format) {
     super(jsonRpc)
-
     this.format = format
   }
 
@@ -132,42 +129,50 @@ class PrettierEslintService extends FormattingService {
   }
 }
 
-const jsonRpcService = new JsonRpcService(process.stdin, process.stdout)
-const [, , modulePath] = process.argv
+let jsonRpcService
+;(async () => {
+  // 1) instantiate and register handlers
+  jsonRpcService = new JsonRpcService(process.stdin, process.stdout)
+  const [, , modulePath] = process.argv
 
-try {
-  const module = require(modulePath)
-  if (
-    modulePath.includes('prettier-eslint') &&
-    PrettierEslintService.isCorrectModule(module)
-  ) {
-    new PrettierEslintService(jsonRpcService, module)
-  } else if (PrettierService.isCorrectModule(module)) {
-    new PrettierService(jsonRpcService, module)
-  } else {
-    throw new Error(
-      `Module at ${modulePath} does not appear to be prettier or prettier-eslint`,
-    )
+  try {
+    const module = require(modulePath)
+    if (
+      modulePath.includes('prettier-eslint') &&
+      PrettierEslintService.isCorrectModule(module)
+    ) {
+      new PrettierEslintService(jsonRpcService, module)
+    } else if (PrettierService.isCorrectModule(module)) {
+      new PrettierService(jsonRpcService, module)
+    } else {
+      throw new Error(
+        `Module at ${modulePath} does not appear to be prettier or prettier-eslint`,
+      )
+    }
+
+    // 2) await the startup notification so we know it went out
+    await jsonRpcService.notify('didStart')
+  } catch (err) {
+    // if we failed during bootstrap, notify and exit
+    if (jsonRpcService) {
+      await jsonRpcService.notify('startDidFail', {
+        name: err.name,
+        message: err.message,
+        stack: err.stack,
+      })
+    }
+    process.exit(1)
   }
-} catch (err) {
-  jsonRpcService.notify('startDidFail', {
-    name: err.name,
-    message: err.message,
-    stack: err.stack,
-  })
-  process.exit()
-}
 
-// at the very bottom of prettier-service.js
-process.once('SIGTERM', async () => {
-  try {
-    await jsonRpcService.dispose?.()
-  } catch {}
-  try {
-    process.stdin.destroy()
-  } catch {}
-  try {
-    process.stdout.destroy()
-  } catch {}
-  process.exit(0)
-})
+  // 3) graceful shutdown
+  process.once('SIGTERM', async () => {
+    try {
+      await jsonRpcService.dispose()
+      process.stdin.destroy()
+      process.stdout.destroy()
+    } catch {
+      /* swallow */
+    }
+    process.exit(0)
+  })
+})()
