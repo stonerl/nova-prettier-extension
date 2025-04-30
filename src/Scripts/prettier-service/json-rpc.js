@@ -21,7 +21,7 @@ const PARSE_ERROR = { code: -32700, message: 'Parse error' }
 const INVALID_REQUEST = { code: -32600, message: 'Invalid Request' }
 const METHOD_NOT_FOUND = { code: -32601, message: 'Method not found' }
 const INTERNAL_ERROR = { code: -32603, message: 'Internal error' }
-const MAX_CONTENT_LENGTH = 128 * 1024 * 1024 // 128 MiB
+const MAX_CONTENT_LENGTH = 32 * 1024 * 1024 // 32 MiB
 
 class JsonRpcParser extends Transform {
   constructor() {
@@ -50,9 +50,10 @@ class JsonRpcParser extends Transform {
       const len = parseInt(headers.get('content-length'), 10)
       // reject missing/invalid or overly large bodies
       if (isNaN(len) || len > MAX_CONTENT_LENGTH) {
+        // notify client of parse‐error, then force the channel to error out
         this.push({ error: PARSE_ERROR, id: null })
-        this.buffer = this.buffer.slice(sep + 4)
-        continue
+        this.destroy(new Error(`Frame too large: ${len} bytes`))
+        return // stop parsing
       }
 
       // Wait for full body

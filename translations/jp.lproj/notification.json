@@ -6,6 +6,7 @@
   "prettier.notification.stopped-running.title": "",
   "prettier.notification.stopped-running.body": "",
   "prettier.notification.stopped-running.action.restart": "",
+  "prettier.notification.fileTooLarge.title": "",
   "prettier.notification.unsupportedSyntax.title": "",
   "prettier.notification.missingParser.body": "",
   "prettier.notification.actions.ok": "",

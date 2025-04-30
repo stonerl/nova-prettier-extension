@@ -6,6 +6,7 @@
   "prettier.notification.stopped-running.title": "Prettier wurde beendet",
   "prettier.notification.stopped-running.body": "Wenn dieses Problem weiterhin besteht, melden Sie das Problem bitte über die Erweiterungsbibliothek.",
   "prettier.notification.stopped-running.action.restart": "Prettier neu starten",
+  "prettier.notification.fileTooLarge.title": "",
   "prettier.notification.unsupportedSyntax.title": "Nicht unterstützte Syntax",
   "prettier.notification.missingParser.body": "Prettier kann diese Datei nicht formatieren – es ist kein Parser für diesen Dateityp verfügbar.",
   "prettier.notification.actions.ok": "OK",

@@ -320,6 +320,28 @@ class Formatter {
   async formatEditor(editor, saving, selectionOnly, flags = {}) {
     const { document } = editor
 
+    // Skip formatting files larger than 32 MiB to stay within the IPC payload limit.
+    // Files up to ~42 MiB have been tested, but anything over 32 MiB isn’t officially supported.
+    const MAX_FILE_SIZE = 32 * 1024 * 1024 // 32 MiB
+    if (document.length > MAX_FILE_SIZE) {
+      showError(
+        'prettier-file-too-large',
+        nova.localize(
+          'prettier.notification.fileTooLarge.title',
+          'File Too Large',
+          'notification',
+        ),
+        nova.localize(
+          'prettier.notification.fileTooLarge.body',
+          'Cannot format this file: its size (' +
+            (document.length / 2 ** 20).toFixed(1) +
+            ' MiB) exceeds the 32 MiB limit.',
+          'notification',
+        ),
+      )
+      return []
+    }
+
     const syntaxKey = this.getSyntaxKey(editor)
     log.debug(`Resolved Syntax Key: ${syntaxKey}`)
 
@@ -621,9 +643,21 @@ class Formatter {
         withCursor: true, // signal that we want formatWithCursor
       })
     } catch (err) {
-      log.error('Prettier IPC error in format:', err)
+      log.error(
+        `Prettier IPC error in format: ${err.name}: ${err.message}\n${err.stack}`,
+      )
       return []
     }
+
+    // if result is somehow missing, bail out with your own notification
+    /*if (!result || typeof result !== 'object') {
+      showError(
+        'prettier-unexpected-result',
+        'Format Failed',
+        'No data was returned from Prettier.',
+      )
+      return []
+    }*/
 
     const {
       formatted,
@@ -635,31 +669,35 @@ class Formatter {
     this._cursorOffset = newCursor
 
     if (error) {
-      return this.issuesFromPrettierError(error)
+      const isMissingParserError = error.message.includes(
+        `Couldn't resolve parser`,
+      )
+
+      if (isMissingParserError || missingParser) {
+        if (!saving) {
+          showError(
+            'prettier-unsupported-syntax',
+            nova.localize(
+              'prettier.notification.unsupportedSyntax.title',
+              'Unsupported Syntax',
+              'notification',
+            ),
+            nova.localize(
+              'prettier.notification.missingParser.body',
+              'Prettier can’t format this file — no parser is available for its type.',
+              'notification',
+            ),
+          )
+        }
+        log.debug(`No parser for ${document.path}`)
+        return []
+      } else {
+        return this.issuesFromPrettierError(error)
+      }
     }
 
     if (ignored) {
       log.debug(`Prettier is configured to ignore ${document.path}`)
-      return []
-    }
-
-    if (missingParser) {
-      if (!saving) {
-        showError(
-          'prettier-unsupported-syntax',
-          nova.localize(
-            'prettier.notification.unsupportedSyntax.title',
-            'Unsupported Syntax',
-            'notification',
-          ),
-          nova.localize(
-            'prettier.notification.missingParser.body',
-            'Prettier can’t format this file — no parser is available for its type.',
-            'notification',
-          ),
-        )
-      }
-      log.debug(`No parser for ${document.path}`)
       return []
     }
 
@@ -703,7 +741,9 @@ class Formatter {
             pathForConfig,
           })
         } catch (err) {
-          log.error('Prettier IPC error in hasConfig:', err)
+          log.error(
+            `Prettier IPC error in hasConfig: ${err.name}: ${err.message}\n${err.stack}`,
+          )
           hasConfig = false
         }
       } else {
