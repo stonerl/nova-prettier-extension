@@ -7,6 +7,8 @@
   "prettier.notification.stopped-running.body": "",
   "prettier.notification.stopped-running.action.restart": "",
   "prettier.notification.fileTooLarge.title": "",
+  "prettier.notification.fileTooLarge.body.prefix": "",
+  "prettier.notification.fileTooLarge.body.suffix": "",
   "prettier.notification.unsupportedSyntax.title": "",
   "prettier.notification.missingParser.body": "",
   "prettier.notification.actions.ok": "",

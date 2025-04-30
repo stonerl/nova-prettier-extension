@@ -328,16 +328,22 @@ class Formatter {
         'prettier-file-too-large',
         nova.localize(
           'prettier.notification.fileTooLarge.title',
-          'File Too Large',
+          'Document Too Large',
           'notification',
         ),
-        nova.localize(
-          'prettier.notification.fileTooLarge.body',
-          'Cannot format this file: its size (' +
-            (document.length / 2 ** 20).toFixed(1) +
-            ' MiB) exceeds the 32 MiB limit.',
-          'notification',
-        ),
+        [
+          nova.localize(
+            'prettier.notification.fileTooLarge.body.prefix',
+            'Cannot format this document:',
+            'notification',
+          ),
+          ` ${(document.length / 2 ** 20).toFixed(1)} MiB `,
+          nova.localize(
+            'prettier.notification.fileTooLarge.body.suffix',
+            'exceeds the 32 MiB limit.',
+            'notification',
+          ),
+        ].join(''),
       )
       return []
     }
