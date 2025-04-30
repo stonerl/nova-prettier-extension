@@ -632,7 +632,7 @@ class Formatter {
     // Log the options being used
     log.debug('Prettier options:', JSON.stringify(options, null, 2))
 
-    // 1) Ensure the JSON-RPC service is ready
+    // 0) Ensure the JSON-RPC service is ready
     const ready = await this.isReady
     if (!ready) {
       log.error(
@@ -641,7 +641,7 @@ class Formatter {
       return []
     }
 
-    // 2) Fire the format request, catching any IPC failure
+    // 1) Fire the format request, catching any IPC failure
     let result
     try {
       result = await this.prettierService.request('format', {
@@ -661,17 +661,7 @@ class Formatter {
       return []
     }
 
-    // if result is somehow missing, bail out with your own notification
-    // TODO: Check this later
-    /*if (!result || typeof result !== 'object') {
-      showError(
-        'prettier-unexpected-result',
-        'Format Failed',
-        'No data was returned from Prettier.',
-      )
-      return []
-    }*/
-
+    // 2) Destructure Prettier’s response
     const {
       formatted,
       error,
@@ -681,50 +671,35 @@ class Formatter {
     } = result
     this._cursorOffset = newCursor
 
-    // Safety check: bail if Prettier failed or returned an empty result
-    if (!formatted) {
-      log.error(`Prettier returned no formatted output for ${document.path}`)
-      return []
-    }
-
+    // 3) Error or missing parser
     if (error) {
-      const isMissingParserError = error.message.includes(
-        `Couldn't resolve parser`,
+      return this._handlePrettierError(
+        error,
+        missingParser,
+        saving,
+        document.path,
       )
-
-      if (isMissingParserError || missingParser) {
-        if (!saving) {
-          showError(
-            'prettier-unsupported-syntax',
-            nova.localize(
-              'prettier.notification.unsupportedSyntax.title',
-              'Unsupported Syntax',
-              'notification',
-            ),
-            nova.localize(
-              'prettier.notification.missingParser.body',
-              'Prettier can’t format this file — no parser is available for its type.',
-              'notification',
-            ),
-          )
-        }
-        log.debug(`No parser for ${document.path}`)
-        return []
-      } else {
-        return this.issuesFromPrettierError(error)
-      }
     }
 
+    // 4) Explicit ignore
     if (ignored) {
       log.debug(`Prettier is configured to ignore ${document.path}`)
       return []
     }
 
+    // 5) No output
+    if (!formatted) {
+      log.debug(`Prettier returned no formatted output for ${document.path}`)
+      return []
+    }
+
+    // 6) No changes
     if (formatted === original) {
       log.debug(`No changes for ${document.path}`)
       return []
     }
 
+    // 7) Finally apply
     await this.applyResult(editor, original, formatted)
   }
 
@@ -840,7 +815,34 @@ class Formatter {
     editor.selectedRanges = [new Range(cursorPosition, cursorPosition)]
   }
 
-  issuesFromPrettierError(error) {
+  _handlePrettierError(error, missingParser, saving, filePath) {
+    const isParserError = error.message.includes("Couldn't resolve parser")
+
+    if (isParserError || missingParser) {
+      if (!saving) {
+        showError(
+          'prettier-unsupported-syntax',
+          nova.localize(
+            'prettier.notification.unsupportedSyntax.title',
+            'Unsupported Syntax',
+            'notification',
+          ),
+          nova.localize(
+            'prettier.notification.missingParser.body',
+            'Prettier can’t format this file — no parser is available for its type.',
+            'notification',
+          ),
+        )
+      }
+      log.debug(`No parser for ${filePath}`)
+      return []
+    }
+
+    // a “real” formatting error
+    return this._issuesFromPrettierError(error)
+  }
+
+  _issuesFromPrettierError(error) {
     // If the error doesn't have a message just ignore it.
     if (typeof error.message !== 'string') return []
 
