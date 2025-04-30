@@ -1,3 +1,39 @@
+## 3.5.34 – 2025‑04‑30
+
+### Refactored
+
+- **Prettier Service, JSON-RPC, and Formatter Resilience**
+
+  - Major internal rewrite of the JSON-RPC layer and service lifecycle
+  - `json-rpc.js`
+    - Rewritten as a `Transform` stream for proper stream piping
+    - Header normalization, improved framing via `Buffer.indexOf`
+    - Enforces JSON-RPC 2.0 spec (validates `jsonrpc`, `id`, `method`)
+    - Supports batch requests and emits multiple messages per chunk
+    - Handles parse errors gracefully (no more hard exits on invalid input)
+    - Respects back-pressure on writes using `'drain'` events
+  - `prettier-service.js`
+    - Service startup now awaits a handshake via `notify('didStart')`
+    - Gracefully handles bootstrap errors via `notify('startDidFail')`
+    - Centralized and simplified `SIGTERM` handler
+  - `formatter.js`
+    - Ensures `isReady` before each call to prevent premature RPC use
+    - Catches all IPC errors in `format()` and `hasConfig()` to avoid crashes
+
+- **Max Payload Size**
+
+  - Parser now enforces a 32 MiB limit on incoming JSON-RPC payloads
+
+- **Lint Feedback**
+  - Lint errors from Prettier are now passed through to Nova’s issue providers
+    for in-editor feedback
+
+### Fixed
+
+- **Formatter Safety Checks**
+  - Skips formatting if no `syntaxKey` could be determined
+  - Prevents writing `undefined` or empty output to avoid file erasure
+
 ## 3.5.33 – 2025‑04‑28
 
 ### Improved
