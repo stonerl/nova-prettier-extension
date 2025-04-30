@@ -351,6 +351,12 @@ class Formatter {
     const syntaxKey = this.getSyntaxKey(editor)
     log.debug(`Resolved Syntax Key: ${syntaxKey}`)
 
+    // If we couldn’t detect a syntax, don’t even try to format
+    if (!syntaxKey) {
+      log.info(`No syntax detected for ${document.path}; skipping formatting.`)
+      return []
+    }
+
     nova.notifications.cancel('prettier-unsupported-syntax')
 
     // Read the custom config file path from settings.
@@ -656,6 +662,7 @@ class Formatter {
     }
 
     // if result is somehow missing, bail out with your own notification
+    // TODO: Check this later
     /*if (!result || typeof result !== 'object') {
       showError(
         'prettier-unexpected-result',
@@ -673,6 +680,12 @@ class Formatter {
       cursorOffset: newCursor,
     } = result
     this._cursorOffset = newCursor
+
+    // Safety check: bail if Prettier failed or returned an empty result
+    if (!formatted) {
+      log.error(`Prettier returned no formatted output for ${document.path}`)
+      return []
+    }
 
     if (error) {
       const isMissingParserError = error.message.includes(
