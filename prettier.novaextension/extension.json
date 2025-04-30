@@ -3,10 +3,10 @@
   "name": "Prettier⁺",
   "organization": "Toni Förster",
   "description": "The Swiss Army knife for formatting — fast, reliable, and built on Prettier.",
-  "version": "3.5.33",
+  "version": "3.5.34",
   "license": "MIT License",
   "funding": "https://github.com/sponsors/stonerl",
-  "categories": ["commands", "formatters"],
+  "categories": ["commands", "formatters", "issues"],
   "repository": "https://github.com/stonerl/nova-prettier-extension",
   "bugs": "https://github.com/stonerl/nova-prettier-extension/issues",
   "entitlements": {
