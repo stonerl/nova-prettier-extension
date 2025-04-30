@@ -1,3 +1,10 @@
+## 3.5.35 - 2025-04-30
+
+### Fixed
+
+- **Lint Feedback**: Fixed an issue where lint errors from Prettier were not
+  forwarded to Nova’s issue panel. These are now correctly surfaced in-editor.
+
 ## 3.5.34 – 2025‑04‑30
 
 ### Refactored
