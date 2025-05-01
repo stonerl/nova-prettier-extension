@@ -1,3 +1,32 @@
+## 3.5.36 – 2025‑05‑01
+
+### Fixed
+
+- **SQL Cursor Position**
+
+  - Resolved an issue where formatting SQL files would reset the cursor to the
+    start of the document.
+    The extension now preserves the editor's current cursor position since
+    `prettier-plugin-sql` always returns `0` as the cursor offset.
+
+- **Save Stall Prevention**
+  - Fixed a bug where Nova could hang on save if the Prettier service wasn’t ready.
+    Formatting now waits for proper initialization before attaching to save events.
+
+### Added
+
+- **Missing Runtime Detection**
+  - A user-friendly error dialog now informs users if Node.js or npm is missing,
+    with guidance on installing Node.js and updating the system `PATH`.
+
+### Improved
+
+- **Startup Resilience & Logging**
+  - Prevented a potential infinite loop on configuration changes during startup.
+  - Logged both the extension and Nova versions at launch for easier debugging.
+  - Detected and cached the system `npm --version` for improved diagnostics.
+  - Renamed internal version helper for better clarity (`isAtLeast` → `minNovaVersion`).
+
 ## 3.5.35 - 2025-04-30
 
 ### Fixed
