@@ -10,38 +10,12 @@
 
 const {
   getConfigWithWorkspaceOverride,
+  getNodeVersion,
+  getNpmVersion,
   handleProcessResult,
   log,
+  showError,
 } = require('./helpers.js')
-
-let _npmVersionPromise = null
-
-/**
- * Asynchronously fetches (and caches) `npm --version`.
- */
-function getNpmVersion() {
-  if (!_npmVersionPromise) {
-    _npmVersionPromise = new Promise((resolve) => {
-      let ver = ''
-      const p = new Process('/usr/bin/env', {
-        args: ['npm', '--version'],
-        cwd: nova.workspace.path || nova.extension.path,
-      })
-      p.onStdout((chunk) => {
-        ver += chunk
-      })
-      p.onDidExit((status) => {
-        if (status === 0) resolve(ver.trim())
-        else {
-          log.warn(`npm --version exited ${status}, defaulting to "unknown"`)
-          resolve('unknown')
-        }
-      })
-      p.start()
-    })
-  }
-  return _npmVersionPromise
-}
 
 function findPathRecursively(directory, subPath, callback) {
   while (true) {
@@ -154,9 +128,29 @@ async function installPackages(directory) {
 }
 
 module.exports = async function () {
-  // Log npm version
+  const nodeVersion = await getNodeVersion()
   const npmVersion = await getNpmVersion()
-  log.debug(`npm Version: ${npmVersion}`)
+
+  // If either npm or Node isn’t detected, error out immediately
+  if (npmVersion === 'unknown' || nodeVersion === 'unknown') {
+    showError(
+      'prettier-resolution-error',
+      nova.localize(
+        'prettier.notification.runtimeMissing.title',
+        'Missing Runtime Tools',
+        'notification',
+      ),
+      nova.localize(
+        'prettier.notification.runtimeMissing.body',
+        'Please install Node.js (which includes npm) and ensure it’s on your PATH so Prettier⁺ can resolve correctly.',
+        'notification',
+      ),
+    )
+    // stop execution — we can’t proceed without both binaries
+    throw new Error('Missing runtime tools: Node.js and npm are required.')
+  }
+
+  log.debug(`node Version: ${nodeVersion}\nnpm Version: ${npmVersion}`)
 
   const preferBundled = getConfigWithWorkspaceOverride(
     'prettier.module.preferBundled',

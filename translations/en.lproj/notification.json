@@ -23,5 +23,7 @@
   "prettier.notification.format-error.title": "Error While Formatting",
   "prettier.notification.format-error.body": "\n\nSee the Extension Console for more info.",
   "prettier.notification.unsupportedSyntax.body": "“Format Selection” isn’t available for this file type. Supported syntaxes: JavaScript, TypeScript, GraphQL, and Handlebars.\n\nClicking “Dismiss” will disable the command for unsupported syntaxes.",
-  "prettier.notification.actions.dismiss": "Dismiss"
+  "prettier.notification.actions.dismiss": "Dismiss",
+  "prettier.notification.runtimeMissing.title": "Missing Runtime Tools",
+  "prettier.notification.runtimeMissing.body": "Please install Node.js (which includes npm) and ensure it’s on your PATH so Prettier⁺ can resolve correctly."
 }
