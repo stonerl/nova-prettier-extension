@@ -12,13 +12,13 @@ let prettierExtensionInstance = null
 
 const findPrettier = require('./module-resolver.js')
 const {
-  showError,
+  debouncePromise,
   getConfigWithWorkspaceOverride,
+  log,
   observeConfigWithWorkspaceOverride,
   observeEmptyArrayCleanup,
-  log,
   sanitizePrettierConfig,
-  debouncePromise,
+  showError,
 } = require('./helpers.js')
 const { Formatter } = require('./formatter.js')
 
@@ -140,10 +140,6 @@ class PrettierExtension {
     sanitizePrettierConfig()
 
     this.configDisposables.push(
-      ...observeConfigWithWorkspaceOverride(
-        'prettier.format-on-save',
-        this.toggleFormatOnSave,
-      ),
       ...observeConfigWithWorkspaceOverride(
         'prettier.module.path',
         this.debouncedModulePathOrPreferBundledDidChangeFast,
@@ -278,7 +274,22 @@ class PrettierExtension {
         )
       }),
     ]
-    this.hasStarted = true
+
+    // Normalize boolean or Promise into a Promise<boolean>
+    const readyPromise = Promise.resolve(this.formatter.isReady)
+
+    readyPromise.then((didStart) => {
+      if (!didStart) return
+
+      this.hasStarted = true
+
+      const disposables = observeConfigWithWorkspaceOverride(
+        'prettier.format-on-save',
+        this.toggleFormatOnSave,
+      )
+      this.configDisposables.push(...disposables)
+      this.toggleFormatOnSave()
+    })
   }
 
   async startFormatter() {
