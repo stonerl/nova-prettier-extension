@@ -65,8 +65,8 @@ class PrettierExtension {
       this.modulePathDidChange,
       5000,
     )
-    this.debouncedProjectConfigDidChange = debouncePromise(
-      this.prettierConfigFileDidChange,
+    this.debouncedReloadPrettierOnConfigChange = debouncePromise(
+      () => this.reloadPrettierConfig(),
       2000,
     )
     this.debouncedModulePathOrPreferBundledDidChangeFast = debouncePromise(
@@ -123,11 +123,17 @@ class PrettierExtension {
       }
     }
 
-    // kick off a restart after debounce
-    this.debouncedProjectConfigDidChange()
+    // only schedule reloads once we've fully started
+    if (this.hasStarted) {
+      this.debouncedReloadPrettierOnConfigChange()
+    }
   }
 
   setupConfiguration() {
+    log.debug(
+      `Nova Version: ${nova.versionString}\n` +
+        `Extension Version: ${nova.extension.version}`,
+    )
     nova.config.remove('prettier.use-compatibility-mode')
     nova.config.remove('prettier.default-config.jsxBracketSameLine')
 
@@ -303,11 +309,17 @@ class PrettierExtension {
     }
   }
 
+  async reloadPrettierConfig() {
+    log.debug('Prettier config file changed — restarting Prettier…')
+    await this.formatter.stop()
+    await this.startFormatter()
+  }
+
   async prettierConfigFileDidChange() {
     if (this.configIgnore && !this.configFile) return
 
     log.debug('prettierConfigFileDidChange invoked')
-    this.debouncedProjectConfigDidChange()
+    this.debouncedReloadPrettierOnConfigChange()
   }
 
   async npmPackageFileDidChange() {
@@ -558,7 +570,7 @@ class PrettierExtension {
     // 6) clear debounce timers
     this.debouncedProjectPrettierModulePathDidChange.cancel()
     this.debouncedNpmPackageFileDidChange.cancel()
-    this.debouncedProjectConfigDidChange.cancel()
+    this.debouncedReloadPrettierOnConfigChange.cancel()
     this.debouncedModulePathOrPreferBundledDidChangeFast.cancel()
 
     // 7) tear down config observers
