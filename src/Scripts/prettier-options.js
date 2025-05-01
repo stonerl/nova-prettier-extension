@@ -120,6 +120,20 @@ module.exports = {
     'tailwindPreserveDuplicates',
   ],
 
+  PRETTIER_TOML_PLUGIN_OPTIONS: [
+    'alignEntries',
+    'alignComments',
+    'arrayAutoExpand',
+    'arrayAutoCollapse',
+    'compactArrays',
+    'compactInlineTables',
+    'compactEntries',
+    'indentTables',
+    'indentEntries',
+    'reorderKeys',
+    'allowedBlankLines',
+  ],
+
   PRETTIER_TWIG_PLUGIN_OPTIONS: [
     'twigSingleQuote',
     'twigAlwaysBreakObjects',

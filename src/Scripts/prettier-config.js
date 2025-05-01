@@ -17,9 +17,10 @@ const {
   PRETTIER_NGINX_PLUGIN_OPTIONS,
   PRETTIER_PHP_PLUGIN_OPTIONS,
   PRETTIER_PROPERTIES_PLUGIN_OPTIONS,
-  PRETTIER_SQL_PLUGIN_SQL_FORMATTER_OPTIONS,
   PRETTIER_SQL_PLUGIN_NODE_SQL_PARSER_OPTIONS,
+  PRETTIER_SQL_PLUGIN_SQL_FORMATTER_OPTIONS,
   PRETTIER_TAILWIND_PLUGIN_OPTIONS,
+  PRETTIER_TOML_PLUGIN_OPTIONS,
   PRETTIER_TWIG_PLUGIN_OPTIONS,
   PRETTIER_XML_PLUGIN_OPTIONS,
 } = require('./prettier-options.js')
@@ -107,6 +108,13 @@ function getTailwindConfig() {
   )
 }
 
+function getTomlConfig() {
+  return loadPluginConfig(
+    PRETTIER_TOML_PLUGIN_OPTIONS,
+    'prettier.plugins.prettier-plugin-toml',
+  )
+}
+
 function getTwigConfig() {
   return loadPluginConfig(
     PRETTIER_TWIG_PLUGIN_OPTIONS,
@@ -132,6 +140,7 @@ module.exports = {
   getPropertiesConfig,
   getSqlFormatterConfig,
   getTailwindConfig,
+  getTomlConfig,
   getTwigConfig,
   getXmlConfig,
 }

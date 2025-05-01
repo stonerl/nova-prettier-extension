@@ -127,6 +127,9 @@ const extToSyntax = {
   '.flink.sql': 'sql', //FlinkSQL
   '.flinksql': 'sql', //FlinkSQL
 
+  // TOML
+  '.toml': 'toml',
+
   // Twig
   '.twig': 'twig',
   '.html.twig': 'twig',
@@ -158,51 +161,52 @@ const sortedExtensions = Object.keys(extToSyntax).sort(
 // 2.5) If Nova reports a SQL-dialect-specific syntax, normalize it to "sql"
 //      These are only reported when the SQL Language Extension is installed.
 const sqlAliases = new Set([
-  'sparksql',
-  'snowflake',
-  'singlestore',
-  'redshift',
-  'postgresql',
-  'plsql',
-  'mysql',
-  'hiveql',
-  'flinksql',
   'bigquery',
-  'tsql',
-  'trino',
-  'sqlpl',
-  'sqlite',
+  'flinksql',
+  'hiveql',
+  'mysql',
+  'plsql',
+  'postgresql',
+  'redshift',
+  'singlestore',
+  'snowflake',
+  'sparksql',
   'sql-generic',
+  'sqlite',
+  'sqlpl',
+  'trino',
+  'tsql',
 ])
 
 // 3) Nova’s built‑in syntax keys we explicitly support
 const knownSyntaxKeys = new Set([
   'astro',
   'blade',
-  'liquid-md',
-  'liquid-html',
-  'html+erb',
-  'html+ejs',
-  'html',
-  'javascript',
-  'typescript',
-  'jsx',
-  'tsx',
+  'css',
   'flow',
   'graphql',
-  'css',
-  'less',
-  'scss',
-  'php',
-  'java',
+  'html',
+  'html+ejs',
+  'html+erb',
   'java-properties',
+  'java',
+  'javascript',
   'json',
-  'yaml',
+  'jsx',
+  'less',
+  'liquid-html',
+  'liquid-md',
   'markdown',
-  'sql',
-  'xml',
   'nginx',
+  'php',
+  'scss',
+  'sql',
+  'toml',
+  'tsx',
+  'typescript',
   'vue',
+  'xml',
+  'yaml',
 ])
 
 /**
