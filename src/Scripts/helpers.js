@@ -234,17 +234,75 @@ function minNovaVersion(major, minor = 0, patch = 0) {
   return c >= patch
 }
 
+// Cache of promises for each CLI tool’s “--version” lookup.
+// This ensures that multiple calls to getCliVersion('npm') or getCliVersion('node')
+// return the same in‐flight or resolved promise, avoiding spawning the process more than once.
+const _cliVersionPromises = {}
+
+/**
+ * Asynchronously fetches (and caches) `<tool> --version`.
+ *
+ * @param {string} toolName     – the binary to invoke (e.g. "npm", "node")
+ * @returns {Promise<string>}   – trimmed stdout, or "unknown" on failure
+ */
+function getCliVersion(toolName) {
+  if (!_cliVersionPromises[toolName]) {
+    _cliVersionPromises[toolName] = new Promise((resolve) => {
+      let ver = ''
+      const p = new Process('/usr/bin/env', {
+        args: [toolName, '--version'],
+        cwd: nova.workspace.path || nova.extension.path,
+      })
+
+      p.onStdout((chunk) => {
+        ver += chunk
+      })
+
+      p.onDidExit((status) => {
+        if (status === 0) {
+          resolve(ver.trim())
+        } else {
+          log.warn(
+            `${toolName} --version exited ${status}, defaulting to "unknown"`,
+          )
+          resolve('unknown')
+        }
+      })
+
+      // Catch any errors thrown by start(), e.g. if the binary isn't on PATH
+      try {
+        p.start()
+      } catch (err) {
+        log.warn(`Failed to spawn ${toolName} for version check:`, err)
+        resolve('unknown')
+      }
+    })
+  }
+  return _cliVersionPromises[toolName]
+}
+
+/** Convenience wrappers for clarity & backward compatibility */
+function getNpmVersion() {
+  return getCliVersion('npm')
+}
+function getNodeVersion() {
+  return getCliVersion('node')
+}
+
 module.exports = {
+  debouncePromise,
   extractPath,
-  showError,
-  showActionableError,
-  log,
+  getCliVersion,
   getConfigWithWorkspaceOverride,
+  getNodeVersion,
+  getNpmVersion,
+  handleProcessResult,
+  log,
+  minNovaVersion,
   observeConfigWithWorkspaceOverride,
   observeEmptyArrayCleanup,
   ProcessError,
-  handleProcessResult,
   sanitizePrettierConfig,
-  debouncePromise,
-  minNovaVersion,
+  showActionableError,
+  showError,
 }
