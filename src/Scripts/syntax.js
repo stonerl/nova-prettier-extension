@@ -228,11 +228,12 @@ function detectSyntax({ syntax, uri }) {
     return syntax
   }
 
-  // 0) Astro, Liquid and Twig exceptions: if Nova got it right, trust it immediately
+  // 0) Astro, Liquid, TOML and Twig exceptions: if Nova got it right, trust it immediately
   if (
     syntax === 'astro' ||
     syntax === 'liquid-md' ||
     syntax === 'liquid-html' ||
+    syntax === 'toml' ||
     syntax === 'twig'
   ) {
     return syntax
