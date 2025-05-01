@@ -18,9 +18,9 @@ const {
 const pluginPaths = require('./prettier-plugins.js')
 
 const {
+  getDefaultConfig,
   getAstroConfig,
   getBladeConfig,
-  getDefaultConfig,
   getLiquidConfig,
   getNginxConfig,
   getNodeSqlParserConfig,
@@ -28,6 +28,7 @@ const {
   getPropertiesConfig,
   getSqlFormatterConfig,
   getTailwindConfig,
+  getTomlConfig,
   getTwigConfig,
   getXmlConfig,
 } = require('./prettier-config.js')
@@ -88,6 +89,10 @@ class Formatter {
 
   get tailwindConfig() {
     return getTailwindConfig()
+  }
+
+  get tomlConfig() {
+    return getTomlConfig()
   }
 
   get twigConfig() {
@@ -459,6 +464,10 @@ class Formatter {
       'prettier.plugins.prettier-plugin-tailwind.enabled',
     )
 
+    const tomlPluginEnabled = getConfigWithWorkspaceOverride(
+      'prettier.plugins.prettier-plugin-toml.enabled',
+    )
+
     const twigPluginEnabled = getConfigWithWorkspaceOverride(
       'prettier.plugins.prettier-plugin-twig.enabled',
     )
@@ -505,12 +514,16 @@ class Formatter {
         plugins.push(pluginPaths.sql)
       }
 
-      if (syntaxKey === 'xml' && xmlPluginEnabled) {
-        plugins.push(pluginPaths.xml)
+      if (syntaxKey === 'toml' && tomlPluginEnabled) {
+        plugins.push(pluginPaths.toml)
       }
 
       if (syntaxKey === 'twig' && twigPluginEnabled) {
         plugins.push(pluginPaths.twig)
+      }
+
+      if (syntaxKey === 'xml' && xmlPluginEnabled) {
+        plugins.push(pluginPaths.xml)
       }
 
       // prettier-plugin-tailwindcss must be loaded last.
@@ -619,6 +632,12 @@ class Formatter {
         Object.assign(options, this.tailwindConfig)
       }
 
+      // ADD TOML plugin options if the document syntax is TOML
+      if (syntaxKey === 'toml') {
+        Object.assign(options, this.tomlConfig)
+      }
+
+      // ADD TWIG plugin options if the document syntax is TWIG
       if (syntaxKey === 'twig') {
         Object.assign(options, this.twigConfig)
       }
@@ -670,12 +689,11 @@ class Formatter {
       cursorOffset: newCursor,
     } = result
 
-    // UPSTREAM: `prettier-plugin-sql, since it does not return a valid cursor
-    if (newCursor === 0 && syntaxKey === 'sql') {
+    // UPSTREAM: `prettier-plugin-sql` & `prettier-plugin-toml` do not return a valid cursor
+    if (newCursor === 0 && (syntaxKey === 'sql' || syntaxKey === 'toml')) {
       this._cursorOffset = editor.selectedRange.start
       log.debug(
-        'Cursor position is 0 and syntax sql. Use current start range:',
-        editor.selectedRange.start,
+        `Cursor position is 0. Adjusting cursor offset for ${syntaxKey} syntax to the current start range: ${editor.selectedRange.start}`,
       )
     } else {
       this._cursorOffset = newCursor

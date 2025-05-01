@@ -87,6 +87,13 @@ module.exports = {
     'dist',
     'index.mjs',
   ),
+  toml: nova.path.join(
+    nova.extension.path,
+    'node_modules',
+    'prettier-plugin-toml',
+    'lib',
+    'index.cjs',
+  ),
   twig: nova.path.join(
     nova.extension.path,
     'node_modules',

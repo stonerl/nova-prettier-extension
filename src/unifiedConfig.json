@@ -2689,6 +2689,252 @@
         ]
       },
       {
+        "key": "prettier.plugins.prettier-plugin-toml.section",
+        "title": "prettier-plugin-toml",
+        "description": "TOML formatter plugin fot Prettier",
+        "link": "https://github.com/un-ts/prettier/tree/master/packages/toml",
+        "type": "section",
+        "children": [
+          {
+            "key": "prettier.plugins.prettier-plugin-toml.enabled",
+            "config": {
+              "title": "Plugin Enabled",
+              "type": "boolean",
+              "default": true
+            },
+            "configWorkspace": {
+              "title": "Plugin Status",
+              "description": "Select whether to use global settings, enable, or disable the plugin.",
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-toml.alignEntries",
+            "title": "Align Entries",
+            "description": "Align consecutive entries vertically.",
+            "link": "https://github.com/un-ts/prettier/tree/master/packages/toml#parser-options",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-toml.alignComments",
+            "title": "Align Comments",
+            "description": "Align consecutive comments after entries and items vertically. This applies to comments that are after entries or array items.",
+            "link": "https://github.com/un-ts/prettier/tree/master/packages/toml#parser-options",
+            "config": {
+              "type": "boolean",
+              "default": true
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-toml.arrayAutoExpand",
+            "title": "Auto Expand Arrays",
+            "description": "Expand arrays to multiple lines that exceed the maximum column width.",
+            "link": "https://github.com/un-ts/prettier/tree/master/packages/toml#parser-options",
+            "config": {
+              "type": "boolean",
+              "default": true
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-toml.arrayAutoCollapse",
+            "title": "Auto Collapse Arrays",
+            "description": "Collapse arrays that don't exceed the maximum column width and don't contain comments.",
+            "link": "https://github.com/un-ts/prettier/tree/master/packages/toml#parser-options",
+            "config": {
+              "type": "boolean",
+              "default": true
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-toml.compactArrays",
+            "title": "Compact Arrays",
+            "description": "Omit white space padding from single-line arrays.",
+            "link": "https://github.com/un-ts/prettier/tree/master/packages/toml#parser-options",
+            "config": {
+              "type": "boolean",
+              "default": true
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-toml.compactInlineTables",
+            "title": "Compact Inline Tables",
+            "description": "Omit white space padding from the start and end of inline tables.",
+            "link": "https://github.com/un-ts/prettier/tree/master/packages/toml#parser-options",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-toml.compactEntries",
+            "title": "Compact Entries",
+            "description": "Omit white space around '='.",
+            "link": "https://github.com/un-ts/prettier/tree/master/packages/toml#parser-options",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-toml.indentTables",
+            "title": "Indent Tables",
+            "description": "Indent based on tables and arrays of tables and their subtables, subtables out of order are not indented.",
+            "link": "https://github.com/un-ts/prettier/tree/master/packages/toml#parser-options",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-toml.indentEntries",
+            "title": "Indent Entries",
+            "description": "Indent entries under tables.",
+            "link": "https://github.com/un-ts/prettier/tree/master/packages/toml#parser-options",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-toml.reorderKeys",
+            "title": "Reorder Keys",
+            "description": "Alphabetically reorder keys that are not separated by empty lines.",
+            "link": "https://github.com/un-ts/prettier/tree/master/packages/toml#parser-options",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-toml.allowedBlankLines",
+            "title": "Blank Lines",
+            "description": "The maximum number of allowed blank lines between entries and tables.",
+            "link": "https://github.com/un-ts/prettier/tree/master/packages/toml#parser-options",
+            "type": "number",
+            "min": 0,
+            "config": {
+              "placeholder": "1",
+              "default": 1,
+              "required": true
+            },
+            "configWorkspace": {
+              "placeholder": "Global Setting",
+              "default": null
+            }
+          }
+        ]
+      },
+      {
         "key": "prettier.plugins.prettier-plugin-twig.section",
         "title": "prettier-plugin-twig",
         "description": "Twig formatter plugin for Prettier",
@@ -3248,6 +3494,24 @@
           {
             "key": "prettier.format-on-save.ignored-syntaxes.sql",
             "title": "SQL",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [false, "Format on Save"],
+                [true, "Ignore"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.format-on-save.ignored-syntaxes.toml",
+            "title": "TOML",
             "config": {
               "type": "boolean",
               "default": false

@@ -2,7 +2,8 @@
 
 The Swiss Army knife for code formatting — seamlessly format JavaScript, TypeScript,
 JSON, CSS, HTML, Markdown, and more in Nova, with built-in support for Astro, EJS,
-Java, Laravel Blade, Liquid, PHP, SQL, Tailwind CSS, Twig, and XML — no extra setup required.
+Java, Laravel Blade, Liquid, PHP, SQL, Tailwind CSS, TOML, Twig, and XML
+— no extra setup required.
 
 > ⚠️ **Prettier⁺** is a drop-in replacement for the original [Prettier Extension](https://extensions.panic.com/extensions/alexanderweiss/alexanderweiss.prettier/).
 > To avoid conflicts, make sure to disable the original before installing or activating Prettier⁺.
@@ -48,6 +49,7 @@ Java, Laravel Blade, Liquid, PHP, SQL, Tailwind CSS, Twig, and XML — no extra 
   `PHP`,
   `SQL`,
   `Tailwind CSS`,
+  `TOML`,
   `Twig`, and
   `XML`.
 
@@ -72,6 +74,7 @@ Java, Laravel Blade, Liquid, PHP, SQL, Tailwind CSS, Twig, and XML — no extra 
 | [prettier-plugin-properties](https://github.com/eemeli/prettier-plugin-properties)                         | ✅ Enabled  | ⚠️ Recommended: [Java Language Definition](https://extensions.panic.com/extensions/me.frmr/me.frmr.JavaLanguage/) |
 | [prettier-plugin-sql](https://github.com/un-ts/prettier/tree/master/packages/sql)                          | ✅ Enabled  | ⚠️ Recommended: [SQL](https://extensions.panic.com/extensions/stonerl/stonerl.sql/)                               |
 | [prettier-plugin-tailwindcss](https://github.com/tailwindlabs/prettier-plugin-tailwindcss)                 | ➕ Optional | ⚠️ Recommended: [Tailwind CSS](https://extensions.panic.com/extensions/jasonplatts/jasonplatts.tailwindcss/)      |
+| [prettier-plugin-toml](https://github.com/un-ts/prettier/tree/master/packages/toml)                        | ✅ Enabled  | ⚠️ Recommended: [TOML](https://extensions.panic.com/extensions/com.neelyadav/com.neelyadav.toml/)                 |
 | [prettier-plugin-twig](https://github.com/zackad/prettier-plugin-twig)                                     | ✅ Enabled  | ⚠️ Recommended: [Twig](https://extensions.panic.com/extensions/tpmatthes/tpmatthes.Twig/)                         |
 
 ### Plugin Legend
