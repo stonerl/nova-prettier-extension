@@ -219,6 +219,21 @@ function debouncePromise(fn, timeoutMs) {
   return debounced
 }
 
+/**
+ * Returns true if the running Nova version is at least the given version.
+ *
+ * @param {number} major    – required major version
+ * @param {number} minor    – optional minor version (defaults to 0)
+ * @param {number} patch    – optional patch version (defaults to 0)
+ * @returns {boolean}
+ */
+function minNovaVersion(major, minor = 0, patch = 0) {
+  const [a = 0, b = 0, c = 0] = nova.version
+  if (a !== major) return a > major
+  if (b !== minor) return b > minor
+  return c >= patch
+}
+
 module.exports = {
   extractPath,
   showError,
@@ -231,4 +246,5 @@ module.exports = {
   handleProcessResult,
   sanitizePrettierConfig,
   debouncePromise,
+  minNovaVersion,
 }

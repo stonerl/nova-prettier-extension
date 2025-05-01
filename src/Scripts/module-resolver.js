@@ -14,6 +14,35 @@ const {
   log,
 } = require('./helpers.js')
 
+let _npmVersionPromise = null
+
+/**
+ * Asynchronously fetches (and caches) `npm --version`.
+ */
+function getNpmVersion() {
+  if (!_npmVersionPromise) {
+    _npmVersionPromise = new Promise((resolve) => {
+      let ver = ''
+      const p = new Process('/usr/bin/env', {
+        args: ['npm', '--version'],
+        cwd: nova.workspace.path || nova.extension.path,
+      })
+      p.onStdout((chunk) => {
+        ver += chunk
+      })
+      p.onDidExit((status) => {
+        if (status === 0) resolve(ver.trim())
+        else {
+          log.warn(`npm --version exited ${status}, defaulting to "unknown"`)
+          resolve('unknown')
+        }
+      })
+      p.start()
+    })
+  }
+  return _npmVersionPromise
+}
+
 function findPathRecursively(directory, subPath, callback) {
   while (true) {
     const path = nova.path.join(directory, subPath)
@@ -125,6 +154,10 @@ async function installPackages(directory) {
 }
 
 module.exports = async function () {
+  // Log npm version
+  const npmVersion = await getNpmVersion()
+  log.debug(`npm Version: ${npmVersion}`)
+
   const preferBundled = getConfigWithWorkspaceOverride(
     'prettier.module.preferBundled',
   )
