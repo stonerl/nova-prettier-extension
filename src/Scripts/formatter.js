@@ -669,7 +669,18 @@ class Formatter {
       missingParser,
       cursorOffset: newCursor,
     } = result
-    this._cursorOffset = newCursor
+
+    // UPSTREAM: `prettier-plugin-sql, since it does not return a valid cursor
+    if (newCursor === 0 && syntaxKey === 'sql') {
+      this._cursorOffset = editor.selectedRange.start
+      log.debug(
+        'Cursor position is 0 and syntax sql. Use current start range:',
+        editor.selectedRange.start,
+      )
+    } else {
+      this._cursorOffset = newCursor
+      log.debug('New Cursor Position:', newCursor)
+    }
 
     // 3) Error or missing parser
     if (error) {
