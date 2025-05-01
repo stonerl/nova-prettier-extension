@@ -142,7 +142,7 @@ module.exports = async function () {
       ),
       nova.localize(
         'prettier.notification.runtimeMissing.body',
-        'Please install Node.js (which includes npm) and ensure it’s on your PATH so Prettier⁺ can resolve correctly.',
+        'Please install Node.js (which includes npm) and ensure it’s on your PATH so Prettier⁺ can resolve correctly. Then restart Nova to apply the change.',
         'notification',
       ),
     )

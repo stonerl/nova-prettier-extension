@@ -9,18 +9,18 @@
  */
 
 const {
-  showError,
-  showActionableError,
-  log,
   getConfigWithWorkspaceOverride,
+  log,
+  showActionableError,
+  showError,
 } = require('./helpers.js')
 
 const pluginPaths = require('./prettier-plugins.js')
 
 const {
-  getDefaultConfig,
   getAstroConfig,
   getBladeConfig,
+  getDefaultConfig,
   getLiquidConfig,
   getNginxConfig,
   getNodeSqlParserConfig,
