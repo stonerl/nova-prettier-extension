@@ -1,3 +1,14 @@
+## 3.5.37 – 2025‑05‑02
+
+### Added
+
+- **Plugin: `prettier-plugin-toml`**
+  Enables formatting support for `.toml` files.
+
+- **Help Section**
+  A dedicated Help Section has been added, accessible via
+  `Extensions → Prettier⁺ → Prettier⁺ Help`.
+
 ## 3.5.36 – 2025‑05‑01
 
 ### Fixed
