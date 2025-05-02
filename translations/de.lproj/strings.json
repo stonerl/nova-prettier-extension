@@ -379,5 +379,6 @@
   "Format Document (Forced)": "Dokument formatieren (erzwingen)",
   "Save Without Formatting": "Speichern ohne Formatierung",
   "Restart Prettier Service": "Prettier-Dienst neu starten",
-  "Reset Syntax Warnings": "Syntax-Warnungen zurücksetzen"
+  "Reset Syntax Warnings": "Syntax-Warnungen zurücksetzen",
+  "Prettier⁺ Help": ""
 }
