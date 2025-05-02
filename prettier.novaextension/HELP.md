@@ -15,8 +15,9 @@
 
 ## General
 
-Prettier⁺ includes a **built-in version of Prettier** with support for common plugins like `prettier-plugin-php`, `prettier-plugin-xml`, `prettier-plugin-sql`, and more.
-This bundled version is the **default** and recommended way to use Prettier⁺.
+Prettier⁺ includes a **built-in version of Prettier** with support for common
+plugins like `prettier-plugin-php`, `prettier-plugin-xml`, `prettier-plugin-sql`,
+and more. This bundled version is the **default** and recommended way to use Prettier⁺.
 
 ### Prettier Module Resolution
 
