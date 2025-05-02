@@ -53,6 +53,10 @@
         "title": "Reset Syntax Warnings",
         "command": "prettier.reset-suppressed-message",
         "when": "prettier.selectionUnsupportedDismissed"
+      },
+      {
+        "title": "Prettier⁺ Help",
+        "command": "prettier.open-help"
       }
     ]
   },

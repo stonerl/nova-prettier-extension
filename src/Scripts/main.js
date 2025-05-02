@@ -273,6 +273,9 @@ class PrettierExtension {
           ),
         )
       }),
+      nova.commands.register('prettier.open-help', () => {
+        nova.extension.openHelp()
+      }),
     ]
 
     // Normalize boolean or Promise into a Promise<boolean>

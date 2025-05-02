@@ -87,63 +87,6 @@ Java, Laravel Blade, Liquid, PHP, SQL, Tailwind CSS, TOML, Twig, and XML
 
 If you want to see other plugins being integrated, head over to the [Discussions](https://github.com/stonerl/nova-prettier-extension/discussions).
 
-## Using external plugins in your project
-
-To use external Prettier plugins, simply install them along with Prettier in
-your project.
-
-## Configuring Prettier⁺
-
-Prettier⁺ automatically detects any supported configuration files in your project,
-including those located in subfolders (e.g. in monorepos), and uses them by default.
-
-If no configuration files are found, Prettier⁺ will fall back to the options set
-in the extension or project settings.
-
-You can also force Prettier⁺ to always use these settings — even if configuration
-files are present — by enabling the `Ignore Configuration Files` option.
-
-Additionally, you can specify a global configuration file in the extension or
-workspace settings. When set, this file takes precedence over all other
-configurations — project settings, local configuration files, and extension
-defaults will be ignored.
-
-## Ignoring files
-
-You can disable `Format on Save` for remote documents, documents without a Prettier
-configuration file, or specific syntaxes in the extension and project settings.
-Additionally you can use Prettier's [built-in exclusion](https://prettier.io/docs/ignore#ignoring-files-prettierignore)
-feature by adding a `.prettierignore` file to the root of your project.
-
-_Note: adding it anywhere else won't work._
-
-## Using a different version of Prettier
-
-To use a specific version of Prettier (v2.0 or higher—though the latest version
-is recommended), simply install it in your project’s root directory.
-The extension will automatically detect and use it.
-
-You can also explicitly specify an installation of Prettier
-(or [`prettier-eslint`](https://github.com/prettier/prettier-eslint))
-by setting the `Prettier module` path in the extension or project settings.
-
-If Prettier⁺ does not automatically pick up the change, you can manually restart
-the service via `Extensions > Prettier⁺ > Restart Prettier Service` (**⌃⇧⌘R**).
-
-## Using Prettier forks or prettier-eslint
-
-You can use any Prettier fork that adheres to the same API,
-as well as [`prettier-eslint`](https://github.com/prettier/prettier-eslint),
-by explicitly specifying the `Prettier module` path in the extension or project settings.
-
-## Working with remote files
-
-Most features are supported for remote files; however,
-[Prettier configuration](https://prettier.io/docs/configuration.html) and
-[.prettierignore](https://prettier.io/docs/ignore.html) files are not.
-Instead, the default configuration set in the extension or project settings will
-be used.
-
 ## Versioning
 
 Prettier⁺ for Nova follows [Semantic Versioning](https://semver.org/),
