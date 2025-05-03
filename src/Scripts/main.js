@@ -456,7 +456,7 @@ class PrettierExtension {
       const dismissed = nova.config.get(suppressionKey)
       if (dismissed === true) return
 
-      let req = new NotificationRequest('prettier-selection-unsupported')
+      const req = new NotificationRequest('prettier-selection-unsupported')
       req.title = nova.localize(
         'prettier.notification.unsupportedSyntax.title',
         'Unsupported Syntax',

@@ -142,7 +142,6 @@ function simulateJsMistakes(content) {
     const currentLine = lines[i]
     const trimmed = currentLine.trim()
 
-    const nextLine = lines[i + 1]?.trim()
     const isComment =
       trimmed.startsWith('//') ||
       trimmed.startsWith('/*') ||
@@ -179,7 +178,7 @@ function simulatePhpMistakes(content) {
   let inHtml = false
 
   for (let i = 0; i < lines.length; i++) {
-    let line = lines[i]
+    const line = lines[i]
     const trimmed = line.trim()
 
     // Detect switch to HTML
@@ -290,7 +289,7 @@ function simulateHtmlMistakes(content) {
   const result = []
   let inScript = false
 
-  for (let line of lines) {
+  for (const line of lines) {
     const trimmed = line.trim()
 
     // Start/end script detection
@@ -354,7 +353,7 @@ function simulateScssMistakes(content) {
   const lines = content.split('\n')
   const result = []
 
-  for (let line of lines) {
+  for (const line of lines) {
     const trimmed = line.trim()
 
     // Leave comments alone
@@ -369,7 +368,7 @@ function simulateScssMistakes(content) {
       continue
     }
 
-    let scrambled = line
+    const scrambled = line
       .replace(/^\s+/g, '') // remove leading indent
       .replace(/\s{2,}/g, ' ') // collapse multiple spaces
       .replace(/\s*([:{}();,{}])\s*/g, '$1') // tighten syntax characters
@@ -388,7 +387,7 @@ function simulateLessMistakes(content) {
   const lines = content.split('\n')
   const result = []
 
-  for (let line of lines) {
+  for (const line of lines) {
     const trimmed = line.trim()
 
     if (
@@ -402,7 +401,7 @@ function simulateLessMistakes(content) {
       continue
     }
 
-    let scrambled = line
+    const scrambled = line
       .replace(/^\s+/g, '') // remove leading indent
       .replace(/\s{2,}/g, ' ') // collapse multiple spaces
       .replace(/\s*([{}();])\s*/g, '$1') // tighten around syntax
@@ -433,8 +432,6 @@ function simulateVueMistakes(content) {
     scrambledTemplate = templateMatch[1]
       .split('\n')
       .map((line) => {
-        const trimmed = line.trim()
-
         return line
           .replace(/:\s+(\w+)/g, ':$1')
           .replace(/@\s+(\w+)/g, '@$1')
@@ -487,7 +484,7 @@ function simulateXmlMistakes(content) {
   let inCdata = false
   let inTextBlock = false
 
-  for (let line of lines) {
+  for (const line of lines) {
     const trimmed = line.trim()
 
     if (trimmed.includes('<![CDATA[')) {
@@ -661,7 +658,7 @@ function simulatePropertiesMistake(content) {
       const match = line.match(/^(\s*)([^:=]+?)(\s*)([:=])(\s*)(.*)$/)
       if (!match) return line
 
-      const [, indent, key, preSepSpace, sep, postSepSpace, value] = match
+      const [, indent, key, sep, value] = match
 
       let newLine = indent
 

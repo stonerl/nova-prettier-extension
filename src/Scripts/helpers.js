@@ -31,7 +31,7 @@ function extractPath(uri) {
 }
 
 function showError(id, title, body) {
-  let request = new NotificationRequest(id)
+  const request = new NotificationRequest(id)
 
   request.title = title
   request.body = body
@@ -43,7 +43,7 @@ function showError(id, title, body) {
 }
 
 function showActionableError(id, title, body, actions, callback) {
-  let request = new NotificationRequest(id)
+  const request = new NotificationRequest(id)
 
   request.title = title
   request.body = body
@@ -178,7 +178,7 @@ async function sanitizePrettierConfig() {
   if (modified) {
     log.info('Prettier configuration sanitized successfully.')
     // Send a notification if values have been changed.
-    let notification = new NotificationRequest('prettier-config-updated')
+    const notification = new NotificationRequest('prettier-config-updated')
     notification.title = nova.localize(
       'prettier.notification.config.updated.title',
       'Project Configuration Updated',

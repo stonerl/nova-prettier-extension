@@ -490,7 +490,7 @@ class Formatter {
     )
 
     // Initialize plugins array and conditionally load plugins if enabled
-    let plugins = []
+    const plugins = []
     if (this.modulePath.includes(nova.extension.path)) {
       if (syntaxKey === 'astro' && astroPluginEnabled) {
         plugins.push(pluginPaths.astro)
