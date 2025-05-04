@@ -10,14 +10,18 @@
 - Ignoring Files
 - Working with Remote Files
 - Troubleshooting
-  - Formatting not working?
+  - Formatting not Working
   - Resetting the Extension
+  - Custom Prettier Forks
+  - Prettier-Eslint (Not Supported)
 
 ## General
 
 Prettier⁺ includes a **built-in version of Prettier** with support for common
 plugins like `prettier-plugin-php`, `prettier-plugin-xml`, `prettier-plugin-sql`,
-and more. This bundled version is the **default** and recommended way to use Prettier⁺.
+and more.
+
+This bundled version is the **default** and recommended way to use Prettier⁺.
 
 ### Prettier Module Resolution
 
@@ -39,14 +43,6 @@ However, Prettier⁺ will automatically prefer another version if found:
 
    If your project contains a `prettier` installation in `node_modules`, it will
    be used automatically.
-
-3. **Custom Prettier Forks / Wrappers**
-
-   Prettier⁺ supports using alternative implementations like `prettier-eslint` or
-   forked Prettier versions.
-
-   > ⚠️ Use at your own risk — compatibility with nonstandard Prettier builds may
-   > vary.
 
 ### Override Behavior Precedence
 
@@ -152,7 +148,7 @@ rules in `.prettierignore`.
 
 ## Troubleshooting
 
-### Formatting not working?
+### Formatting not Working
 
 - Ensure the file type is supported and not ignored.
 - Enable logging and check the **Extension Console** for any errors reported by Prettier⁺.
@@ -174,3 +170,19 @@ dependencies are broken):
    rm -rf node_modules
    npm install
    ```
+
+### Custom Prettier Forks
+
+       Prettier⁺ supports using forked versions of Prettier as long as they export a
+       compatible API (e.g. `format`, `resolveConfig`, `getFileInfo`).
+
+       > ⚠️ Use at your own risk — compatibility with nonstandard Prettier builds may vary.
+
+### Prettier-Eslint (Not Supported)
+
+       Prettier⁺ does not support `prettier-eslint` or similar wrappers.
+
+       If you rely on ESLint formatting rules, configure ESLint separately and run it
+       using a dedicated formatter (e.g., via a Nova ESLint extension or your CI setup).
+
+       Prettier⁺ focuses solely on Prettier and its plugin ecosystem.
