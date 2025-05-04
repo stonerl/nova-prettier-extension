@@ -51,6 +51,24 @@ class PrettierService extends FormattingService {
     this._fileInfoCache = new Map()
   }
 
+  /**
+   * Format the provided source using Prettier.
+   *
+   * @param {Object} params
+   * @param {string} params.original       – The original source text to format
+   * @param {string} params.pathForConfig  – Path to use when resolving .prettierrc or similar
+   * @param {string|null} params.ignorePath – Path to a `.prettierignore` file (or null)
+   * @param {object} params.options        – User-specified Prettier options
+   * @param {boolean} [params.withCursor]  – If true, returns `{ formatted, cursorOffset }`
+   * @returns {Promise<
+   *   { formatted: string } |
+   *   { cursorOffset: number, formatted: string } |
+   *   { ignored: true } |
+   *   { missingParser: true } |
+   *   { error: { name: string, message: string, stack: string } }
+   * >}
+   * @throws {never} Formatting errors are caught and returned in `result.error`, so this method never throws
+   */
   async format({ original, pathForConfig, ignorePath, options, withCursor }) {
     const { ignored, config } = await this.getConfig({
       pathForConfig,
@@ -81,11 +99,29 @@ class PrettierService extends FormattingService {
     }
   }
 
+  /**
+   * Check whether Prettier would find a configuration file at the given path.
+   *
+   * @param {Object} params
+   * @param {string} params.pathForConfig – Path to check for a Prettier config
+   * @returns {Promise<boolean>}          – True if a config was found, else false
+   */
   async hasConfig({ pathForConfig }) {
     const config = await this.prettier.resolveConfig(pathForConfig)
     return config !== null
   }
 
+  /**
+   * Internal helper: resolve and merge Prettier options, honoring ignores and caching.
+   *
+   * @param {Object} params
+   * @param {string}      params.pathForConfig  – Base path for locating config
+   * @param {string|null} params.ignorePath     – Path to ignore-file (or null)
+   * @param {object}      params.options        – Raw options from the RPC payload
+   * @returns {Promise<{ ignored: boolean, config: object }>}
+   *   - { ignored: true } if the file is in .prettierignore
+   *   - otherwise `{ ignored: false, config }` where `config` is the final Prettier options
+   */
   async getConfig({ pathForConfig, ignorePath, options }) {
     let info = {}
     if (options.filepath) {
