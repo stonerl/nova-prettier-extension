@@ -23,79 +23,121 @@ const METHOD_NOT_FOUND = { code: -32601, message: 'Method not found' }
 const INTERNAL_ERROR = { code: -32603, message: 'Internal error' }
 const MAX_CONTENT_LENGTH = 32 * 1024 * 1024 // 32 MiB
 
+/**
+ * @typedef {{ headers: Map<string,string>, body: any }} JsonRpcFrame
+ */
+/** @extends Transform<Buffer, JsonRpcFrame> */
 class JsonRpcParser extends Transform {
   constructor() {
     super({ readableObjectMode: true })
-    this.buffer = Buffer.alloc(0)
+    // buffer-of-buffers strategy
+    this.buffers = [] // raw Buffer chunks
+    this.bytesBuffered = 0 // total bytes across all chunks
+    this.buffer = Buffer.alloc(0) // always-safe alias for toString()/slice()
   }
 
   _transform(chunk, encoding, callback) {
-    // Accumulate incoming bytes
-    this.buffer = Buffer.concat([
-      this.buffer,
-      Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, encoding),
-    ])
+    // 1) stash the new chunk
+    this.buffers.push(chunk)
+    this.bytesBuffered += chunk.length
 
-    let sep
+    // 2) if we’re over threshold, collapse into one Buffer; otherwise
+    //    rebuild the full Buffer so we never lose data across buffers
+    if (this.bytesBuffered > 64 * 1024) {
+      this.buffer = Buffer.concat(this.buffers, this.bytesBuffered)
+      this.buffers = [this.buffer]
+      this.bytesBuffered = this.buffer.length
+    } else {
+      // cheap for small sizes: always re-concat so this.buffer includes all bytes
+      this.buffer = Buffer.concat(this.buffers, this.bytesBuffered)
+    }
+
     // Keep extracting messages while we have a full header+body
-    while ((sep = this.buffer.indexOf('\r\n\r\n')) !== -1) {
-      const headerText = this.buffer.toString('ascii', 0, sep)
+    while (true) {
+      // 1. Turn buffered bytes into ASCII text once
+      const bufStr = this.buffer.toString('ascii')
+
+      // 2. Find either "\r\n\r\n" or "\n\n"
+      const hdrSplit = bufStr.match(/\r?\n\r?\n/)
+      if (!hdrSplit) break // no full header yet
+
+      const sep = hdrSplit.index // position where headers end
+      const delimLen = hdrSplit[0].length // either 4 ("\r\n\r\n") or 2 ("\n\n")
+
+      // 3. Extract header text and parse it as before
+      const headerText = bufStr.slice(0, sep)
       const headers = new Map(
-        headerText.split('\r\n').map((line) => {
+        headerText.split(/\r?\n/).map((line) => {
           const [name, ...rest] = line.split(':')
           return [name.toLowerCase(), rest.join(':').trim()]
         }),
       )
 
+      // 4. Pull out content-length
       const len = parseInt(headers.get('content-length'), 10)
-      // reject missing/invalid or overly large bodies
       if (isNaN(len) || len > MAX_CONTENT_LENGTH) {
-        // notify client of parse‐error, then force the channel to error out
+        const err = new Error(`Frame too large: ${len} bytes`)
         this.push({ error: PARSE_ERROR, id: null })
-        this.destroy(new Error(`Frame too large: ${len} bytes`))
-        return // stop parsing
+        return callback(err)
       }
 
-      // Wait for full body
-      if (this.buffer.length < sep + 4 + len) break
+      // 5. Wait until full body is buffered
+      if (this.buffer.length < sep + delimLen + len) break
 
-      const bodyBuf = this.buffer.slice(sep + 4, sep + 4 + len)
+      // 6. Slice out the body using the dynamic delimiter length
+      const bodyBuf = this.buffer.slice(sep + delimLen, sep + delimLen + len)
       let body
       try {
         body = JSON.parse(bodyBuf.toString('utf8'))
       } catch {
-        // JSON parse error—notify and drop this message
         this.push({ error: PARSE_ERROR, id: null })
-        this.buffer = this.buffer.slice(sep + 4 + len)
+        this.buffer = this.buffer.slice(sep + delimLen + len)
         continue
       }
 
-      // Emit a well-formed frame
+      // 7. Push the parsed frame and remove it from the buffer
       this.push({ headers, body })
-      this.buffer = this.buffer.slice(sep + 4 + len)
+      this.buffer = this.buffer.slice(sep + delimLen + len)
     }
+
+    // Sync up the buffers array to only the unparsed remainder
+    this.buffers = [this.buffer]
+    this.bytesBuffered = this.buffer.length
 
     callback()
   }
 }
 
 class JsonRpcService {
-  constructor(readStream, writeStream) {
+  /**
+   * @param {import('stream').Readable} readStream
+   * @param {import('stream').Writable} writeStream
+   * @param {{logger?(…args:any[]):void}} [options]
+   */
+  constructor(readStream, writeStream, { logger = console } = {}) {
     this.writeStream = writeStream
+    this.logger = logger
     this.handlers = new Map()
     this.parser = new JsonRpcParser()
 
     // Pipe incoming bytes into our parser
-    readStream.pipe(this.parser).on('data', (frame) => {
-      this._handleFrame(frame).catch((err) => {
-        // Fatal internal error
-        this._writePayload({
-          jsonrpc: '2.0',
-          error: INTERNAL_ERROR,
-          id: null,
+    readStream
+      .pipe(this.parser)
+      .on('error', (err) => {
+        // unexpected parse crash → internal error response
+        this._writePayload({ jsonrpc: '2.0', error: INTERNAL_ERROR, id: null })
+        this.logger.error('Parser error', err)
+      })
+      .on('data', (frame) => {
+        this._handleFrame(frame).catch((err) => {
+          // Fatal internal error
+          this._writePayload({
+            jsonrpc: '2.0',
+            error: INTERNAL_ERROR,
+            id: null,
+          })
         })
       })
-    })
   }
 
   onRequest(method, handler) {
@@ -117,12 +159,15 @@ class JsonRpcService {
 
     // Batch requests
     if (Array.isArray(req)) {
-      const responses = await Promise.all(req.map((r) => this._process(r)))
-      const filtered = responses.filter((r) => r !== null)
-      if (filtered.length) {
-        await this._writePayload(filtered)
+      // [] is invalid per JSON-RPC 2.0 §4.3
+      if (req.length === 0) {
+        await this._writePayload({
+          jsonrpc: '2.0',
+          error: INVALID_REQUEST,
+          id: null,
+        })
+        return
       }
-      return
     }
 
     // Single request or notification
@@ -169,10 +214,17 @@ class JsonRpcService {
         id,
       }
     } catch (err) {
+      // if handler threw a JSON-RPC error object, pass it through
       const errObj =
-        typeof err === 'string'
-          ? { code: INTERNAL_ERROR.code, message: err }
-          : { code: INTERNAL_ERROR.code, message: err.message, data: err.stack }
+        err && typeof err.code === 'number' && err.message
+          ? err
+          : typeof err === 'string'
+            ? { code: INTERNAL_ERROR.code, message: err }
+            : {
+                code: INTERNAL_ERROR.code,
+                message: err.message,
+                data: err.stack,
+              }
 
       return {
         jsonrpc: '2.0',
