@@ -28,6 +28,8 @@ const MAX_CONTENT_LENGTH = 32 * 1024 * 1024 // 32 MiB
  */
 /** @extends Transform<Buffer, JsonRpcFrame> */
 class JsonRpcParser extends Transform {
+  static CRLF = Buffer.from('\r\n\r\n', 'ascii')
+  static LF = Buffer.from('\n\n', 'ascii')
   constructor() {
     super({ readableObjectMode: true })
     // buffer-of-buffers strategy
@@ -54,26 +56,36 @@ class JsonRpcParser extends Transform {
 
     // Keep extracting messages while we have a full header+body
     while (true) {
-      // 1. Turn buffered bytes into ASCII text once
-      const bufStr = this.buffer.toString('ascii')
+      // 1. Find header delimiter as raw Buffer (avoid toString+regex)
+      //    Pre-define these once, e.g. static class props:
+      //    JsonRpcParser.CRLF = Buffer.from('\r\n\r\n', 'ascii')
+      //    JsonRpcParser.LF   = Buffer.from('\n\n', 'ascii')
+      const idxCRLF = this.buffer.indexOf(JsonRpcParser.CRLF)
+      const idxLF = this.buffer.indexOf(JsonRpcParser.LF)
+      let sep, delimLen
+      if (idxCRLF !== -1 && (idxLF === -1 || idxCRLF < idxLF)) {
+        sep = idxCRLF
+        delimLen = JsonRpcParser.CRLF.length // 4
+      } else if (idxLF !== -1) {
+        sep = idxLF
+        delimLen = JsonRpcParser.LF.length // 2
+      } else {
+        break // no full header yet
+      }
 
-      // 2. Find either "\r\n\r\n" or "\n\n"
-      const hdrSplit = bufStr.match(/\r?\n\r?\n/)
-      if (!hdrSplit) break // no full header yet
-
-      const sep = hdrSplit.index // position where headers end
-      const delimLen = hdrSplit[0].length // either 4 ("\r\n\r\n") or 2 ("\n\n")
-
-      // 3. Extract header text and parse it as before
-      const headerText = bufStr.slice(0, sep)
+      // 2. Extract header text directly from the Buffer
+      const headerBuf = this.buffer.slice(0, sep)
       const headers = new Map(
-        headerText.split(/\r?\n/).map((line) => {
-          const [name, ...rest] = line.split(':')
-          return [name.toLowerCase(), rest.join(':').trim()]
-        }),
+        headerBuf
+          .toString('ascii')
+          .split(/\r?\n/)
+          .map((line) => {
+            const [name, ...rest] = line.split(':')
+            return [name.toLowerCase(), rest.join(':').trim()]
+          }),
       )
 
-      // 4. Pull out content-length
+      // 3. Pull out content-length
       const len = parseInt(headers.get('content-length'), 10)
       if (isNaN(len) || len > MAX_CONTENT_LENGTH) {
         const err = new Error(`Frame too large: ${len} bytes`)
@@ -81,10 +93,10 @@ class JsonRpcParser extends Transform {
         return callback(err)
       }
 
-      // 5. Wait until full body is buffered
+      // 4. Wait until full body is buffered
       if (this.buffer.length < sep + delimLen + len) break
 
-      // 6. Slice out the body using the dynamic delimiter length
+      // 5. Slice out the body using the dynamic delimiter length
       const bodyBuf = this.buffer.slice(sep + delimLen, sep + delimLen + len)
       let body
       try {
@@ -95,7 +107,7 @@ class JsonRpcParser extends Transform {
         continue
       }
 
-      // 7. Push the parsed frame and remove it from the buffer
+      // 6. Push the parsed frame and remove it from the buffer
       this.push({ headers, body })
       this.buffer = this.buffer.slice(sep + delimLen + len)
     }
