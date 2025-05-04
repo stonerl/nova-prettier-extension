@@ -21,6 +21,11 @@ const PARSE_ERROR = { code: -32700, message: 'Parse error' }
 const INVALID_REQUEST = { code: -32600, message: 'Invalid Request' }
 const METHOD_NOT_FOUND = { code: -32601, message: 'Method not found' }
 const INTERNAL_ERROR = { code: -32603, message: 'Internal error' }
+
+/**
+ * Maximum allowed JSON-RPC frame body in bytes.
+ * Prevents malicious or accidental OOM via gigantic Content-Length headers.
+ */
 const MAX_CONTENT_LENGTH = 32 * 1024 * 1024 // 32 MiB
 
 /**
@@ -28,16 +33,60 @@ const MAX_CONTENT_LENGTH = 32 * 1024 * 1024 // 32 MiB
  */
 /** @extends Transform<Buffer, JsonRpcFrame> */
 class JsonRpcParser extends Transform {
+  /**
+   * Once we've buffered more than this, collapse to a single Buffer
+   * to avoid unbounded array growth. Chosen as a balance between
+   * small-packet concat-cost and large-packet GC pressure.
+   */
+  static COLLAPSE_THRESHOLD = 64 * 1024
+
+  /**
+   * Raw bytes for the CRLF-CRLF header delimiter ("\r\n\r\n").
+   * Used by Buffer.indexOf to find header/body boundaries without string conversions.
+   * @private
+   */
   static CRLF = Buffer.from('\r\n\r\n', 'ascii')
+
+  /**
+   * Raw bytes for the LF-LF header delimiter ("\n\n").
+   * Used by Buffer.indexOf as a fallback for Unix-style or mixed line endings.
+   * @private
+   */
   static LF = Buffer.from('\n\n', 'ascii')
+
   constructor() {
     super({ readableObjectMode: true })
-    // buffer-of-buffers strategy
-    this.buffers = [] // raw Buffer chunks
-    this.bytesBuffered = 0 // total bytes across all chunks
-    this.buffer = Buffer.alloc(0) // always-safe alias for toString()/slice()
+
+    /**
+     * @type {Buffer[]} raw incoming chunks
+     * @private
+     */
+    this.buffers = []
+
+    /**
+     * Total byte length of all chunks in `this.buffers`
+     * @private
+     */
+    this.bytesBuffered = 0
+
+    /**
+     * Always-up-to-date concatenation of `this.buffers`
+     * (pruned after each parse).
+     * @private
+     */
+    this.buffer = Buffer.alloc(0)
   }
 
+  /**
+   * Accumulates chunks, collapses when over threshold, then
+   * repeatedly scans for header delimiters, parses out frames, and
+   * prunes consumed bytes. Uses pure-Buffer operations for max speed.
+   *
+   * @param {Buffer} chunk
+   * @param {string} encoding
+   * @param {function(Error=):void} callback
+   * @private
+   */
   _transform(chunk, encoding, callback) {
     // 1) stash the new chunk
     this.buffers.push(chunk)
@@ -45,7 +94,7 @@ class JsonRpcParser extends Transform {
 
     // 2) if we’re over threshold, collapse into one Buffer; otherwise
     //    rebuild the full Buffer so we never lose data across buffers
-    if (this.bytesBuffered > 64 * 1024) {
+    if (this.bytesBuffered > JsonRpcParser.COLLAPSE_THRESHOLD) {
       this.buffer = Buffer.concat(this.buffers, this.bytesBuffered)
       this.buffers = [this.buffer]
       this.bytesBuffered = this.buffer.length
@@ -152,6 +201,11 @@ class JsonRpcService {
       })
   }
 
+  /**
+   * Register a handler for incoming requests.
+   * @param {string} method   – the JSON-RPC method name
+   * @param {(params: any) => Promise<any> | any} handler
+   */
   onRequest(method, handler) {
     this.handlers.set(method, handler)
   }
@@ -259,8 +313,12 @@ class JsonRpcService {
     }
   }
 
+  /**
+   * Send a JSON-RPC notification (no response expected).
+   * @param {string} method
+   * @param {any} params
+   */
   notify(method, params) {
-    // JSON-RPC notifications have no "id"
     return this._writePayload({
       jsonrpc: '2.0',
       method,
@@ -268,7 +326,9 @@ class JsonRpcService {
     })
   }
 
-  /** Remove all listeners and handlers so this service can be GC’d */
+  /**
+   * Tear down the service: remove parser listeners and clear handlers.
+   */
   dispose() {
     this.parser.removeAllListeners()
     this.handlers.clear()
