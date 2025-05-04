@@ -26,7 +26,7 @@ const INTERNAL_ERROR = { code: -32603, message: 'Internal error' }
  * Maximum allowed JSON-RPC frame body in bytes.
  * Prevents malicious or accidental OOM via gigantic Content-Length headers.
  */
-const MAX_CONTENT_LENGTH = 32 * 1024 * 1024 // 32 MiB
+const MAX_CONTENT_LENGTH = 42 * 1024 * 1024 // 42 MiB
 
 /**
  * @typedef {{ headers: Map<string,string>, body: any }} JsonRpcFrame

@@ -5,7 +5,8 @@
  * @author Alexander Weiss, Toni Förster
  * @copyright © 2023 Alexander Weiss, © 2025 Toni Förster
  *
- * Provides the core formatting logic and manages communication with the background Prettier service.
+ * Provides the core formatting logic and manages communication
+ * with the background Prettier service via JSON-RPC.
  */
 
 const {
@@ -47,6 +48,8 @@ class Formatter {
       this.prettierServiceStartDidFail.bind(this)
 
     this.emitter = new Emitter()
+    /** @type {Map<string,number>} latest in-flight request IDs per file URI */
+    this._latestRequestIds = new Map()
 
     this.setupIsReadyPromise()
   }
@@ -322,11 +325,21 @@ class Formatter {
     return this.formatEditor(editor, false, false, { force: true })
   }
 
+  /**
+   * Format this editor’s text via JSON-RPC.
+   * @param {Editor} editor
+   * @param {boolean} saving
+   * @param {boolean} selectionOnly
+   * @param {object} flags
+   * @returns {Promise<Array<Issue>>} – list of formatting issues or []
+   * @throws {never} All errors are caught and returned as [] or via showError
+   */
   async formatEditor(editor, saving, selectionOnly, flags = {}) {
     const { document } = editor
 
     // Skip formatting files larger than 32 MiB to stay within the IPC payload limit.
-    // Files up to ~42 MiB have been tested, but anything over 32 MiB isn’t officially supported.
+    // Files up to ~42 MiB have been tested, but anything over 32 MiB isn’t officially
+    // supported.
     const MAX_FILE_SIZE = 32 * 1024 * 1024 // 32 MiB
     if (document.length > MAX_FILE_SIZE) {
       showError(
@@ -651,7 +664,7 @@ class Formatter {
     // Log the options being used
     log.debug('Prettier options:', JSON.stringify(options, null, 2))
 
-    // 0) Ensure the JSON-RPC service is ready
+    // 1) Ensure the JSON-RPC service is ready
     const ready = await this.isReady
     if (!ready) {
       log.error(
@@ -660,7 +673,15 @@ class Formatter {
       return []
     }
 
-    // 1) Fire the format request, catching any IPC failure
+    // Identify this file
+    const uri = editor.document.uri.toString()
+
+    // bump and capture this file’s request ID
+    const last = this._latestRequestIds.get(uri) || 0
+    const requestId = last + 1
+    this._latestRequestIds.set(uri, requestId)
+
+    // 2) Fire the format request, catching any IPC failure
     let result
     try {
       result = await this.prettierService.request('format', {
@@ -680,7 +701,16 @@ class Formatter {
       return []
     }
 
-    // 2) Destructure Prettier’s response
+    // 3) If a newer call for **this same file** started in the meantime, drop
+    if (requestId !== this._latestRequestIds.get(uri)) {
+      log.debug('Stale Prettier response, ignoring')
+      return []
+    }
+
+    // 3.1) remove the entry so we don’t leak
+    this._latestRequestIds.delete(uri)
+
+    // 4) Destructure Prettier’s response
     const {
       formatted,
       error,
