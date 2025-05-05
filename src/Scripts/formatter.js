@@ -702,6 +702,9 @@ class Formatter {
     }
 
     // 3) If a newer call for **this same file** started in the meantime, drop
+    // This check ensures that stale responses are ignored when multiple format
+    // requests are fired concurrently for the same file. It compares the current
+    // request ID with the latest request ID stored for the file.
     if (requestId !== this._latestRequestIds.get(uri)) {
       log.debug('Stale Prettier response, ignoring')
       return []
