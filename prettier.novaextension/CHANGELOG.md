@@ -1,3 +1,34 @@
+## 3.5.38 – 2025-05-05
+
+### Added
+
+- Stale-response cancellation for Prettier: track in-flight requests per file
+  URI and ignore outdated replies
+- JSON-RPC handler unsubscription API and automatic unpipe/destroy on fatal parser errors
+
+### Changed
+
+- **JSON-RPC parser**: revamped to a buffer-of-buffers strategy, dynamic
+  `\r?\n\r?\n` header detection, stale-byte pruning, proper callback error
+  signaling, optional logger injection and full JSDoc typings
+- **Formatter**: centralized all flags and readiness checks in private
+  `_formatEditor`, enforced mutual-exclusivity of `forced`, `isSaving` and
+  `selectionOnly`, and simplified command handlers to one-liners
+- **Bootstrap**: dropped all `prettier-eslint` support/detection and streamlined
+  startup to only require PrettierService
+
+### Performance
+
+- JSON-RPC header parsing now uses `Buffer.indexOf`
+  (no intermediate ASCII strings or regex), cutting allocations and GC pressure
+
+### Documentation
+
+- Added comprehensive JSDoc for JSON-RPC constants/methods, PrettierService’s
+  public API (`format`, `hasConfig`, `getConfig`) and private helpers
+- Updated Help section to clarify that `prettier-eslint` is unsupported and
+  direct ESLint should be used
+
 ## 3.5.37 – 2025‑05‑02
 
 ### Added
