@@ -425,37 +425,15 @@ class PrettierExtension {
   }
 
   async editorWillSave(editor) {
-    await this.formatEditor(editor, true, false)
+    await this._formatEditor(editor, { isSaving: true })
   }
 
   async didInvokeFormatCommand(editor) {
-    await this.formatEditor(editor, false, false)
+    await this._formatEditor(editor)
   }
 
   async didInvokeFormatForcedCommand(editor) {
-    try {
-      const ready = await this.formatter.isReady
-      if (!ready) return
-
-      const issues = await this.formatter.formatEditorForced(editor)
-      this.issueCollection.set(editor.document.uri, issues)
-    } catch (err) {
-      log.error(err, err.stack)
-      showError(
-        'prettier-format-error',
-        nova.localize(
-          'prettier.notification.format-error.title',
-          'Error While Formatting',
-          'notification',
-        ),
-        `"${err.message}"` +
-          nova.localize(
-            'prettier.notification.format-error.body',
-            '\n\nSee the Extension Console for more info.',
-            'notification',
-          ),
-      )
-    }
+    await this._formatEditor(editor, { forced: true })
   }
 
   async didInvokeFormatSelectionCommand(editor) {
@@ -515,7 +493,7 @@ class PrettierExtension {
       return
     }
 
-    await this.formatEditor(editor, false, true)
+    await this._formatEditor(editor, { selectionOnly: true })
   }
 
   async didInvokeSaveWithoutFormattingCommand(editor) {
@@ -523,18 +501,41 @@ class PrettierExtension {
     editor.save().finally(() => this.ignoredEditors.delete(editor))
   }
 
-  async formatEditor(editor, isSaving, selectionOnly) {
+  /**
+   * Format an editor, with optional modes.
+   *
+   * @private
+   * @param {TextEditor} editor
+   * @param {Object} opts
+   * @param {boolean} [opts.isSaving=false]      — invoked via the will-save hook
+   * @param {boolean} [opts.selectionOnly=false] — format only the selected range
+   * @param {boolean} [opts.forced=false]        — ignore user opts and always format
+   *                                               cannot be combined with `isSaving` or `selectionOnly`
+   *
+   * @throws {Error} if `forced` is true alongside `isSaving` or `selectionOnly`
+   *
+   */
+
+  async _formatEditor(
+    editor,
+    { isSaving = false, selectionOnly = false, forced = false } = {},
+  ) {
+    if (forced && (isSaving || selectionOnly)) {
+      throw new Error(
+        '`forced` cannot be used alongside `isSaving` or `selectionOnly`',
+      )
+    }
+
     if (this.ignoredEditors.has(editor)) return
 
     try {
       const ready = await this.formatter.isReady
       if (!ready) return
 
-      const issues = await this.formatter.formatEditor(
-        editor,
-        isSaving,
-        selectionOnly,
-      )
+      const issues = forced
+        ? await this.formatter.formatEditorForced(editor)
+        : await this.formatter.formatEditor(editor, isSaving, selectionOnly)
+
       this.issueCollection.set(editor.document.uri, issues)
     } catch (err) {
       log.error(err, err.stack)
