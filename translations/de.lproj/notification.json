@@ -20,10 +20,10 @@
   "prettier.notification.prettier-not-found.action.help": "Hilfeartikel öffnen",
   "prettier.notification.prettier-start-failed.title": "Prettier konnte nicht gestartet werden",
   "prettier.notification.prettier-start-failed.body": "Bitte prüfen Sie die Erweiterungskonsole auf zusätzliche Logausgaben.",
-  "prettier.notification.format-error.title": "Fehler beim Formatieren",
-  "prettier.notification.format-error.body": "\n\nWeitere Informationen finden Sie in der Erweiterungskonsole.",
   "prettier.notification.unsupportedSyntax.body": "„Auswahl formatieren“ ist für diesen Dateityp nicht verfügbar. Unterstützte Syntax: JavaScript, TypeScript, GraphQL und Handlebars.\n\nDurch Klicken auf „Ausblenden“ wird der Befehl für nicht unterstützte Syntax deaktiviert.",
   "prettier.notification.actions.dismiss": "Ausblenden",
+  "prettier.notification.format-error.title": "Fehler beim Formatieren",
+  "prettier.notification.format-error.body": "\n\nWeitere Informationen finden Sie in der Erweiterungskonsole.",
   "prettier.notification.runtimeMissing.title": "Fehlende Laufzeitwerkzeuge",
   "prettier.notification.runtimeMissing.body": "Bitte installieren Sie Node.js (inklusive npm) und stellen Sie sicher, dass es in Ihrem PATH enthalten ist, damit Prettier⁺ es korrekt auflösen kann. Starten Sie anschließend Nova neu, damit die Änderung wirksam wird."
 }

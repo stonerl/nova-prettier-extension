@@ -20,10 +20,10 @@
   "prettier.notification.prettier-not-found.action.help": "",
   "prettier.notification.prettier-start-failed.title": "",
   "prettier.notification.prettier-start-failed.body": "",
-  "prettier.notification.format-error.title": "",
-  "prettier.notification.format-error.body": "",
   "prettier.notification.unsupportedSyntax.body": "",
   "prettier.notification.actions.dismiss": "",
+  "prettier.notification.format-error.title": "",
+  "prettier.notification.format-error.body": "",
   "prettier.notification.runtimeMissing.title": "",
   "prettier.notification.runtimeMissing.body": ""
 }
