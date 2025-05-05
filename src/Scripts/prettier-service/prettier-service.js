@@ -5,7 +5,8 @@
  * @author Alexander Weiss, Toni Förster
  * @copyright © 2023 Alexander Weiss, © 2025 Toni Förster
  *
- * Loads Prettier (or prettier-eslint) in a separate Node.js process and handles JSON-RPC requests for formatting and config resolution.
+ * Loads Prettier in a separate Node.js process and handles JSON-RPC requests
+ * for formatting and config resolution.
  */
 
 const JsonRpcService = require('./json-rpc.js')
@@ -46,8 +47,28 @@ class PrettierService extends FormattingService {
   constructor(jsonRpc, prettier) {
     super(jsonRpc)
     this.prettier = prettier
+    this._configCache = new Map()
+    this._fileInfoCache = new Map()
   }
 
+  /**
+   * Format the provided source using Prettier.
+   *
+   * @param {Object} params
+   * @param {string} params.original       – The original source text to format
+   * @param {string} params.pathForConfig  – Path to use when resolving .prettierrc or similar
+   * @param {string|null} params.ignorePath – Path to a `.prettierignore` file (or null)
+   * @param {object} params.options        – User-specified Prettier options
+   * @param {boolean} [params.withCursor]  – If true, returns `{ formatted, cursorOffset }`
+   * @returns {Promise<
+   *   { formatted: string } |
+   *   { cursorOffset: number, formatted: string } |
+   *   { ignored: true } |
+   *   { missingParser: true } |
+   *   { error: { name: string, message: string, stack: string } }
+   * >}
+   * @throws {never} Formatting errors are caught and returned in `result.error`, so this method never throws
+   */
   async format({ original, pathForConfig, ignorePath, options, withCursor }) {
     const { ignored, config } = await this.getConfig({
       pathForConfig,
@@ -69,66 +90,77 @@ class PrettierService extends FormattingService {
       }
     } catch (err) {
       return {
-        error: { name: err.name, message: err.message, stack: err.stack },
+        error: {
+          name: err.name,
+          message: err.message,
+          stack: err.stack,
+        },
       }
     }
   }
 
+  /**
+   * Check whether Prettier would find a configuration file at the given path.
+   *
+   * @param {Object} params
+   * @param {string} params.pathForConfig – Path to check for a Prettier config
+   * @returns {Promise<boolean>}          – True if a config was found, else false
+   */
   async hasConfig({ pathForConfig }) {
     const config = await this.prettier.resolveConfig(pathForConfig)
     return config !== null
   }
 
+  /**
+   * Internal helper: resolve and merge Prettier options, honoring ignores and caching.
+   *
+   * @param {Object} params
+   * @param {string}      params.pathForConfig  – Base path for locating config
+   * @param {string|null} params.ignorePath     – Path to ignore-file (or null)
+   * @param {object}      params.options        – Raw options from the RPC payload
+   * @returns {Promise<{ ignored: boolean, config: object }>}
+   *   - { ignored: true } if the file is in .prettierignore
+   *   - otherwise `{ ignored: false, config }` where `config` is the final Prettier options
+   */
   async getConfig({ pathForConfig, ignorePath, options }) {
     let info = {}
     if (options.filepath) {
-      info = await this.prettier.getFileInfo(options.filepath, {
-        ignorePath,
-        withNodeModules: false,
-      })
-
-      // Don't format if this file is ignored
+      if (this._fileInfoCache.has(options.filepath)) {
+        info = this._fileInfoCache.get(options.filepath)
+      } else {
+        info = await this.prettier.getFileInfo(options.filepath, {
+          ignorePath,
+          withNodeModules: false,
+        })
+        this._fileInfoCache.set(options.filepath, info)
+      }
       if (info.ignored) return { ignored: true }
     }
 
     let inferredConfig = {}
-    // Only resolve external configuration if the flag isn’t set
     if (!options._customConfigFile && !options._ignoreConfigFile) {
-      inferredConfig = await this.prettier.resolveConfig(pathForConfig, {
-        editorconfig: true,
-      })
+      if (this._configCache.has(pathForConfig)) {
+        inferredConfig = this._configCache.get(pathForConfig)
+      } else {
+        inferredConfig = await this.prettier.resolveConfig(pathForConfig, {
+          editorconfig: true,
+        })
+        this._configCache.set(pathForConfig, inferredConfig)
+      }
     }
 
-    const config = { ...options, ...inferredConfig }
-    // Prefer prettier's inferred parser over our 'default' based on Nova syntax
+    // inferredConfig comes first, user options override
+    const config = { ...inferredConfig, ...options }
+
+    // [optional] cleanup internal flags so Prettier doesn’t see them
+    delete config._customConfigFile
+    delete config._ignoreConfigFile
+
     if (info.inferredParser) {
       config.parser = info.inferredParser
     }
 
     return { ignored: false, config }
-  }
-}
-
-class PrettierEslintService extends FormattingService {
-  static isCorrectModule(module) {
-    return typeof module === 'function'
-  }
-
-  constructor(jsonRpc, format) {
-    super(jsonRpc)
-    this.format = format
-  }
-
-  async format({ original, pathForConfig, ignorePath, options }) {
-    const formatted = this.format({
-      text: original,
-      fallbackPrettierOptions: options,
-    })
-    return { formatted }
-  }
-
-  async hasConfig({ pathForConfig }) {
-    return false
   }
 }
 
@@ -138,18 +170,30 @@ let jsonRpcService
   jsonRpcService = new JsonRpcService(process.stdin, process.stdout)
   const [, , modulePath] = process.argv
 
+  process.on('uncaughtException', async (err) => {
+    await jsonRpcService.notify('didCrash', {
+      name: err.name,
+      message: err.message,
+      stack: err.stack,
+    })
+    process.exit(1)
+  })
+  process.on('unhandledRejection', async (reason) => {
+    await jsonRpcService.notify('didCrash', {
+      name: reason?.name || 'UnhandledRejection',
+      message: reason?.message || String(reason),
+      stack: reason?.stack,
+    })
+    process.exit(1)
+  })
+
   try {
     const module = require(modulePath)
-    if (
-      modulePath.includes('prettier-eslint') &&
-      PrettierEslintService.isCorrectModule(module)
-    ) {
-      new PrettierEslintService(jsonRpcService, module)
-    } else if (PrettierService.isCorrectModule(module)) {
+    if (PrettierService.isCorrectModule(module)) {
       new PrettierService(jsonRpcService, module)
     } else {
       throw new Error(
-        `Module at ${modulePath} does not appear to be prettier or prettier-eslint`,
+        `Module at ${modulePath} does not appear to be a valid Prettier module`,
       )
     }
 
