@@ -176,18 +176,23 @@ class JsonRpcService {
    * @param {{logger?(…args:any[]):void}} [options]
    */
   constructor(readStream, writeStream, { logger = console } = {}) {
+    this.readStream = readStream
     this.writeStream = writeStream
     this.logger = logger
     this.handlers = new Map()
     this.parser = new JsonRpcParser()
 
-    // Pipe incoming bytes into our parser
-    readStream
-      .pipe(this.parser)
+    // Pipe incoming bytes into our parser, and unpipe on fatal errors
+    const piped = readStream.pipe(this.parser)
+    piped
       .on('error', (err) => {
         // unexpected parse crash → internal error response
         this._writePayload({ jsonrpc: '2.0', error: INTERNAL_ERROR, id: null })
         this.logger.error('Parser error', err)
+        // stop feeding any more data
+        readStream.unpipe(this.parser)
+        // optionally destroy the parser to free resources
+        this.parser.destroy()
       })
       .on('data', (frame) => {
         this._handleFrame(frame).catch((err) => {
@@ -197,17 +202,28 @@ class JsonRpcService {
             error: INTERNAL_ERROR,
             id: null,
           })
+          this.logger.error('Fatal error in _handleFrame', err)
+          // unpipe so no further frames are sent
+          readStream.unpipe(this.parser)
+          this.parser.destroy()
         })
       })
   }
 
   /**
    * Register a handler for incoming requests.
-   * @param {string} method   – the JSON-RPC method name
+   * Returns an “unsubscribe” function you can call to remove it.
+   *
+   * @param {string} method
    * @param {(params: any) => Promise<any> | any} handler
+   * @returns {() => void}  – call this to unregister the handler
    */
   onRequest(method, handler) {
     this.handlers.set(method, handler)
+    // return an unsubscribe function
+    return () => {
+      this.handlers.delete(method)
+    }
   }
 
   async _handleFrame({ error, id, headers, body }) {
@@ -234,6 +250,15 @@ class JsonRpcService {
         })
         return
       }
+
+      // Properly handle non-empty batches:
+      const responses = await Promise.all(req.map((r) => this._process(r)))
+      for (const resp of responses) {
+        if (resp) {
+          await this._writePayload(resp)
+        }
+      }
+      return
     }
 
     // Single request or notification
@@ -327,9 +352,10 @@ class JsonRpcService {
   }
 
   /**
-   * Tear down the service: remove parser listeners and clear handlers.
+   * Tear down the service: remove parser listeners, unpipe streams, clear handlers.
    */
   dispose() {
+    this.readStream.unpipe(this.parser)
     this.parser.removeAllListeners()
     this.handlers.clear()
   }
