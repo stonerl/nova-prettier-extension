@@ -33,27 +33,6 @@ const MAX_CONTENT_LENGTH = 42 * 1024 * 1024 // 42 MiB
  */
 /** @extends Transform<Buffer, JsonRpcFrame> */
 class JsonRpcParser extends Transform {
-  /**
-   * Once we've buffered more than this, collapse to a single Buffer
-   * to avoid unbounded array growth. Chosen as a balance between
-   * small-packet concat-cost and large-packet GC pressure.
-   */
-  static COLLAPSE_THRESHOLD = 64 * 1024
-
-  /**
-   * Raw bytes for the CRLF-CRLF header delimiter ("\r\n\r\n").
-   * Used by Buffer.indexOf to find header/body boundaries without string conversions.
-   * @private
-   */
-  static CRLF = Buffer.from('\r\n\r\n', 'ascii')
-
-  /**
-   * Raw bytes for the LF-LF header delimiter ("\n\n").
-   * Used by Buffer.indexOf as a fallback for Unix-style or mixed line endings.
-   * @private
-   */
-  static LF = Buffer.from('\n\n', 'ascii')
-
   constructor() {
     super({ readableObjectMode: true })
 
@@ -169,6 +148,28 @@ class JsonRpcParser extends Transform {
   }
 }
 
+/**
+ * Once we've buffered more than this, collapse to a single Buffer
+ * to avoid unbounded array growth. Chosen as a balance between
+ * small-packet concat-cost and large-packet GC pressure.
+ */
+
+JsonRpcParser.COLLAPSE_THRESHOLD = 64 * 1024
+
+/**
+ * Raw bytes for the CRLF-CRLF header delimiter ("\r\n\r\n").
+ * Used by Buffer.indexOf to find header/body boundaries without string conversions.
+ * @private
+ */
+JsonRpcParser.CRLF = Buffer.from('\r\n\r\n', 'ascii')
+
+/**
+ * Raw bytes for the LF-LF header delimiter ("\n\n").
+ * Used by Buffer.indexOf as a fallback for Unix-style or mixed line endings.
+ * @private
+ */
+JsonRpcParser.LF = Buffer.from('\n\n', 'ascii')
+
 class JsonRpcService {
   /**
    * @param {import('stream').Readable} readStream
@@ -226,7 +227,7 @@ class JsonRpcService {
     }
   }
 
-  async _handleFrame({ error, id, headers, body }) {
+  async _handleFrame({ error, body }) {
     if (error) {
       // Parse error response (id must be null)
       await this._writePayload({
