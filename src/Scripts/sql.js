@@ -86,11 +86,6 @@ const sqlExtensionSyntaxMap = {
   'sql-generic': 'sql', // maps sql-generic to sql
 }
 
-// Use this map for syntax detection or processing
-function getMappedSqlDialect(dialect) {
-  return sqlExtensionSyntaxMap[dialect] || 'sql' // fallback to 'sql' if not found
-}
-
 /**
  * Determines the appropriate SQL dialect for sql-formatter based on the file extension
  * or the provided syntax.

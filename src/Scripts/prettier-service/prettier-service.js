@@ -22,13 +22,30 @@ class FormattingService {
     this.jsonRpc.onRequest('hasConfig', this.hasConfig)
   }
 
-  async format({ original, pathForConfig, ignorePath, options }) {
+  /**
+   * Abstract method. Must be implemented by subclass.
+   * @param {object} params
+   * @param {string} params.original
+   * @param {string} params.pathForConfig
+   * @param {string|null} params.ignorePath
+   * @param {object} params.options
+   * @throws {Error} Always throws unless overridden
+   */
+
+  async format({ _original, _pathForConfig, _ignorePath, _options }) {
     throw new Error(
       'FormattingService.format() must be implemented by subclass',
     )
   }
 
-  async hasConfig({ pathForConfig }) {
+  /**
+   * Abstract method. Must be implemented by subclass.
+   * @param {object} params
+   * @param {string} params.pathForConfig
+   * @throws {Error} Always throws unless overridden
+   */
+
+  async hasConfig({ _pathForConfig }) {
     throw new Error(
       'FormattingService.hasConfig() must be implemented by subclass',
     )
