@@ -1,3 +1,15 @@
+## 3.5.39 – 2025-05-06
+
+### Development
+
+- Added ESLint as a dev dependency and linted the entire codebase.
+- Applied ESLint auto-fixes and suppressed false-positive warnings (e.g., unused variables).
+- Added `eslint-config-prettier` and aligned ESLint rules with Prettier’s formatting.
+
+### Refactored
+
+- Consolidated plugin-loading logic into a lookup map for clearer, DRY syntax-to-plugin resolution.
+
 ## 3.5.38 – 2025-05-05
 
 ### Added
