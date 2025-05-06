@@ -1,38 +1,37 @@
 // eslint.config.js
 const { defineConfig } = require('eslint/config')
+const prettierFlat = require('eslint-config-prettier/flat')
 
-module.exports = defineConfig({
-  files: ['**/*.js'],
+module.exports = defineConfig([
+  {
+    ignores: ['tests/**'],
+  },
 
-  languageOptions: {
-    ecmaVersion: 2021,
-    sourceType: 'module',
-    globals: {
-      browser: 'readonly',
-      node: 'readonly',
+  {
+    files: ['**/*.js'],
+    languageOptions: {
+      ecmaVersion: 2021,
+      sourceType: 'module',
+      globals: {
+        browser: 'readonly',
+        node: 'readonly',
+      },
+    },
+
+    rules: {
+      'no-unused-vars': [
+        'warn',
+        {
+          args: 'after-used',
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+        },
+      ],
+      'no-console': 'off',
+      'prefer-const': 'error',
+      'no-var': 'error',
     },
   },
 
-  extends: ['eslint:recommended', 'prettier'],
-
-  plugins: [],
-
-  settings: {},
-
-  rules: {
-    // Best practices
-    'no-unused-vars': [
-      'warn',
-      {
-        args: 'after-used',
-        argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_',
-      },
-    ],
-    'no-console': 'off',
-
-    // Modern JS
-    'prefer-const': 'error',
-    'no-var': 'error',
-  },
-})
+  prettierFlat,
+])

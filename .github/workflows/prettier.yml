@@ -1,7 +1,14 @@
 name: Prettier Check
 
 on:
+  push:
+   branches: [ "main" ]
+   paths:
+      - '**/*.js'
+      - '**/*.json'
+      - '**/*.md'
   pull_request:
+    branches: [ "main" ]
     paths:
       - '**/*.js'
       - '**/*.json'
