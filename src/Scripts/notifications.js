@@ -24,7 +24,7 @@ const center = nova.notifications
  * @param {string}   [opts.type]                  "input" or "secure-input" to show a text field. Defaults to basic.
  * @param {string}   [opts.textInputPlaceholder]  Placeholder text for input notifications.
  * @param {string}   [opts.textInputValue]        Default value for input notifications.
- * @param {string[]} [opts.actions]               Array of button labels; defaults to ["OK"].
+ * @param {string[]} [opts.actions]               Array of button labels.
  * @param {Function} [opts.callback]              Callback invoked with (actionIdx, textInputValue) after user interaction.
  * @returns {Promise<NotificationResponse|undefined>}
  *   Resolves with the NotificationResponse on success,
@@ -37,9 +37,7 @@ async function showNotification({
   type,
   textInputPlaceholder,
   textInputValue,
-  actions = [
-    nova.localize('prettier.notification.actions.ok', 'OK', 'notification'),
-  ],
+  actions,
   callback,
 }) {
   // auto-cancels any existing notification with the same id
@@ -49,15 +47,17 @@ async function showNotification({
   req.title = title
   req.body = body
 
-  if (type) req.type = type
-  if (textInputPlaceholder) req.textInputPlaceholder = textInputPlaceholder
+  if (type !== undefined) req.type = type
+  if (textInputPlaceholder !== undefined)
+    req.textInputPlaceholder = textInputPlaceholder
   if (typeof textInputValue !== 'undefined') req.textInputValue = textInputValue
 
-  req.actions = actions
+  if (actions !== undefined) req.actions = actions
 
   try {
     const resp = await center.add(req)
-    if (callback) callback(resp.actionIdx, resp.textInputValue)
+    if (typeof callback === 'function')
+      callback(resp?.actionIdx, resp?.textInputValue)
     return resp
   } catch (err) {
     console.error(err, err.stack)
