@@ -8,6 +8,8 @@
  * Contains shared functions for config observation, logging, error handling, and config sanitation.
  */
 
+const { showNotification } = require('./notifications.js')
+
 class ProcessError extends Error {
   constructor(status, message) {
     super(message)
@@ -28,31 +30,6 @@ function extractPath(uri) {
   } catch {
     return uri
   }
-}
-
-function showError(id, title, body) {
-  const request = new NotificationRequest(id)
-
-  request.title = title
-  request.body = body
-  request.actions = [
-    nova.localize('prettier.notification.actions.ok', 'OK', 'notification'),
-  ]
-
-  nova.notifications.add(request).catch((err) => log.error(err, err.stack))
-}
-
-function showActionableError(id, title, body, actions, callback) {
-  const request = new NotificationRequest(id)
-
-  request.title = title
-  request.body = body
-  request.actions = actions.map((action) => action)
-
-  nova.notifications
-    .add(request)
-    .then((response) => callback(response.actionIdx))
-    .catch((err) => log.error(err, err.stack))
 }
 
 function getConfigWithWorkspaceOverride(name) {
@@ -178,21 +155,19 @@ async function sanitizePrettierConfig() {
   if (modified) {
     log.info('Prettier configuration sanitized successfully.')
     // Send a notification if values have been changed.
-    const notification = new NotificationRequest('prettier-config-updated')
-    notification.title = nova.localize(
-      'prettier.notification.config.updated.title',
-      'Project Configuration Updated',
-      'notification',
-    )
-    notification.body = nova.localize(
-      'prettier.notification.config.updated.body',
-      'Your project’s Prettier configuration has been updated to the new config format.',
-      'notification',
-    )
-    notification.actions = [
-      nova.localize('prettier.notification.actions.ok', 'OK', 'notification'),
-    ]
-    await nova.notifications.add(notification)
+    await showNotification({
+      id: 'prettier-config-updated',
+      title: nova.localize(
+        'prettier.notification.config.updated.title',
+        'Project Configuration Updated',
+        'notification',
+      ),
+      body: nova.localize(
+        'prettier.notification.config.updated.body',
+        'Your project’s Prettier configuration has been updated to the new config format.',
+        'notification',
+      ),
+    })
     log.info('Notification sent.')
   } else {
     log.debug('Prettier configuration is already sanitized.')
@@ -303,6 +278,4 @@ module.exports = {
   observeEmptyArrayCleanup,
   ProcessError,
   sanitizePrettierConfig,
-  showActionableError,
-  showError,
 }

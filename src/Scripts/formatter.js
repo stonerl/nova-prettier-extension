@@ -9,12 +9,9 @@
  * with the background Prettier service via JSON-RPC.
  */
 
-const {
-  getConfigWithWorkspaceOverride,
-  log,
-  showActionableError,
-  showError,
-} = require('./helpers.js')
+const { getConfigWithWorkspaceOverride, log } = require('./helpers.js')
+
+const { showNotification, cancelNotification } = require('./notifications.js')
 
 const pluginPaths = require('./prettier-plugins.js')
 
@@ -165,7 +162,7 @@ class Formatter {
   }
 
   stop() {
-    nova.notifications.cancel('prettier-not-running')
+    cancelNotification('prettier-not-running')
     if (!this._isReadyPromise || !this.prettierService) return
     if (this._isStoppedPromise) return
 
@@ -252,19 +249,19 @@ class Formatter {
   prettierServiceStartDidFail({ parameters: error }) {
     this._resolveIsReadyPromise(false)
 
-    showActionableError(
-      'prettier-not-running',
-      nova.localize(
+    showNotification({
+      id: 'prettier-not-running',
+      title: nova.localize(
         'prettier.notification.could-not-load-prettier.title',
         'Can’t Load Prettier',
         'notification',
       ),
-      nova.localize(
+      body: nova.localize(
         'prettier.notification.could-not-load-prettier.body',
         "Please ensure your Node.js installation is up to date. Additionally, check if the 'Prettier module' path is correctly set in your extension or project settings. For more details, refer to the error log in the Extension Console.",
         'notification',
       ),
-      [
+      actions: [
         nova.localize(
           'prettier.notification.could-not-load-prettier.action.project',
           'Project Settings',
@@ -276,49 +273,39 @@ class Formatter {
           'notification',
         ),
       ],
-      (r) => {
-        switch (r) {
-          case 0:
-            nova.workspace.openConfig()
-            break
-          case 1:
-            nova.openConfig()
-            break
-        }
+      callback: (r) => {
+        if (r === 0) nova.workspace.openConfig()
+        else nova.openConfig()
       },
-    )
+    })
 
     log.error(`${error.name}: ${error.message}\n${error.stack}`)
   }
 
   showServiceNotRunningError() {
-    showActionableError(
-      'prettier-not-running',
-      nova.localize(
+    showNotification({
+      id: 'prettier-not-running',
+      title: nova.localize(
         'prettier.notification.stopped-running.title',
         'Prettier Stopped Running',
         'notification',
       ),
-      nova.localize(
+      body: nova.localize(
         'prettier.notification.stopped-running.body',
         'If this problem persists, please report the issue through the Extension Library.',
         'notification',
       ),
-      [
+      actions: [
         nova.localize(
           'prettier.notification.stopped-running.action.restart',
           'Restart Prettier',
           'notification',
         ),
       ],
-      (r) => {
-        switch (r) {
-          case 0:
-            this.start()
-            break
-        }
+      callback: (r) => {
+        if (r === 0) this.start()
       },
-    )
+    })
   }
 
   async formatEditorForced(editor) {
@@ -332,7 +319,7 @@ class Formatter {
    * @param {boolean} selectionOnly
    * @param {object} flags
    * @returns {Promise<Array<Issue>>} – list of formatting issues or []
-   * @throws {never} All errors are caught and returned as [] or via showError
+   * @throws {never} All errors are caught and returned as [] or via showNotification
    */
   async formatEditor(editor, saving, selectionOnly, flags = {}) {
     const { document } = editor
@@ -342,14 +329,14 @@ class Formatter {
     // supported.
     const MAX_FILE_SIZE = 32 * 1024 * 1024 // 32 MiB
     if (document.length > MAX_FILE_SIZE) {
-      showError(
-        'prettier-file-too-large',
-        nova.localize(
+      showNotification({
+        id: 'prettier-file-too-large',
+        title: nova.localize(
           'prettier.notification.fileTooLarge.title',
           'Document Too Large',
           'notification',
         ),
-        [
+        body: [
           nova.localize(
             'prettier.notification.fileTooLarge.body.prefix',
             'Cannot format this document:',
@@ -362,7 +349,7 @@ class Formatter {
             'notification',
           ),
         ].join(''),
-      )
+      })
       return []
     }
 
@@ -375,7 +362,7 @@ class Formatter {
       return []
     }
 
-    nova.notifications.cancel('prettier-unsupported-syntax')
+    cancelNotification('prettier-unsupported-syntax')
 
     // Read the custom config file path from settings.
     const customConfigFile = getConfigWithWorkspaceOverride(
@@ -862,19 +849,19 @@ class Formatter {
 
     if (isParserError || missingParser) {
       if (!saving) {
-        showError(
-          'prettier-unsupported-syntax',
-          nova.localize(
+        showNotification({
+          id: 'prettier-unsupported-syntax',
+          title: nova.localize(
             'prettier.notification.unsupportedSyntax.title',
             'Unsupported Syntax',
             'notification',
           ),
-          nova.localize(
+          body: nova.localize(
             'prettier.notification.missingParser.body',
             'Prettier can’t format this file — no parser is available for its type.',
             'notification',
           ),
-        )
+        })
       }
       log.debug(`No parser for ${filePath}`)
       return []
