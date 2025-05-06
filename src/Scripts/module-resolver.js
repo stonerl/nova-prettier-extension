@@ -14,8 +14,9 @@ const {
   getNpmVersion,
   handleProcessResult,
   log,
-  showError,
 } = require('./helpers.js')
+
+const { showNotification } = require('./notifications.js')
 
 function findPathRecursively(directory, subPath, callback) {
   while (true) {
@@ -133,19 +134,19 @@ module.exports = async function () {
 
   // If either npm or Node isn’t detected, error out immediately
   if (npmVersion === 'unknown' || nodeVersion === 'unknown') {
-    showError(
-      'prettier-resolution-error',
-      nova.localize(
+    await showNotification({
+      id: 'prettier-resolution-error',
+      title: nova.localize(
         'prettier.notification.runtimeMissing.title',
         'Missing Runtime Tools',
         'notification',
       ),
-      nova.localize(
+      body: nova.localize(
         'prettier.notification.runtimeMissing.body',
         'Please install Node.js (which includes npm) and ensure it’s on your PATH so Prettier⁺ can resolve correctly. Then restart Nova to apply the change.',
         'notification',
       ),
-    )
+    })
     // stop execution — we can’t proceed without both binaries
     throw new Error('Missing runtime tools: Node.js and npm are required.')
   }

@@ -11,6 +11,7 @@
 let prettierExtensionInstance = null
 
 const findPrettier = require('./module-resolver.js')
+
 const {
   debouncePromise,
   getConfigWithWorkspaceOverride,
@@ -18,8 +19,9 @@ const {
   observeConfigWithWorkspaceOverride,
   observeEmptyArrayCleanup,
   sanitizePrettierConfig,
-  showError,
 } = require('./helpers.js')
+
+const { showNotification } = require('./notifications.js')
 const { Formatter } = require('./formatter.js')
 
 class PrettierExtension {
@@ -365,19 +367,19 @@ class PrettierExtension {
       await this.startFormatter()
     } catch (err) {
       if (err.status === 127) {
-        return showActionableError(
-          'prettier-resolution-error',
-          nova.localize(
+        await showNotification({
+          id: 'prettier-resolution-error',
+          title: nova.localize(
             'prettier.notification.prettier-not-found.title',
             'Can’t Find npm and Prettier',
             'notification',
           ),
-          nova.localize(
+          body: nova.localize(
             'prettier.notification.prettier-not-found.body',
             'Prettier can’t be found because npm isn’t available. Make sure Node is installed and accessible.\nIf you’re using NVM, adjust your shell configuration so Nova can load the environment correctly.\nSee Nova’s environment variables guide for help.',
             'notification',
           ),
-          [
+          actions: [
             nova.localize(
               'prettier.notification.prettier-not-found.action.help',
               'Open Help Article',
@@ -389,31 +391,33 @@ class PrettierExtension {
               'notification',
             ),
           ],
-          (responseIdx) => {
+          callback: (responseIdx) => {
             if (responseIdx === 0) {
               nova.openURL(
                 'https://library.panic.com/nova/environment-variables/',
               )
             }
           },
-        )
+        })
+        return
       }
 
       log.error('Unable to start prettier service', err, err.stack)
 
-      return showError(
-        'prettier-resolution-error',
-        nova.localize(
+      await showNotification({
+        id: 'prettier-resolution-error',
+        title: nova.localize(
           'prettier.notification.prettier-start-failed.title',
           'Unable to Start Prettier',
           'notification',
         ),
-        nova.localize(
+        body: nova.localize(
           'prettier.notification.prettier-start-failed.body',
           'Please check the Extension Console for additional logs.',
           'notification',
         ),
-      )
+      })
+      return
     }
   }
 
@@ -539,20 +543,21 @@ class PrettierExtension {
       this.issueCollection.set(editor.document.uri, issues)
     } catch (err) {
       log.error(err, err.stack)
-      showError(
-        'prettier-format-error',
-        nova.localize(
+      await showNotification({
+        id: 'prettier-format-error',
+        title: nova.localize(
           'prettier.notification.format-error.title',
           'Error While Formatting',
           'notification',
         ),
-        `"${err.message}"` +
+        body:
+          `"${err.message}"` +
           nova.localize(
             'prettier.notification.format-error.body',
             '\n\nSee the Extension Console for more info.',
             'notification',
           ),
-      )
+      })
     }
   }
 
@@ -601,19 +606,20 @@ exports.activate = async function () {
   } catch (err) {
     log.error('Unable to set up prettier service', err, err.stack)
 
-    return showError(
-      'prettier-resolution-error',
-      nova.localize(
+    await showNotification({
+      id: 'prettier-resolution-error',
+      title: nova.localize(
         'prettier.notification.prettier-start-failed.title',
         'Unable to Start Prettier',
         'notification',
       ),
-      nova.localize(
+      body: nova.localize(
         'prettier.notification.prettier-start-failed.body',
         'Please check the Extension Console for additional logs.',
         'notification',
       ),
-    )
+    })
+    return
   }
 }
 
