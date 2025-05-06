@@ -29,6 +29,6 @@
     "@rollup/plugin-terser": "^0.4.4",
     "eslint": "^9.26.0",
     "eslint-config-prettier": "^10.1.2",
-    "rollup": "^4.40.1"
+    "rollup": "^4.40.2"
   }
 }
