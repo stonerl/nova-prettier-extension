@@ -32,8 +32,7 @@ class FormattingService {
    * @throws {Error} Always throws unless overridden
    */
 
-  // eslint-disable-next-line no-unused-vars
-  async format({ original, pathForConfig, ignorePath, options }) {
+  async format({ _original, _pathForConfig, _ignorePath, _options }) {
     throw new Error(
       'FormattingService.format() must be implemented by subclass',
     )
@@ -46,8 +45,7 @@ class FormattingService {
    * @throws {Error} Always throws unless overridden
    */
 
-  // eslint-disable-next-line no-unused-vars
-  async hasConfig({ pathForConfig }) {
+  async hasConfig({ _pathForConfig }) {
     throw new Error(
       'FormattingService.hasConfig() must be implemented by subclass',
     )

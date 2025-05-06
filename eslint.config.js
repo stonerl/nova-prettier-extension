@@ -1,10 +1,9 @@
+// eslint.config.js
 const { defineConfig } = require('eslint/config')
 
 module.exports = defineConfig({
-  // 1. where to look for files (default is “**/*.js”):
   files: ['**/*.js'],
 
-  // 2. environment globals
   languageOptions: {
     ecmaVersion: 2021,
     sourceType: 'module',
@@ -14,28 +13,26 @@ module.exports = defineConfig({
     },
   },
 
-  // 3. enable recommended rules
-  plugins: {},
+  extends: ['eslint:recommended', 'prettier'],
+
+  plugins: [],
+
   settings: {},
 
   rules: {
-    // stylistic
-    indent: ['error', 2, { SwitchCase: 1, offsetTernaryExpressions: true }],
-    quotes: [
-      'error',
-      'single',
+    // Best practices
+    'no-unused-vars': [
+      'warn',
       {
-        avoidEscape: true,
-        allowTemplateLiterals: true,
+        args: 'after-used',
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
       },
     ],
+    'no-console': 'off',
 
-    // best practices
-    'no-unused-vars': ['warn'],
-    'no-console': ['off'],
-
-    // modern JS
-    'prefer-const': ['error'],
-    'no-var': ['error'],
+    // Modern JS
+    'prefer-const': 'error',
+    'no-var': 'error',
   },
 })
