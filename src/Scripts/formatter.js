@@ -489,54 +489,34 @@ class Formatter {
       'prettier.plugins.prettier-plugin-xml.enabled',
     )
 
-    // Initialize plugins array and conditionally load plugins if enabled
+    // 1) Build a lookup map once
+    const pluginConfigMap = {
+      astro: { enabled: astroPluginEnabled, path: pluginPaths.astro },
+      blade: { enabled: bladePluginEnabled, path: pluginPaths.blade },
+      java: { enabled: javaPluginEnabled, path: pluginPaths.java },
+      'java-properties': {
+        enabled: propertiesPluginEnabled,
+        path: pluginPaths.properties,
+      },
+      'liquid-html': { enabled: liquidPluginEnabled, path: pluginPaths.liquid },
+      'liquid-md': { enabled: liquidPluginEnabled, path: pluginPaths.liquid },
+      nginx: { enabled: nginxPluginEnabled, path: pluginPaths.nginx },
+      php: { enabled: phpPluginEnabled, path: pluginPaths.php },
+      sql: { enabled: sqlPluginEnabled, path: pluginPaths.sql },
+      toml: { enabled: tomlPluginEnabled, path: pluginPaths.toml },
+      twig: { enabled: twigPluginEnabled, path: pluginPaths.twig },
+      xml: { enabled: xmlPluginEnabled, path: pluginPaths.xml },
+    }
+
+    // 2) Kick off with an empty array
     const plugins = []
+
+    // 3) Conditionally load plugins if enabled
     if (this.modulePath.includes(nova.extension.path)) {
-      if (syntaxKey === 'astro' && astroPluginEnabled) {
-        plugins.push(pluginPaths.astro)
-      }
+      const selectedPlugin = pluginConfigMap[syntaxKey]
 
-      if (syntaxKey === 'blade' && bladePluginEnabled) {
-        plugins.push(pluginPaths.blade)
-      }
-
-      if (syntaxKey === 'java' && javaPluginEnabled) {
-        plugins.push(pluginPaths.java)
-      }
-
-      if (syntaxKey === 'java-properties' && propertiesPluginEnabled) {
-        plugins.push(pluginPaths.properties)
-      }
-
-      if (
-        (syntaxKey === 'liquid-html' || syntaxKey === 'liquid-md') &&
-        liquidPluginEnabled
-      ) {
-        plugins.push(pluginPaths.liquid)
-      }
-
-      if (syntaxKey === 'nginx' && nginxPluginEnabled) {
-        plugins.push(pluginPaths.nginx)
-      }
-
-      if (syntaxKey === 'php' && phpPluginEnabled) {
-        plugins.push(pluginPaths.php)
-      }
-
-      if (syntaxKey === 'sql' && sqlPluginEnabled) {
-        plugins.push(pluginPaths.sql)
-      }
-
-      if (syntaxKey === 'toml' && tomlPluginEnabled) {
-        plugins.push(pluginPaths.toml)
-      }
-
-      if (syntaxKey === 'twig' && twigPluginEnabled) {
-        plugins.push(pluginPaths.twig)
-      }
-
-      if (syntaxKey === 'xml' && xmlPluginEnabled) {
-        plugins.push(pluginPaths.xml)
+      if (selectedPlugin?.enabled) {
+        plugins.push(selectedPlugin.path)
       }
 
       // prettier-plugin-tailwindcss must be loaded last.
