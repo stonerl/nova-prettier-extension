@@ -1,3 +1,19 @@
+## 3.5.40 – 2025-05-07
+
+### Added
+
+- **Centralized Notification Handling**
+  - Introduced `notifications.js` to encapsulate all Nova `NotificationRequest` logic.
+  - Provides `showNotification()` for posting UI notifications with optional actions and callbacks.
+  - Provides `cancelNotification()` to dismiss notifications by ID.
+
+### Refactored
+
+- **Notification API**
+  - Notification fields like `type`, `placeholder`, and `inputValue` are now only set when explicitly defined.
+  - Results in cleaner, more predictable UI behavior.
+  - Simplified notification calls throughout the codebase for improved maintainability and testability.
+
 ## 3.5.39 – 2025-05-06
 
 ### Development
