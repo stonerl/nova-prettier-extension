@@ -1,3 +1,12 @@
+## 3.5.41 - 2025-05-18
+
+### Changed
+
+- Update `prettier-plugin-sql` to version `0.19.1`.
+- Update `prettier-plugin-toml`to version `2.0.5`.
+- Missing parser and ignored syntax logs appear as info now, w/o the need to
+  enable debug logging
+
 ## 3.5.40 – 2025-05-07
 
 ### Added
