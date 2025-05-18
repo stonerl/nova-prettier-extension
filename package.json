@@ -22,13 +22,13 @@
     "strings:extract": "node scripts/extract-strings.js"
   },
   "devDependencies": {
-    "@babel/parser": "^7.27.1",
+    "@babel/parser": "^7.27.2",
     "@babel/traverse": "^7.27.1",
     "@rollup/plugin-commonjs": "^28.0.3",
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-terser": "^0.4.4",
-    "eslint": "^9.26.0",
-    "eslint-config-prettier": "^10.1.2",
-    "rollup": "^4.40.2"
+    "eslint": "^9.27.0",
+    "eslint-config-prettier": "^10.1.5",
+    "rollup": "^4.41.0"
   }
 }

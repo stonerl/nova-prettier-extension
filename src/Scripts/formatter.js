@@ -740,7 +740,7 @@ class Formatter {
         `prettier.format-on-save.ignored-syntaxes.${syntaxKey}`,
       ) === true
     ) {
-      log.debug(`Not formatting (${syntaxKey} syntax ignored) ${document.path}`)
+      log.info(`Not formatting (${syntaxKey} syntax ignored) ${document.path}`)
       return null
     }
 
@@ -863,7 +863,7 @@ class Formatter {
           ),
         })
       }
-      log.debug(`No parser for ${filePath}`)
+      log.info(`No parser for ${filePath}`)
       return []
     }
 
