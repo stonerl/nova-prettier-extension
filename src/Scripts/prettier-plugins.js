@@ -78,7 +78,7 @@ module.exports = {
     'node_modules',
     'prettier-plugin-sql',
     'lib',
-    'index.cjs',
+    'index.js',
   ),
   tailwind: nova.path.join(
     nova.extension.path,
@@ -92,7 +92,7 @@ module.exports = {
     'node_modules',
     'prettier-plugin-toml',
     'lib',
-    'index.cjs',
+    'index.js',
   ),
   twig: nova.path.join(
     nova.extension.path,
