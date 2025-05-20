@@ -1,9 +1,18 @@
+## 3.5.42 - 2025-05-20
+
+### Hotfix
+
+- Downgrade `prettier-plugin-sql` to version `0.19.0`.
+- Downgrade `prettier-plugin-toml` to version `2.0.4`.
+
+The latest plugin releases resulted in a "No parser for …" error.
+
 ## 3.5.41 - 2025-05-18
 
 ### Changed
 
 - Update `prettier-plugin-sql` to version `0.19.1`.
-- Update `prettier-plugin-toml`to version `2.0.5`.
+- Update `prettier-plugin-toml` to version `2.0.5`.
 - Missing parser and ignored syntax logs appear as info now, w/o the need to
   enable debug logging
 
