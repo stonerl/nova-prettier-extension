@@ -1,3 +1,11 @@
+## 3.5.43 - 2025-05-20
+
+### Changed
+
+- Upgraded prettier-plugin-sql to version 0.19.1
+- Upgraded prettier-plugin-toml to version 2.0.5
+- Switched from `.cjs` to `.js` modules for compatibility with ES modules for both plugins
+
 ## 3.5.42 - 2025-05-20
 
 ### Hotfix
