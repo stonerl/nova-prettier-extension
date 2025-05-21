@@ -165,7 +165,7 @@ dependencies are broken):
 1. Open Nova’s built-in Terminal: **Extensions → Local Terminal**.
 2. Run the following commands:
 
-   ```bash
+   ```sh
    cd "~/Library/Application Support/Nova/Extensions/stonerl.prettier"
    rm -rf node_modules
    npm install
@@ -173,16 +173,16 @@ dependencies are broken):
 
 ### Custom Prettier Forks
 
-       Prettier⁺ supports using forked versions of Prettier as long as they export a
-       compatible API (e.g. `format`, `resolveConfig`, `getFileInfo`).
+Prettier⁺ supports using forked versions of Prettier as long as they export a
+compatible API (e.g. `format`, `resolveConfig`, `getFileInfo`).
 
-       > ⚠️ Use at your own risk — compatibility with nonstandard Prettier builds may vary.
+> ⚠️ Use at your own risk — compatibility with nonstandard Prettier builds may vary.
 
 ### Prettier-Eslint (Not Supported)
 
-       Prettier⁺ does not support `prettier-eslint` or similar wrappers.
+Prettier⁺ **does not support** `prettier-eslint` or similar wrappers.
 
-       If you rely on ESLint formatting rules, configure ESLint separately and run it
-       using a dedicated formatter (e.g., via a Nova ESLint extension or your CI setup).
+If you rely on ESLint formatting rules, configure ESLint separately and run it
+using a dedicated formatter (e.g., via a Nova ESLint extension or your CI setup).
 
-       Prettier⁺ focuses solely on Prettier and its plugin ecosystem.
+> ⚠️ Prettier⁺ focuses solely on Prettier and its plugin ecosystem.
