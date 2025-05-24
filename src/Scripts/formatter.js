@@ -689,13 +689,15 @@ class Formatter {
       cursorOffset: newCursor,
     } = result
 
-    // UPSTREAM: `prettier-plugin-sql` & `prettier-plugin-toml` do not return a valid cursor
-    if (newCursor === 0 && (syntaxKey === 'sql' || syntaxKey === 'toml')) {
+    // newCursor may be a number or undefined/null.
+    if (newCursor == null) {
+      // Prettier really couldn’t compute a position
       this._cursorOffset = editor.selectedRange.start
       log.debug(
-        `Cursor position is 0. Adjusting cursor offset for ${syntaxKey} syntax to the current start range: ${editor.selectedRange.start}`,
+        `Prettier returned no cursor (null/undefined); falling back to editor position ${this._cursorOffset}`,
       )
     } else {
+      // A numeric cursor — trust it
       this._cursorOffset = newCursor
       log.debug('New Cursor Position:', newCursor)
     }

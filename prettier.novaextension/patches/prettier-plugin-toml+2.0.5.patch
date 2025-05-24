@@ -1,0 +1,26 @@
+diff --git a/node_modules/prettier-plugin-toml/lib/index.js b/node_modules/prettier-plugin-toml/lib/index.js
+index e4ce0fc..577d466 100644
+--- a/node_modules/prettier-plugin-toml/lib/index.js
++++ b/node_modules/prettier-plugin-toml/lib/index.js
+@@ -2,6 +2,10 @@ import taplo from '@taplo/lib';
+ import { languages } from './languages.js';
+ import { prettierOptionsDefinitions } from './options.js';
+ const PLUGIN_NAME = 'toml';
++
++// 32 MiB in bytes (characters)
++const MAX_TOML_FILE_SIZE = 32 * 1024 * 1024; // 33 554 432
++
+ let taploIns;
+ async function format(code, options) {
+     if (!taploIns) {
+@@ -24,8 +28,8 @@ const TomlPlugin = {
+                 });
+             },
+             astFormat: PLUGIN_NAME,
+-            locStart: () => -1,
+-            locEnd: () => -1,
++            locStart: () => 0,
++            locEnd:   () => MAX_TOML_FILE_SIZE,
+         },
+     },
+     printers: {

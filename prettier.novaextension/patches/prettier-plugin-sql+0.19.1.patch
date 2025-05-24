@@ -1,0 +1,26 @@
+diff --git a/node_modules/prettier-plugin-sql/lib/index.js b/node_modules/prettier-plugin-sql/lib/index.js
+index 0879ac1..b8ace14 100644
+--- a/node_modules/prettier-plugin-sql/lib/index.js
++++ b/node_modules/prettier-plugin-sql/lib/index.js
+@@ -6,6 +6,10 @@ const parser = new nodeSqlParser.Parser();
+ const SQL_FORMATTER = 'sql-formatter';
+ const NODE_SQL_PARSER = 'node-sql-parser';
+ const SQL_CST = 'sql-cst';
++
++// 32 MiB in bytes (characters)
++const MAX_SQL_FILE_SIZE = 32 * 1024 * 1024; // 33 554 432
++
+ const SqlPlugin = {
+     languages,
+     parsers: {
+@@ -16,8 +20,8 @@ const SqlPlugin = {
+                     : parser.astify(text, { type, database });
+             },
+             astFormat: 'sql',
+-            locStart: () => -1,
+-            locEnd: () => -1,
++            locStart: () => 0,
++            locEnd:   () => MAX_SQL_FILE_SIZE,
+         },
+     },
+     printers: {
