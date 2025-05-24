@@ -2,7 +2,7 @@
 
 ### Changed
 
--  **SQL & TOML cursor tracking**
+- **SQL & TOML cursor tracking**
   - Replaced dummy `locStart: () => -1` / `locEnd: () => -1` with
     `locStart: () => 0` and `locEnd: () => MAX_*_FILE_SIZE` in both
     `prettier-plugin-sql` and `prettier-plugin-toml`.
@@ -10,7 +10,7 @@
 
 ### Added
 
--  **Cursor fallback**
+- **Cursor fallback**
   - In the editor integration, if Prettier fails to compute a position (`null`/`undefined`),
     fall back to `editor.selectedRange.start`.
 
