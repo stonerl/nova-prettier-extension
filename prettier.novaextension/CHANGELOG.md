@@ -1,3 +1,12 @@
+## 3.5.45 - 2025-05-24
+
+### Changed
+
+- **Print Width toggle limits**
+  - Enforced a minimum value of `60` and a maximum value of `140`
+    when using the Print Width toggle in the UI.
+  - Higher or lower values can still be entered manually in the settings.
+
 ## 3.5.44 - 2025-05-24
 
 ### Changed
