@@ -123,7 +123,8 @@
         "description": "Specify the line length that the printer will wrap on.",
         "link": "https://prettier.io/docs/options#print-width",
         "type": "number",
-        "min": 0,
+        "min": 60,
+        "max": 140,
         "config": {
           "placeholder": "80",
           "default": 80,
@@ -637,7 +638,8 @@
             "description": "Same as in Prettier.",
             "link": "https://prettier.io/docs/options#print-width",
             "type": "number",
-            "min": 0,
+            "min": 60,
+            "max": 140,
             "config": {
               "placeholder": "80",
               "default": 80,
@@ -842,7 +844,8 @@
             "description": "Same as in Prettier.",
             "link": "https://prettier.io/docs/options#print-width",
             "type": "number",
-            "min": 0,
+            "min": 60,
+            "max": 140,
             "config": {
               "placeholder": "80",
               "default": 80,
@@ -1084,7 +1087,8 @@
             "description": "Same as in Prettier.",
             "link": "https://prettier.io/docs/options#print-width",
             "type": "number",
-            "min": 0,
+            "min": 60,
+            "max": 140,
             "config": {
               "placeholder": "120",
               "default": 120,
@@ -1549,7 +1553,8 @@
             "description": "Same as in Prettier.",
             "link": "https://prettier.io/docs/options#print-width",
             "type": "number",
-            "min": 0,
+            "min": 60,
+            "max": 140,
             "config": {
               "placeholder": "120",
               "default": 120,
@@ -1800,7 +1805,8 @@
             "description": "Same as in Prettier.",
             "link": "https://prettier.io/docs/options#print-width",
             "type": "number",
-            "min": 0,
+            "min": 60,
+            "max": 140,
             "config": {
               "placeholder": "80",
               "default": 80,
