@@ -87,6 +87,17 @@ Java, Laravel Blade, Liquid, PHP, SQL, Tailwind CSS, TOML, Twig, and XML
 
 If you want to see other plugins being integrated, head over to the [Discussions](https://github.com/stonerl/nova-prettier-extension/discussions).
 
+## Permissions
+
+### Launch Subprocesses
+
+- To install the bundled Prettier and its plugins.
+- To launch the Prettier Service for code formatting.
+
+### Read Files
+
+- To read Prettier configuration files, such as `.prettierrc` and `.prettierignore`.
+
 ## Versioning
 
 Prettier⁺ for Nova follows [Semantic Versioning](https://semver.org/),
