@@ -1,3 +1,10 @@
+## 3.5.46 - 2025-05-29
+
+### Changed
+
+- Clarified permission usage in `README.md` by detailing the `Launch Subprocesses`
+  and `Read Files` requirements.
+
 ## 3.5.45 - 2025-05-24
 
 ### Changed
