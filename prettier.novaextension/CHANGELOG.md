@@ -1,3 +1,9 @@
+## 3.5.47 - 2025-06-01
+
+### Changed
+
+- Upgraded `prettier-plugin-tailwindcss` to version `0.6.12`
+
 ## 3.5.46 - 2025-05-29
 
 ### Changed
@@ -34,8 +40,8 @@
 
 ### Changed
 
-- Upgraded prettier-plugin-sql to version 0.19.1
-- Upgraded prettier-plugin-toml to version 2.0.5
+- Upgraded `prettier-plugin-sql` to version `0.19.1`
+- Upgraded `prettier-plugin-toml` to version `2.0.5`
 - Switched from `.cjs` to `.js` modules for compatibility with ES modules for both plugins
 
 ## 3.5.42 - 2025-05-20
