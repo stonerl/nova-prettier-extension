@@ -23,7 +23,7 @@
     "prettier-plugin-astro": "^0.14.1",
     "prettier-plugin-ejs": "^1.0.3",
     "prettier-plugin-ejs-tailwindcss": "^0.1.2",
-    "prettier-plugin-java": "^2.6.7",
+    "prettier-plugin-java": "^2.6.8",
     "prettier-plugin-nginx": "^1.0.3",
     "prettier-plugin-properties": "^0.3.0",
     "prettier-plugin-sql": "^0.19.1",
