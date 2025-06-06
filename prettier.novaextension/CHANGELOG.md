@@ -1,8 +1,12 @@
+## 3.5.48 - 2025-06-06
+
+- Updated `prettier-plugin-java` to version `2.6.8`
+
 ## 3.5.47 - 2025-06-01
 
 ### Changed
 
-- Upgraded `prettier-plugin-tailwindcss` to version `0.6.12`
+- Updated `prettier-plugin-tailwindcss` to version `0.6.12`
 
 ## 3.5.46 - 2025-05-29
 
@@ -40,8 +44,8 @@
 
 ### Changed
 
-- Upgraded `prettier-plugin-sql` to version `0.19.1`
-- Upgraded `prettier-plugin-toml` to version `2.0.5`
+- Updated `prettier-plugin-sql` to version `0.19.1`
+- Updated `prettier-plugin-toml` to version `2.0.5`
 - Switched from `.cjs` to `.js` modules for compatibility with ES modules for both plugins
 
 ## 3.5.42 - 2025-05-20
@@ -57,8 +61,8 @@ The latest plugin releases resulted in a "No parser for …" error.
 
 ### Changed
 
-- Update `prettier-plugin-sql` to version `0.19.1`.
-- Update `prettier-plugin-toml` to version `2.0.5`.
+- Updated`prettier-plugin-sql` to version `0.19.1`.
+- Updated`prettier-plugin-toml` to version `2.0.5`.
 - Missing parser and ignored syntax logs appear as info now, w/o the need to
   enable debug logging
 
