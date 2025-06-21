@@ -1,3 +1,7 @@
+## 3.5.49 - 2025-06-21
+
+- Updated `prettier-plugin-tailwindcss` to version `0.6.13`
+
 ## 3.5.48 - 2025-06-06
 
 - Updated `prettier-plugin-java` to version `2.6.8`
