@@ -409,6 +409,26 @@
         }
       },
       {
+        "key": "prettier.default-config.checkIgnorePragma",
+        "title": "Check Ignore Pragma",
+        "description": "Prettier can allow individual files to opt out of formatting if they contain a special comment, called a pragma, at the top of the file.",
+        "link": "https://prettier.io/docs/options#check-ignore-pragma",
+        "config": {
+          "type": "boolean",
+          "default": false
+        },
+        "configWorkspace": {
+          "type": "enum",
+          "radio": false,
+          "default": null,
+          "values": [
+            [null, "Global Setting"],
+            [true, "Enabled"],
+            [false, "Disabled"]
+          ]
+        }
+      },
+      {
         "key": "prettier.default-config.proseWrap",
         "title": "Prose Wrap",
         "description": "By default, Prettier will not change wrapping in markdown text since some services use a linebreak-sensitive renderer, e.g. GitHub comments and BitBucket. To have Prettier wrap prose to the print width, change this option to \"always\". If you want Prettier to force all prose blocks to be on a single line and rely on editor/viewer soft wrapping instead, you can use \"never\".",
