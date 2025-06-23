@@ -145,7 +145,6 @@ The latest plugin releases resulted in a "No parser for …" error.
 ### Fixed
 
 - **SQL Cursor Position**
-
   - Resolved an issue where formatting SQL files would reset the cursor to the
     start of the document.
     The extension now preserves the editor's current cursor position since
@@ -181,7 +180,6 @@ The latest plugin releases resulted in a "No parser for …" error.
 ### Refactored
 
 - **Prettier Service, JSON-RPC, and Formatter Resilience**
-
   - Major internal rewrite of the JSON-RPC layer and service lifecycle
   - `json-rpc.js`
     - Rewritten as a `Transform` stream for proper stream piping
@@ -199,7 +197,6 @@ The latest plugin releases resulted in a "No parser for …" error.
     - Catches all IPC errors in `format()` and `hasConfig()` to avoid crashes
 
 - **Max Payload Size**
-
   - Parser now enforces a 32 MiB limit on incoming JSON-RPC payloads
 
 - **Lint Feedback**
@@ -217,13 +214,11 @@ The latest plugin releases resulted in a "No parser for …" error.
 ### Improved
 
 - **Prettier service lifecycle and stability**
-
   - Optimized startup, shutdown, and crash recovery behavior
   - Faster, more reliable restarts when configuration or project dependencies change
   - Reduced unnecessary restarts on clean exits
 
 - **Debouncing and file watching**
-
   - Smarter debouncing with separate timing for file and settings changes
   - Improved handling of external Prettier config files and custom config paths
   - All watchers and listeners are now properly cleaned up on extension shutdown
@@ -251,7 +246,6 @@ The latest plugin releases resulted in a "No parser for …" error.
 ### Added
 
 - **SQL Dialect Detection Based on File Extension**
-
   - Maps known SQL-related extensions to supported sql-formatter dialects.
   - Prioritizes longest-match extension resolution for accuracy (e.g., `.mariadb.sql` over `.sql`).
   - Falls back to a generic 'sql' dialect when no match is found.
@@ -262,7 +256,6 @@ The latest plugin releases resulted in a "No parser for …" error.
   - Centralizes dialect validation and normalization logic in `sql.js` for a clean formatter integration.
 
 - **Support for Nova's SQL Language Extension**
-
   - When Nova's SQL Language extension is installed, the provided syntax is now used for dialect detection instead of resolving via the URI.
 
 ## 3.5.29 – 2025‑04‑23
@@ -309,7 +302,6 @@ The latest plugin releases resulted in a "No parser for …" error.
 - **Added plugin: `prettier-plugin-tailwindcss`**
 
   Supports Tailwind class sorting in the following syntaxes:
-
   - HTML
   - HTML (EJS)
   - HTML (Liquid)
@@ -416,14 +408,12 @@ The latest plugin releases resulted in a "No parser for …" error.
 ### Changed
 
 - **Switched to Babel AST for localization extraction**
-
   - Uses `@babel/parser` and `@babel/traverse` to extract `nova.localize()` calls.
   - Supports multi-table output: calls with a third argument go into separate files
     (e.g. `notification.json`), others default to `strings.json`.
   - Merges unified configuration and extension metadata into the default localization table.
 
 - **Proper logging**
-
   - Replaced raw `console` calls with `log.info`, `log.warn`, `log.error`, and `log.debug`.
   - Debug logs now require “Log Debug Information” to be enabled.
 
@@ -474,12 +464,10 @@ The latest plugin releases resulted in a "No parser for …" error.
 ### Added
 
 - **New option: `Ignore Configuration`**
-
   - When enabled, external configuration files (e.g. `.prettierrc`) are ignored
   - The extension’s default settings and plugin options are always applied
 
 - **Custom Prettier configuration file support**
-
   - A custom configuration file can now be set in the extension or project settings
   - This file takes precedence over any configuration files in the workspace
   - Supersedes the `Ignore Configuration` option when both are used
@@ -513,7 +501,6 @@ The latest plugin releases resulted in a "No parser for …" error.
 ### Added
 
 - **Automatic package and patch management**
-
   - Implemented a module resolver to validate all dependencies declared in `package.json`
   - Automatically runs `npm install` for any missing or outdated packages
   - Applies patches using `patch-package` after every install
