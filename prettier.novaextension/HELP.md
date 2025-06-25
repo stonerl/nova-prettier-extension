@@ -151,6 +151,7 @@ rules in `.prettierignore`.
 ### Formatting not Working
 
 - Ensure the file type is supported and not ignored.
+- Check for Prettier config files in your project, that might override your settings.
 - Enable logging and check the **Extension Console** for any errors reported by Prettier⁺.
 - Try restarting the **Prettier Service** from the menu:
   `Extensions → Prettier⁺ → Restart Prettier Service`
