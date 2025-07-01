@@ -1,3 +1,8 @@
+## 3.6.1 - 2025-07-01
+
+- Updated `prettier` to version `3.6.2`.
+- Updated `prettier-plugin-java` to version `2.7.1`.
+
 ## 3.6.0 - 2025-06-24
 
 ### Changed
