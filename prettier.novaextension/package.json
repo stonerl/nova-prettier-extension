@@ -14,9 +14,9 @@
   "homepage": "https://github.com/stonerl/nova-prettier-extension#readme",
   "dependencies": {
     "@prettier/plugin-php": "^0.22.4",
-    "@prettier/plugin-xml": "^3.4.1",
+    "@prettier/plugin-xml": "^3.4.2",
     "@shopify/prettier-plugin-liquid": "^1.9.3",
-    "@shufo/prettier-plugin-blade": "^1.15.3",
+    "@shufo/prettier-plugin-blade": "^1.15.4",
     "@zackad/prettier-plugin-twig": "^0.16.0",
     "patch-package": "^8.0.0",
     "prettier": "^3.6.2",
@@ -26,9 +26,9 @@
     "prettier-plugin-java": "^2.7.1",
     "prettier-plugin-nginx": "^1.0.3",
     "prettier-plugin-properties": "^0.3.0",
-    "prettier-plugin-sql": "^0.19.1",
-    "prettier-plugin-tailwindcss": "^0.6.13",
-    "prettier-plugin-toml": "^2.0.5"
+    "prettier-plugin-sql": "^0.19.2",
+    "prettier-plugin-tailwindcss": "^0.6.14",
+    "prettier-plugin-toml": "^2.0.6"
   },
   "scripts": {
     "postinstall": "patch-package"
