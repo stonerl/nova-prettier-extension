@@ -1,3 +1,11 @@
+## 3.6.2 - 2025-07-12
+
+- Updated `prettier-plugin-sql` to version `0.19.2`
+- Updated `prettier-plugin-tailwindcss` to version `0.6.14`
+- Updated `prettier-plugin-toml` to version `2.0.6`
+- Updated `@prettier/plugin-xml`to version `3.4.2`
+- Updated `@shufo/prettier-plugin-blade` to version `1.15.4`
+
 ## 3.6.1 - 2025-07-01
 
 - Updated `prettier` to version `3.6.2`.
