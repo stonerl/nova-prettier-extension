@@ -28,7 +28,7 @@
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-terser": "^0.4.4",
     "eslint": "^9.31.0",
-    "eslint-config-prettier": "^10.1.5",
-    "rollup": "^4.45.0"
+    "eslint-config-prettier": "^10.1.8",
+    "rollup": "^4.45.1"
   }
 }

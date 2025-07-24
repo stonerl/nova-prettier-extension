@@ -606,12 +606,12 @@
           {
             "key": "prettier.plugins.prettier-plugin-php.phpVersion",
             "title": "PHP Version",
-            "description": "Allows specifying the PHP version you're using. If you're using PHP 7.1 or later, setting this option will make use of modern language features in the printed output. If you're using PHP lower than 7.0, you'll have to set this option or Prettier will generate incompatible code.",
+            "description": "Allows specifying the PHP version to use. The default setting 'auto', attempts to auto-detect the supported PHP version from a 'composer.json' file in the project folder. If not found or not able to be parsed, it will default to the latest supported PHP version.",
             "link": "https://github.com/prettier/plugin-php#configuration",
             "type": "enum",
             "radio": false,
             "config": {
-              "default": "7.0",
+              "default": "auto",
               "values": [
                 ["5.0", "5.0"],
                 ["5.1", "5.1"],
@@ -627,7 +627,10 @@
                 ["7.4", "7.4"],
                 ["8.0", "8.0"],
                 ["8.1", "8.1"],
-                ["8.2", "8.2"]
+                ["8.2", "8.2"],
+                ["8.3", "8.3"],
+                ["8.4", "8.4"],
+                ["auto", "auto"]
               ]
             },
             "configWorkspace": {
@@ -648,7 +651,10 @@
                 ["7.4", "7.4"],
                 ["8.0", "8.0"],
                 ["8.1", "8.1"],
-                ["8.2", "8.2"]
+                ["8.2", "8.2"],
+                ["8.3", "8.3"],
+                ["8.4", "8.4"],
+                ["auto", "auto"]
               ]
             }
           },
@@ -1389,7 +1395,7 @@
             "type": "enum",
             "radio": false,
             "config": {
-              "default": "8.1",
+              "default": "8.4",
               "values": [
                 ["5.0", "5.0"],
                 ["5.1", "5.1"],
