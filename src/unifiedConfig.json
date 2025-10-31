@@ -2354,7 +2354,7 @@
                 "type": "text",
                 "config": {
                   "placeholder": "{}",
-                  "default": "{}",
+                  "default": null,
                   "required": true
                 },
                 "configWorkspace": {
