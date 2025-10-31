@@ -2354,8 +2354,7 @@
                 "type": "text",
                 "config": {
                   "placeholder": "{}",
-                  "default": "{}",
-                  "required": true
+                  "default": null
                 },
                 "configWorkspace": {
                   "placeholder": "Global Setting",
