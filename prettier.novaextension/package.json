@@ -3,7 +3,7 @@
   "version": "3.9.1",
   "author": "Toni Förster",
   "license": "MIT",
-  "description": "Prettier integration for Nova – format JavaScript, TypeScript, JSON, CSS, HTML, Markdown, and more, with built-in support for Java, PHP, SQL, and XML – no extra setup required.",
+  "description": "Prettier integration for Nova – format JavaScript, TypeScript, JSON, CSS, HTML, Markdown, and more, with built-in support for Java, PHP, Shell, SQL, and XML – no extra setup required.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/stonerl/nova-prettier-extension.git"
@@ -25,6 +25,7 @@
     "prettier-plugin-java": "^2.10.4",
     "prettier-plugin-nginx": "^2.0.0",
     "prettier-plugin-properties": "^0.3.1",
+    "prettier-plugin-sh": "^0.19.0",
     "prettier-plugin-sql": "^0.20.0",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "prettier-plugin-toml": "^2.0.6"

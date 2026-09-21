@@ -17,6 +17,7 @@ const {
   PRETTIER_NGINX_PLUGIN_OPTIONS,
   PRETTIER_PHP_PLUGIN_OPTIONS,
   PRETTIER_PROPERTIES_PLUGIN_OPTIONS,
+  PRETTIER_SH_PLUGIN_OPTIONS,
   PRETTIER_SQL_PLUGIN_NODE_SQL_PARSER_OPTIONS,
   PRETTIER_SQL_PLUGIN_SQL_FORMATTER_OPTIONS,
   PRETTIER_TAILWIND_PLUGIN_OPTIONS,
@@ -94,6 +95,13 @@ function getPropertiesConfig() {
   )
 }
 
+function getShConfig() {
+  return loadPluginConfig(
+    PRETTIER_SH_PLUGIN_OPTIONS,
+    'prettier.plugins.prettier-plugin-sh',
+  )
+}
+
 function getSqlFormatterConfig() {
   return loadPluginConfig(
     PRETTIER_SQL_PLUGIN_SQL_FORMATTER_OPTIONS,
@@ -138,6 +146,7 @@ module.exports = {
   getNodeSqlParserConfig,
   getPhpConfig,
   getPropertiesConfig,
+  getShConfig,
   getSqlFormatterConfig,
   getTailwindConfig,
   getTomlConfig,

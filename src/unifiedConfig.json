@@ -2034,6 +2034,221 @@
         ]
       },
       {
+        "key": "prettier.plugins.prettier-plugin-sh.section",
+        "title": "prettier-plugin-sh",
+        "description": "Shell script and Dockerfile formatter plugin for Prettier",
+        "link": "https://github.com/un-ts/prettier/tree/master/packages/sh",
+        "type": "section",
+        "children": [
+          {
+            "key": "prettier.plugins.prettier-plugin-sh.enabled",
+            "config": {
+              "title": "Plugin Enabled",
+              "type": "boolean",
+              "default": true
+            },
+            "configWorkspace": {
+              "title": "Plugin Status",
+              "description": "Select whether to use global settings, enable, or disable the plugin.",
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-sh.variant",
+            "title": "Variant",
+            "description": "Shell language variant the parser accepts. Leave unset to use the plugin default (Bash).",
+            "link": "https://github.com/un-ts/prettier/tree/master/packages/sh#options",
+            "type": "enum",
+            "radio": false,
+            "config": {
+              "placeholder": "Plugin Default (Bash)",
+              "default": null,
+              "values": [
+                ["bash", "Bash"],
+                ["posix", "POSIX / sh"],
+                ["mksh", "mksh (Korn Shell)"],
+                ["bats", "Bats"],
+                ["zsh", "Zsh"]
+              ]
+            },
+            "configWorkspace": {
+              "placeholder": "Global Setting",
+              "default": null,
+              "values": [
+                [null, "Global Setting"],
+                ["bash", "Bash"],
+                ["posix", "POSIX / sh"],
+                ["mksh", "mksh (Korn Shell)"],
+                ["bats", "Bats"],
+                ["zsh", "Zsh"]
+              ]
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-sh.indent",
+            "title": "Indent",
+            "description": "Number of spaces used for indentation. If set to 0, tabs will be used. Leave unset to derive from the Tab Width option (0 when Tabs is enabled).",
+            "link": "https://github.com/un-ts/prettier/tree/master/packages/sh#options",
+            "type": "number",
+            "min": 0,
+            "max": 8,
+            "config": {
+              "placeholder": "Auto (Tab Width)"
+            },
+            "configWorkspace": {
+              "placeholder": "Global Setting"
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-sh.binaryNextLine",
+            "title": "Binary Next Line",
+            "description": "Make binary operators appear on the next line when a binary command, such as a pipe, spans multiple lines. A backslash will be used.",
+            "link": "https://github.com/un-ts/prettier/tree/master/packages/sh#options",
+            "config": {
+              "type": "boolean",
+              "default": true
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-sh.switchCaseIndent",
+            "title": "Switch Case Indent",
+            "description": "Indent switch cases. Switch case bodies will be two levels deeper than the switch itself.",
+            "link": "https://github.com/un-ts/prettier/tree/master/packages/sh#options",
+            "config": {
+              "type": "boolean",
+              "default": true
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-sh.spaceRedirects",
+            "title": "Space Redirects",
+            "description": "Put a space after most redirection operators.",
+            "link": "https://github.com/un-ts/prettier/tree/master/packages/sh#options",
+            "config": {
+              "type": "boolean",
+              "default": true
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-sh.keepComments",
+            "title": "Keep Comments",
+            "description": "Parse comments and attach them to nodes, as opposed to discarding them.",
+            "link": "https://github.com/un-ts/prettier/tree/master/packages/sh#options",
+            "config": {
+              "type": "boolean",
+              "default": true
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-sh.minify",
+            "title": "Minify",
+            "description": "Print programs in a way to save the most bytes possible. Indentation and comments are skipped, and extra whitespace is avoided when possible.",
+            "link": "https://github.com/un-ts/prettier/tree/master/packages/sh#options",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-sh.singleLine",
+            "title": "Single Line",
+            "description": "Attempt to print programs in one line. Some newlines must still appear, such as those following comments or around here-documents.",
+            "link": "https://github.com/un-ts/prettier/tree/master/packages/sh#options",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-sh.functionNextLine",
+            "title": "Function Next Line",
+            "description": "Place a function’s opening braces on the next line.",
+            "link": "https://github.com/un-ts/prettier/tree/master/packages/sh#options",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          }
+        ]
+      },
+      {
         "key": "prettier.plugins.prettier-plugin-sql.section",
         "title": "prettier-plugin-sql",
         "description": "SQL formatter plugin for Prettier",

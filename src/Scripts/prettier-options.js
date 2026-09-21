@@ -95,6 +95,18 @@ module.exports = {
 
   PRETTIER_PROPERTIES_PLUGIN_OPTIONS: ['escapeNonLatin1', 'keySeparator'],
 
+  PRETTIER_SH_PLUGIN_OPTIONS: [
+    'variant',
+    'indent',
+    'binaryNextLine',
+    'switchCaseIndent',
+    'spaceRedirects',
+    'keepComments',
+    'minify',
+    'singleLine',
+    'functionNextLine',
+  ],
+
   PRETTIER_SQL_PLUGIN_SQL_FORMATTER_OPTIONS: [
     'language',
     'keywordCase',

@@ -28,6 +28,7 @@ const {
   getNodeSqlParserConfig,
   getPhpConfig,
   getPropertiesConfig,
+  getShConfig,
   getSqlFormatterConfig,
   getTailwindConfig,
   getTomlConfig,
@@ -129,6 +130,16 @@ const PLUGIN_DESCRIPTORS = {
     configKey: 'prettier-plugin-php',
     pluginPath: pluginPaths.php,
     optionsConfig: getPhpConfig,
+  },
+  sh: {
+    configKey: 'prettier-plugin-sh',
+    pluginPath: pluginPaths.sh,
+    optionsConfig: getShConfig,
+  },
+  dockerfile: {
+    configKey: 'prettier-plugin-sh',
+    pluginPath: pluginPaths.sh,
+    optionsConfig: getShConfig,
   },
   sql: {
     configKey: 'prettier-plugin-sql',
@@ -766,12 +777,14 @@ class Formatter {
       }
     }
 
-    // newCursor may be a number or undefined/null.
-    if (newCursor == null) {
+    // newCursor may be a number or undefined/null. Prettier returns -1 when
+    // the cursor cannot be mapped onto the formatted output (e.g. the
+    // surrounding text was rewritten), which is not a valid document offset.
+    if (newCursor == null || newCursor < 0) {
       // Prettier really couldn’t compute a position
       this._cursorOffset = editor.selectedRange.start
       log.debug(
-        `Prettier returned no cursor (null/undefined); falling back to editor position ${this._cursorOffset}`,
+        `Prettier returned no cursor (${newCursor ?? 'null/undefined'}); falling back to editor position ${this._cursorOffset}`,
       )
     } else {
       // A numeric cursor — trust it

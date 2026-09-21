@@ -67,6 +67,13 @@ module.exports = {
     'prettier-plugin-properties',
     'index.js',
   ),
+  sh: nova.path.join(
+    nova.extension.path,
+    'node_modules',
+    'prettier-plugin-sh',
+    'lib',
+    'index.cjs',
+  ),
   sql: nova.path.join(
     nova.extension.path,
     'node_modules',

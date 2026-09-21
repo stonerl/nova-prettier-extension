@@ -1,0 +1,121 @@
+diff --git a/node_modules/prettier-plugin-sh/lib/index.cjs b/node_modules/prettier-plugin-sh/lib/index.cjs
+index b6d89d0..87e97b0 100644
+--- a/node_modules/prettier-plugin-sh/lib/index.cjs
++++ b/node_modules/prettier-plugin-sh/lib/index.cjs
+@@ -573,7 +573,42 @@ function hasPragma(text) {
+ const dockerfileParser = {
+   astFormat: "dockerfile",
+   hasPragma,
+-  parse: (text) => text,
++  // Patch: run the (async) dockerfmt formatting during `parse`, which
++  // Prettier awaits, and stash the result on the shared options object.
++  // The printer must return a synchronous string — a Promise-returning
++  // print crashes Prettier's cursor handling because the Dockerfile AST
++  // (the raw text) is always the cursor node.
++  parse: (text, options) => __async(null, null, function* () {
++    const indent = options.indent != null ? options.indent : options.useTabs ? 0 : options.tabWidth != null ? options.tabWidth : 2;
++    try {
++      const formatDockerfileContents = yield getFormatDockerfileContents();
++      options.__formattedDockerfile = yield formatDockerfileContents(text, {
++        indent,
++        spaceRedirects: options.spaceRedirects != null ? options.spaceRedirects : false,
++        trailingNewline: true
++      });
++    } catch (e) {
++      options.__formattedDockerfile = yield shSyntax.processor(text, {
++        print: true,
++        filepath: options.filepath,
++        keepComments: options.keepComments != null ? options.keepComments : true,
++        variant: options.variant,
++        stopAt: options.stopAt,
++        recoverErrors: options.recoverErrors,
++        useTabs: options.useTabs,
++        tabWidth: options.tabWidth,
++        indent,
++        binaryNextLine: true,
++        switchCaseIndent: true,
++        spaceRedirects: options.spaceRedirects != null ? options.spaceRedirects : true,
++        keepPadding: options.keepPadding,
++        minify: options.minify,
++        singleLine: options.singleLine,
++        functionNextLine: options.functionNextLine
++      });
++    }
++    return text;
++  }),
+   locStart: () => 0,
+   locEnd: (node) => node.length
+ };
+@@ -586,63 +621,20 @@ const getFormatDockerfileContents = () => __async(null, null, function* () {
+   return formatDockerfileContents_;
+ });
+ const dockerPrinter = {
+-  // @ts-expect-error -- https://github.com/prettier/prettier/issues/15080#issuecomment-1630987744
+-  print(_0, _1) {
+-    return __async(this, arguments, function* (path, {
+-      filepath,
+-      // parser options
+-      keepComments = true,
+-      variant,
+-      stopAt,
+-      recoverErrors,
+-      // printer options
+-      useTabs,
+-      tabWidth,
+-      indent = useTabs ? 0 : tabWidth != null ? tabWidth : 2,
+-      binaryNextLine = true,
+-      switchCaseIndent = true,
+-      spaceRedirects,
+-      // eslint-disable-next-line sonarjs/deprecation
+-      keepPadding,
+-      minify,
+-      singleLine,
+-      functionNextLine
+-    }) {
+-      const formatDockerfileContents = yield getFormatDockerfileContents();
+-      try {
+-        return yield formatDockerfileContents(path.node, {
+-          indent,
+-          spaceRedirects: spaceRedirects != null ? spaceRedirects : false,
+-          trailingNewline: true
+-        });
+-      } catch (e) {
+-        return shSyntax.processor(path.node, {
+-          print: true,
+-          filepath,
+-          keepComments,
+-          variant,
+-          stopAt,
+-          recoverErrors,
+-          useTabs,
+-          tabWidth,
+-          indent,
+-          binaryNextLine,
+-          switchCaseIndent,
+-          spaceRedirects: spaceRedirects != null ? spaceRedirects : true,
+-          keepPadding,
+-          minify,
+-          singleLine,
+-          functionNextLine
+-        });
+-      }
+-    });
++  // Patch: return the result stashed by the parser synchronously.
++  // See the note in dockerfileParser.parse.
++  print(path, options) {
++    return options.__formattedDockerfile;
+   }
+ };
+ const shParser = {
+   astFormat: "sh",
+   hasPragma,
+-  locStart: (node) => node.Pos.Offset,
+-  locEnd: (node) => node.End.Offset,
++  // Patch: guard against undefined nodes — Prettier's cursor handling
++  // (formatWithCursor) walks the AST with generic child traversal and can
++  // pass undefined here, which crashed the plugin.
++  locStart: (node) => node?.Pos?.Offset ?? 0,
++  locEnd: (node) => node?.End?.Offset ?? 0,
+   parse(_0, _1) {
+     return __async(this, arguments, function* (text, {
+       filepath,
