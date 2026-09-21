@@ -1,3 +1,33 @@
+## 3.9.2 - 2026-09-21
+
+### Added
+
+- **Dockerfile and shell script formatting**
+  - `prettier-plugin-sh` (0.19.0) is now bundled and enabled by default,
+    adding format support for Dockerfile/Containerfile and shell scripts
+    (`sh`, `bash`, `zsh`, `ksh`, `csh`, `bats`), plus rc files, `gradlew`,
+    `.nvmrc`, PKGBUILD, and dotenv-style files.
+  - New plugin options: `variant`, `indent`, `binaryNextLine`,
+    `switchCaseIndent`, `spaceRedirects`, `keepComments`, `minify`,
+    `singleLine`, `functionNextLine`.
+
+### Fixed
+
+- **Duplicate "Resolving Prettier installation…" output at startup**
+  - An observer wrapper had inverted semantics, so the module-path
+    observer's initial notification triggered a second, debounced service
+    resolution on every activation.
+- **Nova froze when activating Prettier⁺ alongside other extensions**
+  - Concurrent config writes from two extensions during activation could
+    deadlock Nova's config store. Prettier⁺ now defers all config writes
+    until after activation and only writes when a value actually changes.
+
+### Development
+
+- Patched `prettier-plugin-sh` upstream: `formatWithCursor` crashed on
+  undefined AST nodes, and async Dockerfile printing broke cursor handling.
+- Unmappable cursor offsets (`-1`) are now treated as "keep position".
+
 ## 3.9.1 - 2026-09-21
 
 ### Fixed
