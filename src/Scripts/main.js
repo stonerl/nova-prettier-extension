@@ -59,11 +59,11 @@ class PrettierExtension {
     this.customConfigWatcher = null
 
     // debouncers
-    this.debouncedProjectPrettierModulePathDidChange = debouncePromise(
-      this.modulePathDidChange,
-      5000,
-    )
-    this.debouncedNpmPackageFileDidChange = debouncePromise(
+    // Shared 5s debouncer for all "restart module" triggers — package
+    // file changes, project Prettier updates, and the restart command
+    // all funnel into modulePathDidChange. One instance prevents
+    // concurrent stop/start interleavings when multiple triggers fire.
+    this.debouncedModulePathDidChange = debouncePromise(
       this.modulePathDidChange,
       5000,
     )
@@ -353,7 +353,7 @@ class PrettierExtension {
     if (this.preferBundled || this.modulePath) return
 
     log.debug('npmPackageFileDidChange invoked')
-    this.debouncedNpmPackageFileDidChange()
+    this.debouncedModulePathDidChange()
   }
 
   async modulePreferBundledDidChange() {
@@ -369,7 +369,7 @@ class PrettierExtension {
     if (this.preferBundled || this.modulePath) return
 
     log.debug('moduleProjectPrettierDidChange invoked')
-    this.debouncedProjectPrettierModulePathDidChange()
+    this.debouncedModulePathDidChange()
   }
 
   async modulePathDidChange() {
@@ -599,8 +599,7 @@ class PrettierExtension {
     this.saveListeners.clear()
 
     // 6) clear debounce timers
-    this.debouncedProjectPrettierModulePathDidChange.cancel()
-    this.debouncedNpmPackageFileDidChange.cancel()
+    this.debouncedModulePathDidChange.cancel()
     this.debouncedReloadPrettierOnConfigChange.cancel()
     this.debouncedModulePathOrPreferBundledDidChangeFast.cancel()
 
