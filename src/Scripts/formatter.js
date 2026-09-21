@@ -911,11 +911,20 @@ class Formatter {
   async applyResult(editor, original, formatted) {
     log.info(`Applying formatted changes to ${editor.document.path}`)
 
+    // Restoring a single cursor would destroy multi-cursor setups and
+    // active text selections — leave those untouched after the edit.
+    const selectedRanges = editor.selectedRanges
+    const hasComplexSelection =
+      selectedRanges.length > 1 ||
+      selectedRanges.some((range) => range.start !== range.end)
+
     const documentRange = new Range(0, editor.document.length)
 
     await editor.edit((e) => {
       e.replace(documentRange, formatted)
     })
+
+    if (hasComplexSelection) return
 
     const cursorOffset =
       this._cursorOffset != null ? this._cursorOffset : editor.selectedRange.end
