@@ -318,14 +318,18 @@ class JsonRpcService {
     } catch (err) {
       // if handler threw a JSON-RPC error object, pass it through
       const errObj =
-        err && typeof err.code === 'number' && err.message
+        err && typeof err.code === 'number' && typeof err.message === 'string'
           ? err
           : typeof err === 'string'
             ? { code: INTERNAL_ERROR.code, message: err }
             : {
                 code: INTERNAL_ERROR.code,
-                message: err.message,
-                data: err.stack,
+                // Handlers may reject with non-Error values (or Errors
+                // without a message). JSON.stringify drops undefined
+                // properties, which would leave the client a frame with
+                // no message at all — "undefined: undefined" in logs.
+                message: err?.message ?? String(err),
+                ...(err?.stack ? { data: err.stack } : {}),
               }
 
       return {
