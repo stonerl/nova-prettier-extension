@@ -32,7 +32,7 @@ class FormattingService {
    * @throws {Error} Always throws unless overridden
    */
 
-  async format({ _original, _pathForConfig, _ignorePath, _options }) {
+  async format() {
     throw new Error(
       'FormattingService.format() must be implemented by subclass',
     )
@@ -45,7 +45,7 @@ class FormattingService {
    * @throws {Error} Always throws unless overridden
    */
 
-  async hasConfig({ _pathForConfig }) {
+  async hasConfig() {
     throw new Error(
       'FormattingService.hasConfig() must be implemented by subclass',
     )
