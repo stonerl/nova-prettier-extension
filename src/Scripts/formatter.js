@@ -166,6 +166,15 @@ class Formatter {
     if (this.prettierService) return
     log.info('Starting Prettier service…')
 
+    // Await the didStart handshake so callers (e.g. the retry loop in
+    // startFormatter) can detect service-side load failures, not just
+    // Process construction errors.
+    const handshake = new Promise((resolve, reject) => {
+      this._resolveStartHandshake = resolve
+      this._rejectStartHandshake = reject
+    })
+    this._startHandshake = handshake
+
     this.prettierService = new Process('/usr/bin/env', {
       args: [
         'node',
@@ -184,12 +193,19 @@ class Formatter {
     this.prettierService.onNotify('didStart', () => {
       log.info('Prettier service started successfully')
       this._resolveIsReadyPromise(true)
+      this._resolveStartHandshake()
     })
     this.prettierService.onNotify(
       'startDidFail',
       this.prettierServiceStartDidFail,
     )
     this.prettierService.start()
+
+    try {
+      await handshake
+    } finally {
+      this._startHandshake = null
+    }
   }
 
   stop() {
@@ -239,6 +255,17 @@ class Formatter {
   }
 
   prettierServiceDidExit(exitCode) {
+    // 0) Reject any pending start handshake — the process exited before
+    //    completing the didStart handshake.
+    if (this._startHandshake) {
+      this._startHandshake = null
+      this._rejectStartHandshake(
+        new Error(
+          `Prettier service exited before starting (exit code ${exitCode})`,
+        ),
+      )
+    }
+
     // 1) Wake up anyone awaiting stop()
     if (this._resolveIsStoppedPromise) {
       this._resolveIsStoppedPromise()
@@ -274,11 +301,19 @@ class Formatter {
 
     // 8) Now restart the service
     log.debug('Restarting Prettier…')
-    this.start()
+    this.start().catch(() => {
+      // startDidFail already surfaced the reason via notification
+    })
   }
 
   prettierServiceStartDidFail({ parameters: error }) {
     this._resolveIsReadyPromise(false)
+
+    // Wake the awaiting start() caller with the actual failure reason.
+    if (this._startHandshake) {
+      this._startHandshake = null
+      this._rejectStartHandshake(new Error(`${error.name}: ${error.message}`))
+    }
 
     showNotification({
       id: 'prettier-not-running',
@@ -334,7 +369,7 @@ class Formatter {
         ),
       ],
       callback: (r) => {
-        if (r === 0) this.start()
+        if (r === 0) this.start().catch(() => {})
       },
     })
   }
