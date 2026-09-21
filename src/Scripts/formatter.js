@@ -33,6 +33,33 @@ const {
 
 const { detectSyntax } = require('./syntax.js')
 
+/**
+ * Count the UTF-8 byte length of a string without relying on Node's
+ * Buffer (unavailable in Nova's extension runtime).
+ *
+ * @param {string} str
+ * @returns {number}
+ */
+function utf8ByteLength(str) {
+  let bytes = 0
+  for (let i = 0; i < str.length; i++) {
+    const code = str.charCodeAt(i)
+    if (code < 0x80) {
+      bytes += 1
+    } else if (code < 0x800) {
+      bytes += 2
+    } else if (code >= 0xd800 && code < 0xdc00) {
+      bytes += 4 // high surrogate — the low surrogate is consumed below
+      i++
+    } else if (code >= 0xdc00 && code < 0xe000) {
+      // unpaired low surrogate; nothing to count (its pair was counted)
+    } else {
+      bytes += 3
+    }
+  }
+  return bytes
+}
+
 const {
   getSqlDialectFromUriOrSyntax,
   getSqlParserDialect,
@@ -333,27 +360,7 @@ class Formatter {
     // supported.
     const MAX_FILE_SIZE = 32 * 1024 * 1024 // 32 MiB
     if (document.length > MAX_FILE_SIZE) {
-      showNotification({
-        id: 'prettier-file-too-large',
-        title: nova.localize(
-          'prettier.notification.fileTooLarge.title',
-          'Document Too Large',
-          'notification',
-        ),
-        body: [
-          nova.localize(
-            'prettier.notification.fileTooLarge.body.prefix',
-            'Cannot format this document:',
-            'notification',
-          ),
-          ` ${(document.length / 2 ** 20).toFixed(1)} MiB `,
-          nova.localize(
-            'prettier.notification.fileTooLarge.body.suffix',
-            'exceeds the 32 MiB limit.',
-            'notification',
-          ),
-        ].join(''),
-      })
+      this.notifyFileTooLarge(document.length)
       return []
     }
 
@@ -413,6 +420,16 @@ class Formatter {
 
     const documentRange = new Range(0, document.length)
     const original = editor.getTextInRange(documentRange)
+
+    // The character guard above counts characters, but the JSON-RPC frame
+    // cap is bytes — a multibyte document (e.g. CJK at 3 bytes/char) can
+    // pass it yet overflow the service's 42 MiB Content-Length limit and
+    // kill the parser stream. Check the real UTF-8 payload size too.
+    const originalByteLength = utf8ByteLength(original)
+    if (originalByteLength > MAX_FILE_SIZE) {
+      this.notifyFileTooLarge(originalByteLength)
+      return []
+    }
 
     // Check if plugins are enabled
     const astroPluginEnabled = getConfigWithWorkspaceOverride(
@@ -797,6 +814,35 @@ class Formatter {
   getIgnorePath(path) {
     const expectedIgnoreDir = nova.workspace.path || nova.path.dirname(path)
     return nova.path.join(expectedIgnoreDir, '.prettierignore')
+  }
+
+  /**
+   * Show the "Document Too Large" notification for the given payload size.
+   *
+   * @param {number} size  size in bytes (or chars — used for the MiB readout)
+   */
+  notifyFileTooLarge(size) {
+    showNotification({
+      id: 'prettier-file-too-large',
+      title: nova.localize(
+        'prettier.notification.fileTooLarge.title',
+        'Document Too Large',
+        'notification',
+      ),
+      body: [
+        nova.localize(
+          'prettier.notification.fileTooLarge.body.prefix',
+          'Cannot format this document:',
+          'notification',
+        ),
+        ` ${(size / 2 ** 20).toFixed(1)} MiB `,
+        nova.localize(
+          'prettier.notification.fileTooLarge.body.suffix',
+          'exceeds the 32 MiB limit.',
+          'notification',
+        ),
+      ].join(''),
+    })
   }
 
   getParserForSyntax(syntax) {
