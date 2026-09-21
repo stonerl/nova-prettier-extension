@@ -40,17 +40,21 @@ function getConfigWithWorkspaceOverride(name) {
 }
 
 /**
- * Wrap a function so only its first invocation runs; later invocations
- * (e.g. each observer's initial "current value" notification) are ignored.
+ * Wrap a function so its first invocation is swallowed and later
+ * invocations are forwarded. Nova config observers fire once with the
+ * current value on registration — that initial notification must not
+ * reach the callback; only real changes should.
  *
  * @param {Function} fn
  * @returns {Function}
  */
-function once(fn) {
-  let called = false
+function skipInitialCall(fn) {
+  let skipped = false
   return function (...args) {
-    if (called) return
-    called = true
+    if (!skipped) {
+      skipped = true
+      return
+    }
     fn.apply(this, args)
   }
 }
@@ -63,10 +67,14 @@ function once(fn) {
  */
 function observeConfigWithWorkspaceOverride(name, fn) {
   // Each observer fires once with the current value on registration, so
-  // each gets its own once() wrapper — a shared flag would depend on both
-  // observers firing initially and would let the second initial call leak.
-  const workspaceDisposable = nova.workspace.config.observe(name, once(fn))
-  const extensionDisposable = nova.config.observe(name, once(fn))
+  // each gets its own skipInitialCall wrapper — a shared flag would
+  // depend on both observers firing initially and would let the second
+  // initial call leak.
+  const workspaceDisposable = nova.workspace.config.observe(
+    name,
+    skipInitialCall(fn),
+  )
+  const extensionDisposable = nova.config.observe(name, skipInitialCall(fn))
 
   return [workspaceDisposable, extensionDisposable]
 }
