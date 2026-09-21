@@ -1,3 +1,19 @@
+## 3.9.1 - 2026-09-21
+
+### Fixed
+
+- **Force Format vs `.prettierignore`**
+  - `Format Document (Forced)` now reliably ignores `.prettierignore` for
+    the current file. Previously this only worked if the file had not been
+    formatted normally since the Prettier service started: a cached
+    `ignored: true` result was served to the forced call because the cache
+    was keyed without the ignore path.
+
+### Performance
+
+- File info lookups now pass the known parser to Prettier, skipping its
+  expensive parser inference for uncached calls.
+
 ## 3.9.0 - 2026-09-21
 
 ### Added
