@@ -745,13 +745,23 @@ class Formatter {
       configPlugins,
     } = result
 
-    // The service only reports this when it substituted our bundled
-    // plugins for ones declared in the user's own config file.
+    // The service reports the plugins declared in the user's config
+    // whenever bundled plugins were sent. Filter out declarations already
+    // satisfied by the bundled set (matched by package name in the bundled
+    // path) — only genuinely unsupported plugins should notify.
     if (configPlugins?.length) {
-      log.info(
-        `Your Prettier config declares plugins (${configPlugins.join(', ')}) — Prettier⁺ formats with its bundled equivalents instead.`,
+      const unsupportedPlugins = configPlugins.filter(
+        (declared) =>
+          typeof declared !== 'string' ||
+          !plugins.some((bundled) => bundled.includes(declared)),
       )
-      this.showConfigPluginsNotice()
+
+      if (unsupportedPlugins.length > 0) {
+        log.info(
+          `Your Prettier config declares plugins (${unsupportedPlugins.join(', ')}) — Prettier⁺ formats with its bundled equivalents instead.`,
+        )
+        this.showConfigPluginsNotice()
+      }
     }
 
     // newCursor may be a number or undefined/null.

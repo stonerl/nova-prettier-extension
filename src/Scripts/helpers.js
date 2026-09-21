@@ -40,24 +40,33 @@ function getConfigWithWorkspaceOverride(name) {
 }
 
 /**
- * Observe a config key in both workspace and extension, but only after
- * the initial “current value” notification.
+ * Wrap a function so only its first invocation runs; later invocations
+ * (e.g. each observer's initial "current value" notification) are ignored.
+ *
+ * @param {Function} fn
+ * @returns {Function}
+ */
+function once(fn) {
+  let called = false
+  return function (...args) {
+    if (called) return
+    called = true
+    fn.apply(this, args)
+  }
+}
+
+/**
+ * Observe a config key in both workspace and extension, skipping each
+ * observer's initial "current value" notification so only real changes
+ * reach the callback.
  * Returns the two Disposables so callers can dispose them later.
  */
 function observeConfigWithWorkspaceOverride(name, fn) {
-  let skippedInitialCall = false
-  function wrapped(...args) {
-    if (!skippedInitialCall) {
-      // skip the first call (initial value)
-      skippedInitialCall = true
-      return
-    }
-    fn.apply(this, args)
-  }
-
-  // capture the two Disposables
-  const workspaceDisposable = nova.workspace.config.observe(name, wrapped)
-  const extensionDisposable = nova.config.observe(name, wrapped)
+  // Each observer fires once with the current value on registration, so
+  // each gets its own once() wrapper — a shared flag would depend on both
+  // observers firing initially and would let the second initial call leak.
+  const workspaceDisposable = nova.workspace.config.observe(name, once(fn))
+  const extensionDisposable = nova.config.observe(name, once(fn))
 
   return [workspaceDisposable, extensionDisposable]
 }

@@ -284,6 +284,13 @@ class PrettierExtension {
     // Normalize boolean or Promise into a Promise<boolean>
     const readyPromise = Promise.resolve(this.formatter.isReady)
 
+    // Initial service start. Config observers skip their initial
+    // "current value" notification, so nothing else triggers this on a
+    // fresh activation — kick it off explicitly. Fire-and-forget:
+    // modulePathDidChange catches internally and surfaces failures as
+    // notifications.
+    this.modulePathDidChange()
+
     readyPromise.then((didStart) => {
       if (!didStart) return
 
