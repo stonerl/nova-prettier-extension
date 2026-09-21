@@ -17,7 +17,7 @@
     "@prettier/plugin-xml": "^3.4.2",
     "@shopify/prettier-plugin-liquid": "^1.11.0",
     "@shufo/prettier-plugin-blade": "^1.16.2",
-    "@zackad/prettier-plugin-twig": "^0.16.0",
+    "@zackad/prettier-plugin-twig": "^0.17.0",
     "patch-package": "^8.0.1",
     "prettier": "^3.9.8",
     "prettier-plugin-astro": "^0.14.1",
