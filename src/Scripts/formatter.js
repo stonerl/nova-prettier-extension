@@ -82,58 +82,6 @@ class Formatter {
     this.setupIsReadyPromise()
   }
 
-  get defaultConfig() {
-    return getDefaultConfig()
-  }
-
-  get astroConfig() {
-    return getAstroConfig()
-  }
-
-  get bladeConfig() {
-    return getBladeConfig()
-  }
-
-  get liquidConfig() {
-    return getLiquidConfig()
-  }
-
-  get nginxConfig() {
-    return getNginxConfig()
-  }
-
-  get nodeSqlParserConfig() {
-    return getNodeSqlParserConfig()
-  }
-
-  get phpConfig() {
-    return getPhpConfig()
-  }
-
-  get propertiesConfig() {
-    return getPropertiesConfig()
-  }
-
-  get sqlFormatterConfig() {
-    return getSqlFormatterConfig()
-  }
-
-  get tailwindConfig() {
-    return getTailwindConfig()
-  }
-
-  get tomlConfig() {
-    return getTomlConfig()
-  }
-
-  get twigConfig() {
-    return getTwigConfig()
-  }
-
-  get xmlConfig() {
-    return getXmlConfig()
-  }
-
   /**
    * Returns the “true” syntax key by combining Nova’s
    * document.syntax with our extension‑based fallback.
@@ -595,7 +543,7 @@ class Formatter {
       ...(customConfigFile
         ? customFileConfig
         : ignoreConfigFile || shouldApplyDefaultConfig
-          ? this.defaultConfig
+          ? getDefaultConfig()
           : {}),
       ...(selectionOnly
         ? {
@@ -612,38 +560,38 @@ class Formatter {
     if (!customConfigFile && (ignoreConfigFile || shouldApplyDefaultConfig)) {
       // Add ASTRO plugin options if the document syntax is ASTRO
       if (syntaxKey === 'astro') {
-        Object.assign(options, this.astroConfig)
+        Object.assign(options, getAstroConfig())
       }
 
       // Add BLADE plugin options if the document syntax is BLADE
       if (syntaxKey === 'blade') {
-        Object.assign(options, this.bladeConfig)
+        Object.assign(options, getBladeConfig())
       }
 
       // Add PROPERTIES plugin options if the document syntax is JAVA-PROPERTIES
       if (syntaxKey === 'java-properties') {
-        Object.assign(options, this.propertiesConfig)
+        Object.assign(options, getPropertiesConfig())
       }
 
       // Add LIQUID plugin options if the document syntax is LIQUID
       if (syntaxKey === 'liquid-html' || syntaxKey === 'liquid-md') {
-        Object.assign(options, this.liquidConfig)
+        Object.assign(options, getLiquidConfig())
       }
 
       // Add NGINX plugin options if the document syntax is NGINX
       if (syntaxKey === 'nginx') {
-        Object.assign(options, this.nginxConfig)
+        Object.assign(options, getNginxConfig())
       }
 
       // Add PHP plugin options if the document syntax is PHP
       if (syntaxKey === 'php') {
-        Object.assign(options, this.phpConfig)
+        Object.assign(options, getPhpConfig())
       }
 
       // Add SQL plugin options if the document syntax is SQL
       if (syntaxKey === 'sql') {
         if (sqlFormatter === 'sql-formatter') {
-          const config = { ...this.sqlFormatterConfig }
+          const config = { ...getSqlFormatterConfig() }
 
           if (config.language === 'auto') {
             config.language = getSqlDialectFromUriOrSyntax(
@@ -655,7 +603,7 @@ class Formatter {
 
           Object.assign(options, config)
         } else if (sqlFormatter === 'node-sql-parser') {
-          const config = { ...this.nodeSqlParserConfig }
+          const config = { ...getNodeSqlParserConfig() }
 
           if (config.database === 'auto') {
             config.database = getSqlParserDialect(document.uri, document.syntax)
@@ -669,22 +617,22 @@ class Formatter {
       // Add TAILWIND plugin options if the document syntax is of a supported type
       // and the plugin is enabled
       if (tailwindSyntaxesEnabled && tailwindPluginEnabled) {
-        Object.assign(options, this.tailwindConfig)
+        Object.assign(options, getTailwindConfig())
       }
 
       // ADD TOML plugin options if the document syntax is TOML
       if (syntaxKey === 'toml') {
-        Object.assign(options, this.tomlConfig)
+        Object.assign(options, getTomlConfig())
       }
 
       // ADD TWIG plugin options if the document syntax is TWIG
       if (syntaxKey === 'twig') {
-        Object.assign(options, this.twigConfig)
+        Object.assign(options, getTwigConfig())
       }
 
       // Add XML plugin options if the document syntax is XML
       if (syntaxKey === 'xml') {
-        Object.assign(options, this.xmlConfig)
+        Object.assign(options, getXmlConfig())
       }
     }
 
