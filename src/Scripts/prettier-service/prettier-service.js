@@ -87,11 +87,19 @@ class PrettierService extends FormattingService {
    * @throws {never} Formatting errors are caught and returned in `result.error`, so this method never throws
    */
   async format({ original, pathForConfig, ignorePath, options, withCursor }) {
-    const { ignored, config } = await this.getConfig({
-      pathForConfig,
-      ignorePath,
-      options,
-    })
+    let ignored, config
+    try {
+      ;({ ignored, config } = await this.getConfig({
+        pathForConfig,
+        ignorePath,
+        options,
+      }))
+    } catch (err) {
+      // Config resolution (getFileInfo / resolveConfig) runs outside the
+      // format try/catch below — structure its failures the same way so
+      // the client logs a real error instead of an opaque IPC rejection.
+      return this._errorResult(err)
+    }
 
     if (ignored) return { ignored: true }
     if (!config.parser) return { missingParser: true }
@@ -106,13 +114,24 @@ class PrettierService extends FormattingService {
         return { formatted: await this.prettier.format(original, config) }
       }
     } catch (err) {
-      return {
-        error: {
-          name: err.name,
-          message: err.message,
-          stack: err.stack,
-        },
-      }
+      return this._errorResult(err)
+    }
+  }
+
+  /**
+   * Shape a thrown value into the structured error result the client
+   * expects, filling in fallbacks for non-Error rejections.
+   *
+   * @param {unknown} err
+   * @returns {{ error: { name: string, message: string, stack?: string } }}
+   */
+  _errorResult(err) {
+    return {
+      error: {
+        name: err?.name ?? 'ServiceError',
+        message: err?.message ?? String(err),
+        ...(err?.stack ? { stack: err.stack } : {}),
+      },
     }
   }
 
