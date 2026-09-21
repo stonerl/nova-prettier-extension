@@ -172,6 +172,7 @@ class Formatter {
     this.prettierServiceDidExit = this.prettierServiceDidExit.bind(this)
     this.prettierServiceStartDidFail =
       this.prettierServiceStartDidFail.bind(this)
+    this.prettierServiceDidCrash = this.prettierServiceDidCrash.bind(this)
 
     this.emitter = new Emitter()
     /** @type {Map<string,number>} latest in-flight request IDs per file URI */
@@ -249,6 +250,7 @@ class Formatter {
       'startDidFail',
       this.prettierServiceStartDidFail,
     )
+    this.prettierService.onNotify('didCrash', this.prettierServiceDidCrash)
     this.prettierService.start()
 
     // If the service neither signals didStart nor exits, reject after a
@@ -371,6 +373,18 @@ class Formatter {
     this.start().catch(() => {
       // startDidFail already surfaced the reason via notification
     })
+  }
+
+  prettierServiceDidCrash({ parameters }) {
+    // The service sends this right before exiting after an
+    // uncaughtException or unhandledRejection — prettierServiceDidExit
+    // handles restart/notification once it's gone. Our job here is
+    // surfacing the crash reason, which would otherwise be lost and
+    // leave only an opaque IPC rejection behind.
+    const { name, message, stack } = parameters ?? {}
+    log.error(
+      `Prettier service crashed: ${name ?? 'Unknown'}: ${message ?? 'no message'}${stack ? `\n${stack}` : ''}`,
+    )
   }
 
   prettierServiceStartDidFail({ parameters: error }) {
