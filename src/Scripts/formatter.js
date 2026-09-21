@@ -53,10 +53,16 @@ function utf8ByteLength(str) {
     } else if (code < 0x800) {
       bytes += 2
     } else if (code >= 0xd800 && code < 0xdc00) {
-      bytes += 4 // high surrogate — the low surrogate is consumed below
-      i++
+      // High surrogate: 4 bytes if properly paired, else U+FFFD (3 bytes)
+      const next = str.charCodeAt(i + 1)
+      if (next >= 0xdc00 && next < 0xe000) {
+        bytes += 4
+        i++
+      } else {
+        bytes += 3
+      }
     } else if (code >= 0xdc00 && code < 0xe000) {
-      // unpaired low surrogate; nothing to count (its pair was counted)
+      bytes += 3 // lone low surrogate → U+FFFD
     } else {
       bytes += 3
     }
@@ -253,7 +259,7 @@ class Formatter {
     proc.onNotify('didStart', () => {
       if (!isCurrent()) return
       log.info('Prettier service started successfully')
-      this._resolveIsReadyPromise(true)
+      if (this._resolveIsReadyPromise) this._resolveIsReadyPromise(true)
       this._resolveStartHandshake()
     })
     proc.onNotify('startDidFail', (error) => {
@@ -414,7 +420,7 @@ class Formatter {
   }
 
   prettierServiceStartDidFail({ parameters: error }) {
-    this._resolveIsReadyPromise(false)
+    if (this._resolveIsReadyPromise) this._resolveIsReadyPromise(false)
 
     // Wake the awaiting start() caller with the actual failure reason.
     if (this._startHandshake) {
