@@ -183,6 +183,16 @@ class JsonRpcService {
     this.handlers = new Map()
     this.parser = new JsonRpcParser()
 
+    /**
+     * Serializes frame writes. Concurrent payloads (e.g. a didCrash
+     * notification racing a format response) must never interleave
+     * bytes mid-frame.
+     *
+     * @type {Promise<void>}
+     * @private
+     */
+    this._writeQueue = Promise.resolve()
+
     // Pipe incoming bytes into our parser, and unpipe on fatal errors
     const piped = readStream.pipe(this.parser)
     piped
@@ -331,10 +341,25 @@ class JsonRpcService {
     const buf = Buffer.from(str, 'utf8')
     const hdr = Buffer.from(`Content-Length: ${buf.length}\r\n\r\n`, 'ascii')
 
-    if (!this.writeStream.write(hdr)) {
-      await once(this.writeStream, 'drain')
-    }
-    if (!this.writeStream.write(buf)) {
+    // Build the frame atomically — header and body must hit the stream
+    // as a single write so concurrent writers can't interleave them.
+    const frame = Buffer.concat([hdr, buf], hdr.length + buf.length)
+
+    const write = this._writeQueue.then(() => this._writeFrame(frame))
+    // Keep the queue alive even if a write fails, but don't leak the
+    // rejection — the failing caller still receives it via `write`.
+    this._writeQueue = write.catch(() => {})
+    return write
+  }
+
+  /**
+   * Write a fully-formed frame, respecting back-pressure.
+   *
+   * @param {Buffer} frame
+   * @private
+   */
+  async _writeFrame(frame) {
+    if (!this.writeStream.write(frame)) {
       await once(this.writeStream, 'drain')
     }
   }
