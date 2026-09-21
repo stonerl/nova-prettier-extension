@@ -1,3 +1,7 @@
+## 3.6.3 - 2026-09-21
+
+- Fix startup crash 
+
 ## 3.6.2 - 2025-07-12
 
 - Updated `prettier-plugin-sql` to version `0.19.2`
