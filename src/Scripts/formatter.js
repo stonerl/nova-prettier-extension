@@ -69,6 +69,104 @@ const {
   getSqlParserDialect,
 } = require('./sql.js')
 
+/**
+ * Single source of truth for bundled plugins: the config key under
+ * `prettier.plugins.*`, the bundled entry point, and — when the plugin
+ * has Nova-managed options — the loader producing them.
+ *
+ * Flag-only plugins (ejs, ejsTailwind, tailwind) never act as the
+ * primary parser for a syntax; they're selected by the ordering rules
+ * in formatEditor.
+ */
+const PLUGIN_DESCRIPTORS = {
+  astro: {
+    configKey: 'prettier-plugin-astro',
+    pluginPath: pluginPaths.astro,
+    optionsConfig: getAstroConfig,
+  },
+  blade: {
+    configKey: 'prettier-plugin-blade',
+    pluginPath: pluginPaths.blade,
+    optionsConfig: getBladeConfig,
+  },
+  ejs: {
+    configKey: 'prettier-plugin-ejs',
+    pluginPath: pluginPaths.ejs,
+    optionsConfig: null,
+  },
+  ejsTailwind: {
+    configKey: 'prettier-plugin-ejs-tailwindcss',
+    pluginPath: pluginPaths.ejsTailwind,
+    optionsConfig: null,
+  },
+  java: {
+    configKey: 'prettier-plugin-java',
+    pluginPath: pluginPaths.java,
+    optionsConfig: null,
+  },
+  'java-properties': {
+    configKey: 'prettier-plugin-properties',
+    pluginPath: pluginPaths.properties,
+    optionsConfig: getPropertiesConfig,
+  },
+  'liquid-html': {
+    configKey: 'prettier-plugin-liquid',
+    pluginPath: pluginPaths.liquid,
+    optionsConfig: getLiquidConfig,
+  },
+  'liquid-md': {
+    configKey: 'prettier-plugin-liquid',
+    pluginPath: pluginPaths.liquid,
+    optionsConfig: getLiquidConfig,
+  },
+  nginx: {
+    configKey: 'prettier-plugin-nginx',
+    pluginPath: pluginPaths.nginx,
+    optionsConfig: getNginxConfig,
+  },
+  php: {
+    configKey: 'prettier-plugin-php',
+    pluginPath: pluginPaths.php,
+    optionsConfig: getPhpConfig,
+  },
+  sql: {
+    configKey: 'prettier-plugin-sql',
+    pluginPath: pluginPaths.sql,
+    // handled separately — depends on the configured formatter type
+    optionsConfig: null,
+  },
+  tailwind: {
+    configKey: 'prettier-plugin-tailwind',
+    pluginPath: pluginPaths.tailwind,
+    optionsConfig: getTailwindConfig,
+  },
+  toml: {
+    configKey: 'prettier-plugin-toml',
+    pluginPath: pluginPaths.toml,
+    optionsConfig: getTomlConfig,
+  },
+  twig: {
+    configKey: 'prettier-plugin-twig',
+    pluginPath: pluginPaths.twig,
+    optionsConfig: getTwigConfig,
+  },
+  xml: {
+    configKey: 'prettier-plugin-xml',
+    pluginPath: pluginPaths.xml,
+    optionsConfig: getXmlConfig,
+  },
+}
+
+/**
+ * Read a plugin's enabled flag from workspace-or-extension config.
+ *
+ * @param {string} configKey  the plugin's key under `prettier.plugins.*`
+ * @returns {boolean|undefined}
+ */
+function isPluginEnabled(configKey) {
+  return getConfigWithWorkspaceOverride(`prettier.plugins.${configKey}.enabled`)
+}
+
 class Formatter {
   constructor() {
     this.prettierServiceDidExit = this.prettierServiceDidExit.bind(this)
@@ -436,105 +534,29 @@ class Formatter {
     }
 
     // Check if plugins are enabled
-    const astroPluginEnabled = getConfigWithWorkspaceOverride(
-      'prettier.plugins.prettier-plugin-astro.enabled',
+    // Tailwind is driven by both a master flag and a per-syntax flag.
+    const tailwindPluginEnabled = isPluginEnabled(
+      PLUGIN_DESCRIPTORS.tailwind.configKey,
     )
-
-    const bladePluginEnabled = getConfigWithWorkspaceOverride(
-      'prettier.plugins.prettier-plugin-blade.enabled',
-    )
-
-    const ejsPluginEnabled = getConfigWithWorkspaceOverride(
-      'prettier.plugins.prettier-plugin-ejs.enabled',
-    )
-
-    const ejsTailwindPluginEnabled = getConfigWithWorkspaceOverride(
-      'prettier.plugins.prettier-plugin-ejs-tailwindcss.enabled',
-    )
-
-    const javaPluginEnabled = getConfigWithWorkspaceOverride(
-      'prettier.plugins.prettier-plugin-java.enabled',
-    )
-
-    const liquidPluginEnabled = getConfigWithWorkspaceOverride(
-      'prettier.plugins.prettier-plugin-liquid.enabled',
-    )
-
-    const nginxPluginEnabled = getConfigWithWorkspaceOverride(
-      'prettier.plugins.prettier-plugin-nginx.enabled',
-    )
-
-    const phpPluginEnabled = getConfigWithWorkspaceOverride(
-      'prettier.plugins.prettier-plugin-php.enabled',
-    )
-
-    const propertiesPluginEnabled = getConfigWithWorkspaceOverride(
-      'prettier.plugins.prettier-plugin-properties.enabled',
-    )
-
-    /// Retrieve the configured SQL formatter type
-    const sqlFormatter = getConfigWithWorkspaceOverride(
-      'prettier.plugins.prettier-plugin-sql.formatter',
-    )
-
-    const sqlPluginEnabled = getConfigWithWorkspaceOverride(
-      'prettier.plugins.prettier-plugin-sql.enabled',
-    )
-
     const tailwindSyntaxesEnabled = getConfigWithWorkspaceOverride(
       `prettier.plugins.prettier-plugin-tailwind.syntaxes.${syntaxKey}`,
     )
 
-    const tailwindPluginEnabled = getConfigWithWorkspaceOverride(
-      'prettier.plugins.prettier-plugin-tailwind.enabled',
-    )
-
-    const tomlPluginEnabled = getConfigWithWorkspaceOverride(
-      'prettier.plugins.prettier-plugin-toml.enabled',
-    )
-
-    const twigPluginEnabled = getConfigWithWorkspaceOverride(
-      'prettier.plugins.prettier-plugin-twig.enabled',
-    )
-
-    const xmlPluginEnabled = getConfigWithWorkspaceOverride(
-      'prettier.plugins.prettier-plugin-xml.enabled',
-    )
-
-    // 1) Build a lookup map once
-    const pluginConfigMap = {
-      astro: { enabled: astroPluginEnabled, path: pluginPaths.astro },
-      blade: { enabled: bladePluginEnabled, path: pluginPaths.blade },
-      java: { enabled: javaPluginEnabled, path: pluginPaths.java },
-      'java-properties': {
-        enabled: propertiesPluginEnabled,
-        path: pluginPaths.properties,
-      },
-      'liquid-html': { enabled: liquidPluginEnabled, path: pluginPaths.liquid },
-      'liquid-md': { enabled: liquidPluginEnabled, path: pluginPaths.liquid },
-      nginx: { enabled: nginxPluginEnabled, path: pluginPaths.nginx },
-      php: { enabled: phpPluginEnabled, path: pluginPaths.php },
-      sql: { enabled: sqlPluginEnabled, path: pluginPaths.sql },
-      toml: { enabled: tomlPluginEnabled, path: pluginPaths.toml },
-      twig: { enabled: twigPluginEnabled, path: pluginPaths.twig },
-      xml: { enabled: xmlPluginEnabled, path: pluginPaths.xml },
-    }
-
-    // 2) Kick off with an empty array
+    // 1) Kick off with an empty array
     const plugins = []
 
-    // 3) Conditionally load plugins if enabled
+    // 2) Conditionally load plugins if enabled
     if (this.modulePath?.includes(nova.extension.path)) {
-      const selectedPlugin = pluginConfigMap[syntaxKey]
+      const primaryPlugin = PLUGIN_DESCRIPTORS[syntaxKey]
 
-      if (selectedPlugin?.enabled) {
-        plugins.push(selectedPlugin.path)
+      if (primaryPlugin && isPluginEnabled(primaryPlugin.configKey)) {
+        plugins.push(primaryPlugin.pluginPath)
       }
 
       // prettier-plugin-tailwindcss must be loaded last.
       // See: https://github.com/tailwindlabs/prettier-plugin-tailwindcss#compatibility-with-other-prettier-plugins
       if (tailwindSyntaxesEnabled && tailwindPluginEnabled) {
-        plugins.push(pluginPaths.tailwind)
+        plugins.push(PLUGIN_DESCRIPTORS.tailwind.pluginPath)
       }
 
       // Pick the right ejs plugin
@@ -543,12 +565,12 @@ class Formatter {
         const useTailwindEJS =
           tailwindPluginEnabled &&
           tailwindSyntaxesEnabled &&
-          ejsTailwindPluginEnabled
+          isPluginEnabled(PLUGIN_DESCRIPTORS.ejsTailwind.configKey)
 
         if (useTailwindEJS) {
-          plugins.push(pluginPaths.ejsTailwind)
-        } else if (ejsPluginEnabled) {
-          plugins.push(pluginPaths.ejs)
+          plugins.push(PLUGIN_DESCRIPTORS.ejsTailwind.pluginPath)
+        } else if (isPluginEnabled(PLUGIN_DESCRIPTORS.ejs.configKey)) {
+          plugins.push(PLUGIN_DESCRIPTORS.ejs.pluginPath)
         }
       }
     }
@@ -575,38 +597,25 @@ class Formatter {
 
     // Apply plugin options only if no config is found or it’s intentionally ignored.
     if (!customConfigFile && (ignoreConfigFile || shouldApplyDefaultConfig)) {
-      // Add ASTRO plugin options if the document syntax is ASTRO
-      if (syntaxKey === 'astro') {
-        Object.assign(options, getAstroConfig())
+      // Plugin options for the document's syntax — looked up by syntax key,
+      // regardless of the plugin's enabled flag (matching the old behavior).
+      const optionsConfig = PLUGIN_DESCRIPTORS[syntaxKey]?.optionsConfig
+      if (optionsConfig) {
+        Object.assign(options, optionsConfig())
       }
 
-      // Add BLADE plugin options if the document syntax is BLADE
-      if (syntaxKey === 'blade') {
-        Object.assign(options, getBladeConfig())
+      // TAILWIND plugin options apply to any supported syntax,
+      // not just the syntax the plugin itself parses
+      if (tailwindSyntaxesEnabled && tailwindPluginEnabled) {
+        Object.assign(options, getTailwindConfig())
       }
 
-      // Add PROPERTIES plugin options if the document syntax is JAVA-PROPERTIES
-      if (syntaxKey === 'java-properties') {
-        Object.assign(options, getPropertiesConfig())
-      }
-
-      // Add LIQUID plugin options if the document syntax is LIQUID
-      if (syntaxKey === 'liquid-html' || syntaxKey === 'liquid-md') {
-        Object.assign(options, getLiquidConfig())
-      }
-
-      // Add NGINX plugin options if the document syntax is NGINX
-      if (syntaxKey === 'nginx') {
-        Object.assign(options, getNginxConfig())
-      }
-
-      // Add PHP plugin options if the document syntax is PHP
-      if (syntaxKey === 'php') {
-        Object.assign(options, getPhpConfig())
-      }
-
-      // Add SQL plugin options if the document syntax is SQL
+      // SQL plugin options depend on the configured formatter implementation
       if (syntaxKey === 'sql') {
+        const sqlFormatter = getConfigWithWorkspaceOverride(
+          'prettier.plugins.prettier-plugin-sql.formatter',
+        )
+
         if (sqlFormatter === 'sql-formatter') {
           const config = { ...getSqlFormatterConfig() }
 
@@ -629,27 +638,6 @@ class Formatter {
 
           Object.assign(options, config)
         }
-      }
-
-      // Add TAILWIND plugin options if the document syntax is of a supported type
-      // and the plugin is enabled
-      if (tailwindSyntaxesEnabled && tailwindPluginEnabled) {
-        Object.assign(options, getTailwindConfig())
-      }
-
-      // ADD TOML plugin options if the document syntax is TOML
-      if (syntaxKey === 'toml') {
-        Object.assign(options, getTomlConfig())
-      }
-
-      // ADD TWIG plugin options if the document syntax is TWIG
-      if (syntaxKey === 'twig') {
-        Object.assign(options, getTwigConfig())
-      }
-
-      // Add XML plugin options if the document syntax is XML
-      if (syntaxKey === 'xml') {
-        Object.assign(options, getXmlConfig())
       }
     }
 
