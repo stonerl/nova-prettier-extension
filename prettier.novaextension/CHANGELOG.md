@@ -1,3 +1,74 @@
+## 3.9.0 - 2026-09-21
+
+### Added
+
+- **Config-declared plugins are now surfaced**
+  - If the project's Prettier config declares plugins, a notification
+    explains that Prettier⁺ formats with its own bundled plugins instead of
+    failing silently - but only for plugins not already covered by the
+    bundled set.
+- **New option: `astroCompressHTML`**
+  - `jsx` (default) / `html` / `none` - mirror the `compressHTML` setting
+    of the Astro project.
+- **SQL: ClickHouse dialect** added to the sql-formatter language dropdown.
+- **PHP: 8.5 support** added to the phpVersion dropdown.
+- **`.editorconfig` changes now restart the Prettier service**, so new
+  settings are picked up without a manual restart.
+
+### Changed
+
+- Updated `prettier` to version `3.9.8`.
+- Updated `@shopify/prettier-plugin-liquid` to version `1.11.0`.
+- Updated `prettier-plugin-java` to version `2.10.4`.
+- Updated `@shufo/prettier-plugin-blade` to version `1.16.2`.
+- Updated `prettier-plugin-astro` to version `1.0.1`.
+- Updated `prettier-plugin-tailwindcss` to version `0.8.1`.
+- Updated `prettier-plugin-sql` to version `0.20.0`.
+- Updated `@prettier/plugin-php` to version `0.25.0`.
+- Updated `@zackad/prettier-plugin-twig` to version `0.17.0`.
+- Updated `prettier-plugin-nginx` to version `2.0.0`.
+- Updated `prettier-plugin-properties` to version `0.3.1`.
+- ⚠️ `prettier-plugin-astro` 1.0 is a full rewrite on the new Rust
+  compiler: formatting output may change, and `.astro` files now require
+  Node.js 22.12+.
+
+### Fixed
+
+- **HTML / HTML (EJS) formatting on Prettier 3.9**
+  - The bundled `prettier-plugin-ejs-tailwindcss` crashed on Prettier 3.9.
+    It is replaced by composing the bundled `prettier-plugin-ejs` with
+    `prettier-plugin-tailwindcss` - class sorting and EJS tag support are
+    identical.
+- **Prettier service lifecycle hardening**
+  - Hung service starts are torn down after a 10 second timeout instead of
+    reporting success while the service was dead.
+  - Late events from a superseded service process can no longer corrupt
+    the current startup.
+- **Stability**
+  - Multi-range selections are preserved when formatting applies.
+  - Formatting issues now report numeric line/column values.
+  - File handles are no longer leaked when config or `package.json` reads fail.
+- **IPC robustness**
+  - JSON-RPC frame writes are serialized.
+  - The 32 MiB payload limit is now enforced in bytes, not characters.
+- Fail fast when the configured Prettier module path is missing.
+- `.inc` files are no longer treated as SQL.
+
+### Removed
+
+- `prettier-plugin-ejs-tailwindcss` - see the fix above. The
+  `prettier-plugin-ejs-tailwindcss.enabled` setting no longer has any
+  effect and can be removed from saved settings.
+
+### Performance
+
+- Skipped serializing options for debug logging when debug logging is off.
+
+### Development
+
+- Upgraded the build toolchain (rollup 4.63, ESLint 10, Babel 8,
+  terser plugin 1.0) - minified output is byte-identical.
+
 ## 3.6.4 - 2026-09-21
 
 - Fix startup crash
@@ -259,7 +330,7 @@ The latest plugin releases resulted in a "No parser for …" error.
   - Added detailed logs for service startup, shutdown timing, and crash detection
   - Improved visibility into module loading failures
 
-## 3.5.32 — 2025-04-27
+## 3.5.32 - 2025-04-27
 
 ### Removed
 
@@ -311,7 +382,7 @@ The latest plugin releases resulted in a "No parser for …" error.
 - **Advanced Syntax Detection**
 
   Prettier⁺ no longer relies solely on Nova's reported syntax.
-  It now intelligently determines the correct syntax based on file extensions—ensuring accurate
+  It now intelligently determines the correct syntax based on file extensions-ensuring accurate
   formatting even when language extensions are not installed.
   This behavior can be disabled via the `Advanced Syntax Detection` setting.
   ⚠️ Language extensions are still recommended for best results.
@@ -430,7 +501,7 @@ The latest plugin releases resulted in a "No parser for …" error.
 ### Added
 
 - **Full German localization**
-  - All strings now translated — **100% complete** via Weblate.
+  - All strings now translated - **100% complete** via Weblate.
 
 ### Removed
 
@@ -456,7 +527,7 @@ The latest plugin releases resulted in a "No parser for …" error.
 
 ### Changed
 
-- Renamed the extension to **Prettier⁺** — because it just looks better 😎
+- Renamed the extension to **Prettier⁺** - because it just looks better 😎
 - updated `prettier-plugin-sql` to version `0.19.0`
 - updated `rollup` to version `4.4.0`
 
@@ -475,7 +546,7 @@ The latest plugin releases resulted in a "No parser for …" error.
     - running `npm install` (adds or removes Prettier)
     - setting/unsetting a global Prettier path
     - toggling the “Prefer Bundled Prettier” option
-  - No need to restart Nova anymore — Prettier⁺ will pick up the correct module on its own
+  - No need to restart Nova anymore - Prettier⁺ will pick up the correct module on its own
 
 ### Fixed
 
@@ -518,7 +589,7 @@ The latest plugin releases resulted in a "No parser for …" error.
 
 ### Added
 
-- New Command: **Format Document (Forced)** — formats the current file even if its
+- New Command: **Format Document (Forced)** - formats the current file even if its
   syntax is ignored or excluded via `.prettierignore`.
 
 ### Changed
@@ -592,7 +663,7 @@ The latest plugin releases resulted in a "No parser for …" error.
 All UI elements have been translated into German. If you spot anything awkward or off,
 head over to [Weblate](https://hosted.weblate.org/projects/prettier-for-nova/) and suggest improvements.
 
-Chinese, French, and Japanese translations still need contributors — feel free to jump in! 😄
+Chinese, French, and Japanese translations still need contributors - feel free to jump in! 😄
 
 ## 3.5.10 - 2025-04-06
 
@@ -648,7 +719,7 @@ See the README for usage details.
 ### Fixed
 
 - Plugin option mapping: NGINX and SQL plugin options (specifically for node-sql-parser)
-  were being mishandled—this has now been corrected.
+  were being mishandled-this has now been corrected.
 
 ## 3.5.5 - 2025-04-01
 
