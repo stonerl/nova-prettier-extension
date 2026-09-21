@@ -884,9 +884,14 @@ class Formatter {
   }
 
   /**
-   * Show the "Document Too Large" notification for the given payload size.
+   * Show the "Document Too Large" notification for the given size estimate.
    *
-   * @param {number} size  size in bytes (or chars — used for the MiB readout)
+   * Callers pass either a UTF-16 char count (early document.length check,
+   * before the text is read) or a UTF-8 byte count (after reading). Both
+   * are compared against the 32 MiB limit and rendered as "MiB"; the char
+   * variant is an approximation that avoids materializing huge text.
+   *
+   * @param {number} size  size estimate in chars or bytes
    */
   notifyFileTooLarge(size) {
     showNotification({

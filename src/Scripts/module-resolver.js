@@ -43,8 +43,13 @@ function findModuleWithFileSystem(directory, module) {
       if (!stats.isFile()) return false
 
       const file = nova.fs.open(path, 'r')
+      let json
       try {
-        const json = JSON.parse(file.read())
+        try {
+          json = JSON.parse(file.read())
+        } finally {
+          file.close()
+        }
         if (
           (json.dependencies && json.dependencies[module]) ||
           (json.devDependencies && json.devDependencies[module])
@@ -222,9 +227,12 @@ module.exports = async function () {
 
       try {
         const file = nova.fs.open(packageJsonPath, 'r') // Open the file for reading
-        const packageJsonContent = file.read() // Read the content into a string
-
-        const json = JSON.parse(packageJsonContent) // Parse the JSON string
+        let json
+        try {
+          json = JSON.parse(file.read()) // Parse the JSON string
+        } finally {
+          file.close()
+        }
 
         declaredPackages = {
           ...(json.dependencies || {}),

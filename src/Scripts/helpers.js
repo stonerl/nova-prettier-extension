@@ -181,8 +181,12 @@ async function sanitizePrettierConfig() {
       return
     }
 
-    const json = JSON.parse(await file.read())
-    file.close()
+    let json
+    try {
+      json = JSON.parse(await file.read())
+    } finally {
+      file.close()
+    }
 
     let modified = false
 
