@@ -6,6 +6,8 @@
   "prettier.notification.stopped-running.title": "",
   "prettier.notification.stopped-running.body": "",
   "prettier.notification.stopped-running.action.restart": "",
+  "prettier.notification.config-plugins.title": "",
+  "prettier.notification.config-plugins.body": "",
   "prettier.notification.fileTooLarge.title": "",
   "prettier.notification.fileTooLarge.body.prefix": "",
   "prettier.notification.fileTooLarge.body.suffix": "",

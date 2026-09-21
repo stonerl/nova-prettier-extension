@@ -6,6 +6,8 @@
   "prettier.notification.stopped-running.title": "Prettier wurde beendet",
   "prettier.notification.stopped-running.body": "Wenn dieses Problem weiterhin besteht, melden Sie das Problem bitte über die Erweiterungsbibliothek.",
   "prettier.notification.stopped-running.action.restart": "Prettier neu starten",
+  "prettier.notification.config-plugins.title": "Prettier⁺ verwendet eigene Plugins",
+  "prettier.notification.config-plugins.body": "Ihre Prettier-Konfigurationsdatei deklariert Plugins. Prettier⁺ ignoriert diese Deklarationen und formatiert stattdessen mit den integrierten Plugins – Sie können die Konfigurationsdatei für die Nutzung über die Kommandozeile behalten.",
   "prettier.notification.fileTooLarge.title": "Dokument zu groß",
   "prettier.notification.fileTooLarge.body.prefix": "Dieses Dokument kann nicht formatiert werden:",
   "prettier.notification.fileTooLarge.body.suffix": "überschreiten das Limit von 32 MiB.",
