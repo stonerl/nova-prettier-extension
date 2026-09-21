@@ -83,20 +83,53 @@ function observeEmptyArrayCleanup(keys, disposables) {
   })
 }
 
-function handleProcessResult(process, reject, resolve) {
+/**
+ * Wire up rejection/resolution for a Nova Process based on its stderr
+ * and exit status, with an optional inactivity-free timeout so a hung
+ * child process can't block the caller forever.
+ *
+ * @param {Process} process
+ * @param {Function} reject
+ * @param {Function} resolve
+ * @param {number} [timeoutMs=30000]  – 0 disables the timeout
+ */
+function handleProcessResult(process, reject, resolve, timeoutMs = 30000) {
   const errors = []
+  let settled = false
+
+  const settle = (fn, value) => {
+    if (settled) return
+    settled = true
+    fn(value)
+  }
+
   process.onStderr((err) => {
     errors.push(err)
   })
 
   process.onDidExit((status) => {
     if (status === 0) {
-      if (resolve) resolve()
+      settle(resolve)
       return
     }
 
-    reject(new ProcessError(status, errors.join('\n')))
+    settle(reject, new ProcessError(status, errors.join('\n')))
   })
+
+  if (timeoutMs > 0) {
+    setTimeout(() => {
+      if (settled) return
+      try {
+        process.terminate()
+      } catch {
+        // already exited — nothing to terminate
+      }
+      settle(
+        reject,
+        new ProcessError(-1, `Process timed out after ${timeoutMs}ms`),
+      )
+    }, timeoutMs)
+  }
 }
 
 /**

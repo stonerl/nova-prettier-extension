@@ -122,7 +122,8 @@ async function installPackages(directory) {
     cwd: directory,
   })
 
-  handleProcessResult(process, reject, resolve)
+  // npm install can legitimately take a while — give it 5 minutes.
+  handleProcessResult(process, reject, resolve, 300000)
   process.start()
 
   return promise
