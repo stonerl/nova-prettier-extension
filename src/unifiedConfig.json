@@ -2122,7 +2122,8 @@
                     ["sql", "Generic SQL"],
                     ["sqlite", "SQLite"],
                     ["transactsql", "SQL Server Transact-SQL"],
-                    ["trino", "Trino / Presto"]
+                    ["trino", "Trino / Presto"],
+                    ["clickhouse", "ClickHouse"]
                   ]
                 },
                 "configWorkspace": {
@@ -2147,7 +2148,8 @@
                     ["sql", "Generic SQL"],
                     ["sqlite", "SQLite"],
                     ["transactsql", "SQL Server Transact-SQL"],
-                    ["trino", "Trino / Presto"]
+                    ["trino", "Trino / Presto"],
+                    ["clickhouse", "ClickHouse"]
                   ]
                 }
               },
