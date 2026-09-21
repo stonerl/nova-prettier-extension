@@ -205,6 +205,7 @@ class PrettierExtension {
         '**/prettier.config.cts',
         '**/prettier.config.mts',
         '**/.prettierignore',
+        '**/.editorconfig',
       ]
 
       for (const pattern of configFilesToWatch) {
