@@ -167,14 +167,23 @@ class PrettierService extends FormattingService {
   async getConfig({ pathForConfig, ignorePath, options }) {
     let info = {}
     if (options.filepath) {
-      if (this._fileInfoCache.has(options.filepath)) {
-        info = this._fileInfoCache.get(options.filepath)
+      // Cache key includes every input that can change the result, so a
+      // normal lookup (ignorePath set) can never poison a forced one
+      // (ignorePath null) and vice versa. (withNodeModules is always
+      // false here and thus not part of the key.)
+      const cacheKey = `${options.filepath}\u0000${ignorePath ?? ''}`
+      if (this._fileInfoCache.has(cacheKey)) {
+        info = this._fileInfoCache.get(cacheKey)
       } else {
         info = await this.prettier.getFileInfo(options.filepath, {
           ignorePath,
           withNodeModules: false,
+          // The client always sends an explicit parser; passing it through
+          // skips Prettier's expensive inference path (resolveConfig +
+          // plugin loading), making uncached lookups near-free.
+          ...(options.parser ? { parser: options.parser } : {}),
         })
-        this._fileInfoCache.set(options.filepath, info)
+        this._fileInfoCache.set(cacheKey, info)
       }
       if (info.ignored) return { ignored: true }
     }
