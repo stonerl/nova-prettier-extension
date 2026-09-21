@@ -22,12 +22,11 @@
     "prettier": "^3.9.8",
     "prettier-plugin-astro": "^0.14.1",
     "prettier-plugin-ejs": "^1.0.3",
-    "prettier-plugin-ejs-tailwindcss": "^0.1.2",
     "prettier-plugin-java": "^2.10.4",
     "prettier-plugin-nginx": "^2.0.0",
     "prettier-plugin-properties": "^0.3.1",
     "prettier-plugin-sql": "^0.20.0",
-    "prettier-plugin-tailwindcss": "^0.7.1",
+    "prettier-plugin-tailwindcss": "^0.8.1",
     "prettier-plugin-toml": "^2.0.6"
   },
   "scripts": {

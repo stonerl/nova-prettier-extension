@@ -1470,43 +1470,13 @@
             "key": "prettier.plugins.prettier-plugin-ejs.enabled",
             "config": {
               "title": "Plugin Enabled",
-              "description": "Used only if 'prettier-plugin-tailwindcss' is disabled or Tailwind sorting is not enabled for the 'HTML (EJS)' syntax.",
+              "description": "Required for EJS tag support in 'HTML' and 'HTML (EJS)' files. Class sorting requires 'prettier-plugin-tailwindcss' and Tailwind sorting enabled for the syntax.",
               "type": "boolean",
               "default": true
             },
             "configWorkspace": {
               "title": "Plugin Status",
-              "description": "Select whether to use global settings, enable, or disable the plugin.\n\nUsed only if 'prettier-plugin-tailwindcss' is disabled or Tailwind sorting is not enabled for the 'HTML (EJS)' syntax.",
-              "type": "enum",
-              "radio": false,
-              "values": [
-                [null, "Global Setting"],
-                [true, "Enabled"],
-                [false, "Disabled"]
-              ],
-              "default": null
-            }
-          }
-        ]
-      },
-      {
-        "key": "prettier.plugins.prettier-plugin-ejs-tailwindcss.section",
-        "title": "prettier-plugin-ejs-tailwindcss",
-        "description": "EJS template formatter and Tailwind CSS class sorting plugin for Prettier",
-        "link": "https://github.com/janghye0k/prettier-plugin-ejs-tailwindcss",
-        "type": "section",
-        "children": [
-          {
-            "key": "prettier.plugins.prettier-plugin-ejs-tailwindcss.enabled",
-            "config": {
-              "title": "Plugin Enabled",
-              "description": "Requires both 'prettier-plugin-tailwindcss' and Tailwind sorting enabled for the 'HTML (EJS)' syntax.",
-              "type": "boolean",
-              "default": true
-            },
-            "configWorkspace": {
-              "title": "Plugin Status",
-              "description": "Select whether to use global settings, enable, or disable the plugin.\n\nRequires both 'prettier-plugin-tailwindcss' and Tailwind sorting enabled for the 'HTML (EJS)' syntax.",
+              "description": "Select whether to use global settings, enable, or disable the plugin.\n\nRequired for EJS tag support in 'HTML' and 'HTML (EJS)' files. Class sorting requires 'prettier-plugin-tailwindcss' and Tailwind sorting enabled for the syntax.",
               "type": "enum",
               "radio": false,
               "values": [

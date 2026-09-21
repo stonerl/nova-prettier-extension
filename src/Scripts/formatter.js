@@ -80,7 +80,7 @@ const {
  * `prettier.plugins.*`, the bundled entry point, and — when the plugin
  * has Nova-managed options — the loader producing them.
  *
- * Flag-only plugins (ejs, ejsTailwind, tailwind) never act as the
+ * Flag-only plugins (ejs, tailwind) never act as the
  * primary parser for a syntax; they're selected by the ordering rules
  * in formatEditor.
  */
@@ -98,11 +98,6 @@ const PLUGIN_DESCRIPTORS = {
   ejs: {
     configKey: 'prettier-plugin-ejs',
     pluginPath: pluginPaths.ejs,
-    optionsConfig: null,
-  },
-  ejsTailwind: {
-    configKey: 'prettier-plugin-ejs-tailwindcss',
-    pluginPath: pluginPaths.ejsTailwind,
     optionsConfig: null,
   },
   java: {
@@ -599,25 +594,26 @@ class Formatter {
         plugins.push(primaryPlugin.pluginPath)
       }
 
+      // For html and html+ejs the EJS plugin rewrites EJS tags into
+      // placeholder nodes the html parser understands, so it must be
+      // loaded before prettier-plugin-tailwindcss, which must be last.
+      // (prettier-plugin-ejs-tailwindcss is no longer used: it crashes
+      // on Prettier 3.9's embedded-languages visitor keys and the
+      // plain ejs + tailwind composition produces identical output.)
+      if (syntaxKey === 'html+ejs' || syntaxKey === 'html') {
+        if (isPluginEnabled(PLUGIN_DESCRIPTORS.ejs.configKey)) {
+          plugins.push(PLUGIN_DESCRIPTORS.ejs.pluginPath)
+        }
+        if (tailwindSyntaxesEnabled && tailwindPluginEnabled) {
+          plugins.push(PLUGIN_DESCRIPTORS.tailwind.pluginPath)
+        }
+        return
+      }
+
       // prettier-plugin-tailwindcss must be loaded last.
       // See: https://github.com/tailwindlabs/prettier-plugin-tailwindcss#compatibility-with-other-prettier-plugins
       if (tailwindSyntaxesEnabled && tailwindPluginEnabled) {
         plugins.push(PLUGIN_DESCRIPTORS.tailwind.pluginPath)
-      }
-
-      // Pick the right ejs plugin
-      // When using prettier-plugin-ejs-tailwindcss it must be loaded after prettier-plugin-tailwindcss.
-      if (syntaxKey === 'html+ejs' || syntaxKey === 'html') {
-        const useTailwindEJS =
-          tailwindPluginEnabled &&
-          tailwindSyntaxesEnabled &&
-          isPluginEnabled(PLUGIN_DESCRIPTORS.ejsTailwind.configKey)
-
-        if (useTailwindEJS) {
-          plugins.push(PLUGIN_DESCRIPTORS.ejsTailwind.pluginPath)
-        } else if (isPluginEnabled(PLUGIN_DESCRIPTORS.ejs.configKey)) {
-          plugins.push(PLUGIN_DESCRIPTORS.ejs.pluginPath)
-        }
       }
     }
 
