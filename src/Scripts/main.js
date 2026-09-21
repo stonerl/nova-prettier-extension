@@ -305,13 +305,23 @@ class PrettierExtension {
     }
 
     log.info(`Loading prettier at ${path}`)
-    await this.formatter
-      .start(path)
-      .catch(() =>
-        new Promise((resolve) => setTimeout(resolve, 1000)).then(() =>
-          this.formatter.start(path),
-        ),
-      )
+
+    const MAX_ATTEMPTS = 3
+    const RETRY_DELAY_MS = 1000
+
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      try {
+        await this.formatter.start(path)
+        return
+      } catch (err) {
+        if (attempt === MAX_ATTEMPTS) throw err
+        log.warn(
+          `Starting Prettier service failed (attempt ${attempt}/${MAX_ATTEMPTS}), retrying in ${RETRY_DELAY_MS}ms`,
+          err,
+        )
+        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS))
+      }
+    }
   }
 
   toggleFormatOnSave() {
