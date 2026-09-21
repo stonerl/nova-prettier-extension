@@ -984,8 +984,8 @@ class Formatter {
       ? error.message
       : error.message.split(/\n\s*?at\s+/i)[0] // When error is only a message it probably has the stack trace appended. Remove it.
     issue.severity = IssueSeverity.Error
-    issue.line = lineData[1]
-    issue.column = lineData[2]
+    issue.line = Number(lineData[1])
+    issue.column = Number(lineData[2])
 
     return [issue]
   }
