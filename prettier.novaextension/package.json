@@ -13,7 +13,7 @@
   },
   "homepage": "https://github.com/stonerl/nova-prettier-extension#readme",
   "dependencies": {
-    "@prettier/plugin-php": "^0.24.0",
+    "@prettier/plugin-php": "^0.25.0",
     "@prettier/plugin-xml": "^3.4.2",
     "@shopify/prettier-plugin-liquid": "^1.11.0",
     "@shufo/prettier-plugin-blade": "^1.16.2",
