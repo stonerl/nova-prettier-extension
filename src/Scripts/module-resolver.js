@@ -118,7 +118,7 @@ async function installPackages(directory) {
   })
 
   const process = new Process('/usr/bin/env', {
-    args: ['npm', 'install', '--only-prod'],
+    args: ['npm', 'install', '--omit=dev'],
     cwd: directory,
   })
 
