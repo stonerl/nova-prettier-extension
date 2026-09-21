@@ -42,7 +42,7 @@ module.exports = {
     'node_modules',
     'prettier-plugin-java',
     'dist',
-    'index.js',
+    'index.cjs',
   ),
   liquid: nova.path.join(
     nova.extension.path,
