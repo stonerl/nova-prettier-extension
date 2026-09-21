@@ -226,7 +226,7 @@ class Formatter {
     })
     this._startHandshake = handshake
 
-    this.prettierService = new Process('/usr/bin/env', {
+    const proc = new Process('/usr/bin/env', {
       args: [
         'node',
         nova.path.join(
@@ -240,18 +240,29 @@ class Formatter {
       stdio: 'jsonrpc',
       cwd: nova.workspace.path,
     })
-    this.prettierService.onDidExit(this.prettierServiceDidExit)
-    this.prettierService.onNotify('didStart', () => {
+    this.prettierService = proc
+
+    // Stale-process guard: a superseded process's late events must never
+    // act on the current handshake or service state (e.g. a crashed
+    // process's late didStart resolving the replacement's handshake).
+    const isCurrent = () => this.prettierService === proc
+
+    proc.onDidExit((exitCode) => {
+      if (isCurrent()) this.prettierServiceDidExit(exitCode)
+    })
+    proc.onNotify('didStart', () => {
+      if (!isCurrent()) return
       log.info('Prettier service started successfully')
       this._resolveIsReadyPromise(true)
       this._resolveStartHandshake()
     })
-    this.prettierService.onNotify(
-      'startDidFail',
-      this.prettierServiceStartDidFail,
-    )
-    this.prettierService.onNotify('didCrash', this.prettierServiceDidCrash)
-    this.prettierService.start()
+    proc.onNotify('startDidFail', (error) => {
+      if (isCurrent()) this.prettierServiceStartDidFail(error)
+    })
+    proc.onNotify('didCrash', (params) => {
+      if (isCurrent()) this.prettierServiceDidCrash(params)
+    })
+    proc.start()
 
     // If the service neither signals didStart nor exits, tear it down so
     // start() rejects and a retry begins from a clean slate. Detach the
@@ -286,7 +297,9 @@ class Formatter {
       await handshake
     } finally {
       clearTimeout(timeout)
-      this._startHandshake = null
+      // Only clear our own handshake — a restart triggered by
+      // prettierServiceDidExit may have already replaced it.
+      if (this._startHandshake === handshake) this._startHandshake = null
     }
   }
 
