@@ -716,7 +716,17 @@ class Formatter {
       ignored,
       missingParser,
       cursorOffset: newCursor,
+      configPlugins,
     } = result
+
+    // The service only reports this when it substituted our bundled
+    // plugins for ones declared in the user's own config file.
+    if (configPlugins?.length) {
+      log.info(
+        `Your Prettier config declares plugins (${configPlugins.join(', ')}) — Prettier⁺ formats with its bundled equivalents instead.`,
+      )
+      this.showConfigPluginsNotice()
+    }
 
     // newCursor may be a number or undefined/null.
     if (newCursor == null) {
@@ -822,6 +832,29 @@ class Formatter {
   getIgnorePath(path) {
     const expectedIgnoreDir = nova.workspace.path || nova.path.dirname(path)
     return nova.path.join(expectedIgnoreDir, '.prettierignore')
+  }
+
+  /**
+   * One-time-per-session notice that the user's own config file declares
+   * plugins which Prettier⁺ replaced with its bundled equivalents.
+   */
+  showConfigPluginsNotice() {
+    if (this._configPluginsNoticeShown) return
+    this._configPluginsNoticeShown = true
+
+    showNotification({
+      id: 'prettier-config-plugins',
+      title: nova.localize(
+        'prettier.notification.config-plugins.title',
+        'Prettier⁺ Is Using Its Own Plugins',
+        'notification',
+      ),
+      body: nova.localize(
+        'prettier.notification.config-plugins.body',
+        'Your Prettier config file declares plugins. Prettier⁺ ignores those declarations and formats with its own bundled plugins instead — you can keep the config file for command-line use.',
+        'notification',
+      ),
+    })
   }
 
   /**

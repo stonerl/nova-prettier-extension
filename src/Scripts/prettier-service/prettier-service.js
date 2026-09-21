@@ -87,9 +87,9 @@ class PrettierService extends FormattingService {
    * @throws {never} Formatting errors are caught and returned in `result.error`, so this method never throws
    */
   async format({ original, pathForConfig, ignorePath, options, withCursor }) {
-    let ignored, config
+    let ignored, config, configPlugins
     try {
-      ;({ ignored, config } = await this.getConfig({
+      ;({ ignored, config, configPlugins } = await this.getConfig({
         pathForConfig,
         ignorePath,
         options,
@@ -108,10 +108,16 @@ class PrettierService extends FormattingService {
       // If withCursor flag is true and a cursor offset was provided, use formatWithCursor
       if (withCursor && typeof config.cursorOffset === 'number') {
         // formatWithCursor returns an object with both formatted code and new cursorOffset
-        return await this.prettier.formatWithCursor(original, config)
+        return {
+          ...(await this.prettier.formatWithCursor(original, config)),
+          configPlugins,
+        }
       } else {
         // Otherwise fall back to the regular format method
-        return { formatted: await this.prettier.format(original, config) }
+        return {
+          formatted: await this.prettier.format(original, config),
+          configPlugins,
+        }
       }
     } catch (err) {
       return this._errorResult(err)
@@ -196,7 +202,18 @@ class PrettierService extends FormattingService {
       config.parser = info.inferredParser
     }
 
-    return { ignored: false, config }
+    // Surface plugins declared in the resolved config file — but only
+    // when the client injected its own bundled plugins (options.plugins
+    // non-empty), because that's the only case where the declared ones
+    // are actually overridden. With a project Prettier, config-declared
+    // plugins load normally and there's nothing to report.
+    const configPlugins = options.plugins?.length
+      ? Array.isArray(inferredConfig.plugins)
+        ? inferredConfig.plugins
+        : []
+      : undefined
+
+    return { ignored: false, config, configPlugins }
   }
 }
 
