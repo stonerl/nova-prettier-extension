@@ -121,56 +121,68 @@ const log = Object.fromEntries(
 
 // Sanitize Prettier Config Function using Nova's File API with correct mode strings
 async function sanitizePrettierConfig() {
-  const configPath = nova.workspace.path + '/.nova/Configuration.json'
-
-  const file = nova.fs.open(configPath)
-  if (!file) {
-    log.debug('Could not open .nova/Configuration.json')
+  // Nothing to sanitize without an open workspace — building the path
+  // from a null workspace path would throw inside nova.fs.open.
+  if (!nova.workspace.path) {
+    log.debug('No workspace open — skipping Prettier config sanitation.')
     return
   }
 
-  const json = JSON.parse(await file.read())
-  file.close()
+  try {
+    const configPath = nova.workspace.path + '/.nova/Configuration.json'
 
-  let modified = false
-
-  for (const [key, value] of Object.entries(json)) {
-    if (!key.startsWith('prettier.')) continue
-
-    if (value === 'Enable' || value === 'Enabled') {
-      nova.workspace.config.set(key, true)
-      modified = true
-      log.debug(`Key ${key} set to true`)
-    } else if (value === 'Disable' || value === 'Disabled') {
-      nova.workspace.config.set(key, false)
-      modified = true
-      log.debug(`Key ${key} set to false`)
-    } else if (value === 'Global Default' || value === 'Globale Setting') {
-      nova.workspace.config.remove(key)
-      modified = true
-      log.debug(`Key ${key} removed`)
+    const file = nova.fs.open(configPath)
+    if (!file) {
+      log.debug('Could not open .nova/Configuration.json')
+      return
     }
-  }
 
-  if (modified) {
-    log.info('Prettier configuration sanitized successfully.')
-    // Send a notification if values have been changed.
-    await showNotification({
-      id: 'prettier-config-updated',
-      title: nova.localize(
-        'prettier.notification.config.updated.title',
-        'Project Configuration Updated',
-        'notification',
-      ),
-      body: nova.localize(
-        'prettier.notification.config.updated.body',
-        'Your project’s Prettier configuration has been updated to the new config format.',
-        'notification',
-      ),
-    })
-    log.info('Notification sent.')
-  } else {
-    log.debug('Prettier configuration is already sanitized.')
+    const json = JSON.parse(await file.read())
+    file.close()
+
+    let modified = false
+
+    for (const [key, value] of Object.entries(json)) {
+      if (!key.startsWith('prettier.')) continue
+
+      if (value === 'Enable' || value === 'Enabled') {
+        nova.workspace.config.set(key, true)
+        modified = true
+        log.debug(`Key ${key} set to true`)
+      } else if (value === 'Disable' || value === 'Disabled') {
+        nova.workspace.config.set(key, false)
+        modified = true
+        log.debug(`Key ${key} set to false`)
+      } else if (value === 'Global Default' || value === 'Globale Setting') {
+        nova.workspace.config.remove(key)
+        modified = true
+        log.debug(`Key ${key} removed`)
+      }
+    }
+
+    if (modified) {
+      log.info('Prettier configuration sanitized successfully.')
+      // Send a notification if values have been changed.
+      await showNotification({
+        id: 'prettier-config-updated',
+        title: nova.localize(
+          'prettier.notification.config.updated.title',
+          'Project Configuration Updated',
+          'notification',
+        ),
+        body: nova.localize(
+          'prettier.notification.config.updated.body',
+          'Your project’s Prettier configuration has been updated to the new config format.',
+          'notification',
+        ),
+      })
+      log.info('Notification sent.')
+    } else {
+      log.debug('Prettier configuration is already sanitized.')
+    }
+  } catch (err) {
+    // Missing or malformed Configuration.json must never break extension startup.
+    log.warn('Error while sanitizing Prettier configuration', err)
   }
 }
 
