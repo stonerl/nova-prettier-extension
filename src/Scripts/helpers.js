@@ -99,16 +99,27 @@ function handleProcessResult(process, reject, resolve) {
   })
 }
 
+/**
+ * Mirrors the gate inside log.debug so callers can skip building
+ * expensive debug payloads (e.g. JSON.stringify of large objects)
+ * when they would only be discarded anyway.
+ *
+ * @returns {boolean}
+ */
+function isDebugLoggingEnabled() {
+  return (
+    nova.inDevMode() ||
+    getConfigWithWorkspaceOverride('prettier.debug.logging') === true
+  )
+}
+
 const log = Object.fromEntries(
   ['log', 'info', 'warn', 'error', 'debug'].map((fn) => [
     fn,
     (...args) => {
       if (fn === 'debug') {
         // Gate debug logs: if not in dev mode or debug logging flag is off, do nothing.
-        if (
-          !nova.inDevMode() &&
-          !getConfigWithWorkspaceOverride('prettier.debug.logging')
-        ) {
+        if (!isDebugLoggingEnabled()) {
           return
         }
         // Remap debug to use console.log
@@ -284,6 +295,7 @@ module.exports = {
   getNodeVersion,
   getNpmVersion,
   handleProcessResult,
+  isDebugLoggingEnabled,
   log,
   minNovaVersion,
   observeConfigWithWorkspaceOverride,

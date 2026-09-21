@@ -9,7 +9,11 @@
  * with the background Prettier service via JSON-RPC.
  */
 
-const { getConfigWithWorkspaceOverride, log } = require('./helpers.js')
+const {
+  getConfigWithWorkspaceOverride,
+  isDebugLoggingEnabled,
+  log,
+} = require('./helpers.js')
 
 const { showNotification, cancelNotification } = require('./notifications.js')
 
@@ -685,7 +689,9 @@ class Formatter {
     }
 
     // Log the options being used
-    log.debug('Prettier options:', JSON.stringify(options, null, 2))
+    if (isDebugLoggingEnabled()) {
+      log.debug('Prettier options:', JSON.stringify(options, null, 2))
+    }
 
     // 1) Ensure the JSON-RPC service is ready
     const ready = await this.isReady
