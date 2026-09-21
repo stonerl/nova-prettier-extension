@@ -106,7 +106,6 @@ const extToSyntax = {
   // SQLPL – DB2 SQL Procedural Language
   '.db2': 'sql', // IBM DB2 SQL
   '.cql': 'sql', // Cassandra Query Language
-  '.inc': 'sql', // SQL include files
   '.tab': 'sql', // Table definitions
   '.udf': 'sql', // User-defined function
   '.viw': 'sql', // View
