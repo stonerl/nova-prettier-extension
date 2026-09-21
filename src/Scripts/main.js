@@ -107,6 +107,7 @@ class PrettierExtension {
         (watcher) => watcher !== this.customConfigWatcher,
       )
       this.customConfigWatcher = null
+      this.configSetupTimer = null
     }
 
     if (this.configFile) {
@@ -136,8 +137,19 @@ class PrettierExtension {
       `Nova Version: ${nova.versionString}\n` +
         `Extension Version: ${nova.extension.version}`,
     )
-    nova.config.remove('prettier.use-compatibility-mode')
-    nova.config.remove('prettier.default-config.jsxBracketSameLine')
+
+    // Legacy key cleanup — only write when a legacy key is actually
+    // present. Unconditional removes performed a config write on every
+    // activation, contending with other extensions' config access and
+    // widening the window for Nova's config-store activation deadlock.
+    for (const legacyKey of [
+      'prettier.use-compatibility-mode',
+      'prettier.default-config.jsxBracketSameLine',
+    ]) {
+      if (nova.config.get(legacyKey) !== null) {
+        nova.config.remove(legacyKey)
+      }
+    }
 
     sanitizePrettierConfig()
 
@@ -174,15 +186,35 @@ class PrettierExtension {
   syncSelectionUnsupportedContext() {
     const dismissed =
       nova.config.get('prettier.selection-unsupported.dismissed') === true
-    nova.workspace.context.set(
+
+    // Only write when the mirrored value actually differs — context
+    // writes go through the same Nova config store as extension config,
+    // so an unconditional set on every activation is needless contention.
+    const current = nova.workspace.context.get(
       'prettier.selectionUnsupportedDismissed',
-      dismissed,
     )
+    if (current !== dismissed) {
+      nova.workspace.context.set(
+        'prettier.selectionUnsupportedDismissed',
+        dismissed,
+      )
+    }
   }
 
   start() {
-    this.setupConfiguration()
-    this.syncSelectionUnsupportedContext()
+    // Config writes and observer registration are deferred until after
+    // activation has returned. Nova's config store can deadlock — a
+    // config write waits for its synchronous change-notification
+    // observers, which re-enter config reads behind a writer-priority
+    // rwlock — when two extensions touch config concurrently during
+    // activation (e.g. alongside Docker Suite). Keeping activate()
+    // free of config-store traffic shrinks that window.
+    this.configSetupTimer = setTimeout(() => {
+      this.configSetupTimer = null
+      this.setupConfiguration()
+      this.syncSelectionUnsupportedContext()
+    }, 0)
+
     // 1) File‐system watchers
     if (nova.workspace.path) {
       const configFilesToWatch = [
@@ -581,6 +613,13 @@ class PrettierExtension {
   }
 
   dispose() {
+    // 0) cancel deferred config setup so it never registers anything
+    //    on a disposed instance
+    if (this.configSetupTimer) {
+      clearTimeout(this.configSetupTimer)
+      this.configSetupTimer = null
+    }
+
     // 1) stop the Prettier subprocess
     this.formatter.stop()
 
