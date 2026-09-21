@@ -35,6 +35,7 @@ module.exports = {
   PRETTIER_ASTRO_PLUGIN_OPTIONS: [
     'astroAllowShorthand',
     'astroSkipFrontmatter',
+    'astroCompressHTML',
   ],
 
   PRETTIER_BLADE_PLUGIN_OPTIONS: [

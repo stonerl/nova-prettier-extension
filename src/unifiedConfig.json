@@ -1079,6 +1079,31 @@
               ],
               "default": null
             }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-astro.astroCompressHTML",
+            "title": "Compress HTML",
+            "description": "Mirror of Astro's compressHTML config. Tells the formatter which whitespace the compiler will collapse.",
+            "link": "https://github.com/withastro/prettier-plugin-astro#astro-compress-html",
+            "type": "enum",
+            "radio": false,
+            "config": {
+              "default": "jsx",
+              "values": [
+                ["jsx", "jsx"],
+                ["html", "html"],
+                ["none", "none"]
+              ]
+            },
+            "configWorkspace": {
+              "default": null,
+              "values": [
+                [null, "Global Setting"],
+                ["jsx", "jsx"],
+                ["html", "html"],
+                ["none", "none"]
+              ]
+            }
           }
         ]
       },
