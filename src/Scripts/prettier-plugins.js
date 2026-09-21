@@ -57,6 +57,7 @@ module.exports = {
     'node_modules',
     'prettier-plugin-nginx',
     'dist',
+    'cjs',
     'index.js',
   ),
   php: nova.path.join(
