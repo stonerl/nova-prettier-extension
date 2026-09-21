@@ -253,15 +253,28 @@ class Formatter {
     this.prettierService.onNotify('didCrash', this.prettierServiceDidCrash)
     this.prettierService.start()
 
-    // If the service neither signals didStart nor exits, reject after a
-    // grace period so start() can't hang the retry loop. Deliberately no
-    // terminate(): a late didStart still settles the ready promise and
-    // recovers naturally, whereas killing the process would race the
-    // crash-restart path in prettierServiceDidExit.
+    // If the service neither signals didStart nor exits, tear it down so
+    // start() rejects and a retry begins from a clean slate. Detach the
+    // process handle *before* terminating: prettierServiceDidExit then
+    // bails out at its `!this.prettierService` guard, so it won't run the
+    // crash-restart path that would race the caller's retry loop.
     const START_TIMEOUT_MS = 10000
     const timeout = setTimeout(() => {
       if (this._startHandshake !== handshake) return // already settled
       this._startHandshake = null
+
+      const hungProcess = this.prettierService
+      this.prettierService = null
+      if (this._resolveIsReadyPromise) this._resolveIsReadyPromise(false)
+      this._isReadyPromise = null
+      if (hungProcess) {
+        try {
+          hungProcess.terminate()
+        } catch {
+          // already exited — nothing to terminate
+        }
+      }
+
       this._rejectStartHandshake(
         new Error(
           `Prettier service did not signal startup within ${START_TIMEOUT_MS}ms`,
