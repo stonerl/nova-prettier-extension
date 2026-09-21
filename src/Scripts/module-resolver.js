@@ -264,5 +264,8 @@ module.exports = async function () {
   } catch (err) {
     if (err.status === 127) throw err
     log.warn('Error trying to find or install bundled Prettier', err)
+    // Rethrow so callers can surface a real error instead of an
+    // undefined module path that crashes the Prettier service later.
+    throw err
   }
 }

@@ -326,9 +326,10 @@ class PrettierExtension {
   }
 
   async reloadPrettierConfig() {
-    log.debug('Prettier config file changed — restarting Prettier…')
-    await this.formatter.stop()
-    await this.startFormatter()
+    log.debug('Prettier config file changed — restarting Prettier…')
+    // Delegate to modulePathDidChange so failures surface through
+    // its existing notification handling instead of rejecting unhandled.
+    await this.modulePathDidChange()
   }
 
   async prettierConfigFileDidChange() {

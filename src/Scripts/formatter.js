@@ -126,6 +126,10 @@ class Formatter {
   async start(modulePath) {
     if (modulePath) this.modulePath = modulePath
 
+    if (!this.modulePath) {
+      throw new Error('Prettier module path is required to start the service')
+    }
+
     if (!this._isReadyPromise) this.setupIsReadyPromise()
     // If we're currently stopping we'll wait for that to complete before starting
     if (this._isStoppedPromise) {
@@ -499,7 +503,7 @@ class Formatter {
     const plugins = []
 
     // 3) Conditionally load plugins if enabled
-    if (this.modulePath.includes(nova.extension.path)) {
+    if (this.modulePath?.includes(nova.extension.path)) {
       const selectedPlugin = pluginConfigMap[syntaxKey]
 
       if (selectedPlugin?.enabled) {
