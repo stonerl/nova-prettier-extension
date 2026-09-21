@@ -770,7 +770,7 @@ class Formatter {
     }
 
     // 7) Finally apply
-    await this.applyResult(editor, original, formatted)
+    await this.applyResult(editor, formatted)
   }
 
   async shouldApplyDefaultConfig(syntaxKey, document, saving, pathForConfig) {
@@ -908,7 +908,7 @@ class Formatter {
     }
   }
 
-  async applyResult(editor, original, formatted) {
+  async applyResult(editor, formatted) {
     log.info(`Applying formatted changes to ${editor.document.path}`)
 
     // Restoring a single cursor would destroy multi-cursor setups and
