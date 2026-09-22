@@ -413,7 +413,14 @@ class PrettierExtension {
   }
 
   async modulePathDidChange() {
+    // Mark the restart as planned so a momentarily missing service doesn't
+    // surface the "Prettier Stopped Running" notification, and wait for any
+    // in-flight format requests (e.g. a save-triggered format) to settle
+    // before stopping the service.
+    this.formatter._restarting = true
     try {
+      await this.formatter.waitForPendingFormats()
+
       await this.formatter.stop()
       await this.startFormatter()
     } catch (err) {
@@ -469,6 +476,10 @@ class PrettierExtension {
         ),
       })
       return
+    } finally {
+      // Never leave the flag set — otherwise genuine failures would be
+      // silently suppressed for the rest of the session.
+      this.formatter._restarting = false
     }
   }
 

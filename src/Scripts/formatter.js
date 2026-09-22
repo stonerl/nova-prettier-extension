@@ -189,6 +189,10 @@ class Formatter {
     this.emitter = new Emitter()
     /** @type {Map<string,number>} latest in-flight request IDs per file URI */
     this._latestRequestIds = new Map()
+    /** @type {Set<Promise>} format requests currently in flight */
+    this._pendingFormats = new Set()
+    /** true while a planned stop/restart cycle is in progress */
+    this._restarting = false
 
     this.setupIsReadyPromise()
   }
@@ -206,7 +210,10 @@ class Formatter {
 
   get isReady() {
     if (!this._isReadyPromise) {
-      this.showServiceNotRunningError()
+      // A planned stop/restart cycle (e.g. after a config file change) is
+      // in progress — skip the "Prettier Stopped Running" notification and
+      // let callers quietly skip formatting until the new service is up.
+      if (!this._restarting) this.showServiceNotRunningError()
       return false
     }
 
@@ -359,6 +366,22 @@ class Formatter {
     this._isReadyPromise = new Promise((resolve) => {
       this._resolveIsReadyPromise = resolve
     })
+  }
+
+  /**
+   * Waits until all in-flight format requests have settled (or the given
+   * timeout elapses). Used before a planned restart so a save-triggered
+   * format isn't cut short by stopping the service mid-request.
+   * @param {number} [timeoutMs] safety timeout so a hung RPC can't block
+   *                             the restart forever
+   */
+  async waitForPendingFormats(timeoutMs = 10000) {
+    if (this._pendingFormats.size === 0) return
+
+    await Promise.race([
+      Promise.allSettled([...this._pendingFormats]),
+      new Promise((resolve) => setTimeout(resolve, timeoutMs)),
+    ])
   }
 
   prettierServiceDidExit(exitCode) {
@@ -716,25 +739,34 @@ class Formatter {
     const requestId = last + 1
     this._latestRequestIds.set(uri, requestId)
 
-    // 2) Fire the format request, catching any IPC failure
-    let result
-    try {
-      result = await this.prettierService.request('format', {
-        original,
-        pathForConfig,
-        ignorePath: flags.force ? null : this.getIgnorePath(pathForConfig),
-        options: {
-          ...options,
-          cursorOffset: editor.selectedRange.start, // send cursor position
-        },
-        withCursor: true, // signal that we want formatWithCursor
-      })
-    } catch (err) {
-      log.error(
-        `Prettier IPC error in format: ${err.name}: ${err.message}\n${err.stack}`,
-      )
-      return []
-    }
+    // 2) Fire the format request, catching any IPC failure. Track it as
+    //    in-flight so a pending restart can wait for it to settle before
+    //    stopping the service.
+    const pending = (async () => {
+      try {
+        return await this.prettierService.request('format', {
+          original,
+          pathForConfig,
+          ignorePath: flags.force ? null : this.getIgnorePath(pathForConfig),
+          options: {
+            ...options,
+            cursorOffset: editor.selectedRange.start, // send cursor position
+          },
+          withCursor: true, // signal that we want formatWithCursor
+        })
+      } catch (err) {
+        log.error(
+          `Prettier IPC error in format: ${err.name}: ${err.message}\n${err.stack}`,
+        )
+        return null
+      }
+    })()
+    this._pendingFormats.add(pending)
+    const result = await pending.finally(() =>
+      this._pendingFormats.delete(pending),
+    )
+
+    if (result === null) return []
 
     // 3) If a newer call for **this same file** started in the meantime, drop
     // This check ensures that stale responses are ignored when multiple format
