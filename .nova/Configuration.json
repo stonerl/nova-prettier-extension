@@ -1,5 +1,6 @@
 {
   "editor.default_syntax" : "javascript",
+  "github.repo" : "stonerl\/nova-prettier-extension",
   "index.ignored_file_patterns" : [
     "prettier.novaextension\/Scripts\/*",
     "tests\/*"
