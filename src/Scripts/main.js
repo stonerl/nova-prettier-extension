@@ -78,6 +78,16 @@ class PrettierExtension {
 
     this.formatter = new Formatter()
     this.hasStarted = false
+
+    // Module-path resolution cache. findPrettier() shells out to npm and
+    // can take many seconds; config-file changes restart the service but
+    // never change which Prettier binary to load, so the resolved path is
+    // reused until a trigger that can affect resolution fires.
+    this._resolvedModulePath = null
+    this._needsResolution = true
+
+    // In-flight stop/start cycle (singleflight — see _runRestartCycle)
+    this._restartCycle = null
   }
 
   get preferBundled() {
@@ -291,7 +301,12 @@ class PrettierExtension {
 
       nova.commands.register(
         'prettier.restart-service',
-        this.modulePathDidChange,
+        // An explicit restart command should also do a fresh resolution,
+        // not reuse the cached module path.
+        async () => {
+          this._needsResolution = true
+          await this.modulePathDidChange()
+        },
       ),
 
       nova.commands.register('prettier.reset-suppressed-message', () => {
@@ -338,12 +353,49 @@ class PrettierExtension {
   }
 
   async startFormatter() {
-    let path = this.modulePath
-    if (!path) {
-      log.info('Resolving Prettier installation…')
-      path = await findPrettier()
+    // An explicitly configured module path always wins and never touches
+    // the resolution cache.
+    if (this.modulePath) {
+      await this._startWithModulePath(this.modulePath)
+      return
     }
 
+    // Config-change restarts reuse the cached path; triggers that can
+    // affect resolution (package files, node_modules, preferBundled)
+    // set _needsResolution first.
+    let path = this._resolvedModulePath
+    const fromCache = !!path && !this._needsResolution
+    if (!path || this._needsResolution) {
+      log.info('Resolving Prettier installation…')
+      path = await findPrettier()
+      this._resolvedModulePath = path
+      this._needsResolution = false
+    }
+
+    try {
+      await this._startWithModulePath(path)
+    } catch (err) {
+      // The cached path may be stale (e.g. node_modules was wiped while
+      // no watcher fired) — re-resolve once before giving up. A freshly
+      // resolved path already reflects the current state, so retrying
+      // with another resolution would be pointless.
+      if (!fromCache) throw err
+      log.warn('Starting with cached module path failed, re-resolving…', err)
+      path = await findPrettier()
+      this._resolvedModulePath = path
+      this._needsResolution = false
+      await this._startWithModulePath(path)
+    }
+  }
+
+  /**
+   * Starts the service at the given module path, attempting up to three
+   * times with a fixed delay between attempts.
+   *
+   * @param {string} path — resolved Prettier module directory
+   * @private
+   */
+  async _startWithModulePath(path) {
     log.info(`Loading prettier at ${path}`)
 
     const MAX_ATTEMPTS = 3
@@ -393,6 +445,9 @@ class PrettierExtension {
     if (this.preferBundled || this.modulePath) return
 
     log.debug('npmPackageFileDidChange invoked')
+    // package.json / lockfiles changed — the resolved module path may be
+    // different now
+    this._needsResolution = true
     this.debouncedModulePathDidChange()
   }
 
@@ -402,6 +457,8 @@ class PrettierExtension {
       'modulePreferBundledDidChange invoked — preferBundled: ',
       this.preferBundled,
     )
+    // switching between bundled and project Prettier changes resolution
+    this._needsResolution = true
     this.debouncedModulePathOrPreferBundledDidChangeFast()
   }
 
@@ -409,7 +466,33 @@ class PrettierExtension {
     if (this.preferBundled || this.modulePath) return
 
     log.debug('moduleProjectPrettierDidChange invoked')
+    // node_modules/prettier changed — the resolved module path may be
+    // different now
+    this._needsResolution = true
     this.debouncedModulePathDidChange()
+  }
+
+  /**
+   * Runs one full stop/start cycle. Concurrent triggers coalesce into the
+   * running cycle instead of spawning a second resolution/install — a
+   * slow resolution (e.g. first-run npm install) combined with watcher
+   * storms from npm's own writes would otherwise run them in parallel and
+   * fail with ENOTEMPTY races.
+   *
+   * @private
+   * @returns {Promise<void>}
+   */
+  _runRestartCycle() {
+    if (this._restartCycle) return this._restartCycle
+
+    this._restartCycle = (async () => {
+      await this.formatter.waitForPendingFormats()
+      await this.formatter.stop()
+      await this.startFormatter()
+    })().finally(() => {
+      this._restartCycle = null
+    })
+    return this._restartCycle
   }
 
   async modulePathDidChange() {
@@ -419,10 +502,7 @@ class PrettierExtension {
     // before stopping the service.
     this.formatter._restarting = true
     try {
-      await this.formatter.waitForPendingFormats()
-
-      await this.formatter.stop()
-      await this.startFormatter()
+      await this._runRestartCycle()
     } catch (err) {
       if (err.status === 127) {
         await showNotification({
