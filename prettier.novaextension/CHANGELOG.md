@@ -1,3 +1,22 @@
+## 3.9.3 - 2026-09-22
+
+### Fixed
+
+- **"Prettier Stopped Running" notifications when saving config files**
+  - Saving an observed file (e.g. `.prettierrc`) no longer cuts off an
+    in-flight format; the service restarts only after the save completes.
+- **Reliability on fresh installs**
+  - Interrupted installs no longer fail with `EEXIST` symlink errors, and
+    a failed install is retried once before reporting an error.
+  - Concurrent installs when Nova reloads the extension mid-install are
+    now prevented.
+
+### Performance
+
+- **Much faster service restarts**
+  - config-file changes now restart the service in a fraction of a second
+    instead of re-resolving the Prettier installation.
+
 ## 3.9.2 - 2026-09-21
 
 ### Added
