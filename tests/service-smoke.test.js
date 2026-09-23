@@ -426,6 +426,24 @@ async function customConfigSuite() {
         missing.formatted === '{ "a": { "b": 1 } }\n',
         missing,
       )
+
+      // 5) Relative custom config path — the service anchors it at its
+      //    own cwd. This pins the cwd semantics the client relies on
+      //    when a workspace-relative setting is used.
+      const relative = await client.requestRaw(
+        'format',
+        formatParams('custom.json'),
+      )
+      check(
+        'relative custom config resolved from service cwd (tabs in output)',
+        relative.formatted !== undefined && relative.formatted.includes('\t'),
+        relative,
+      )
+      check(
+        'relative custom config: no error, no configError',
+        relative.error === undefined && relative.configError === undefined,
+        relative,
+      )
     } finally {
       await client.kill()
     }

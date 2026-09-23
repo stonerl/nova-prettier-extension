@@ -568,12 +568,18 @@ class Formatter {
     let customConfigFile = getConfigWithWorkspaceOverride(
       'prettier.config.file',
     )
-    if (
-      customConfigFile &&
-      nova.workspace.path &&
-      !nova.path.isAbsolute(customConfigFile)
-    ) {
-      customConfigFile = nova.path.join(nova.workspace.path, customConfigFile)
+    if (customConfigFile && !nova.path.isAbsolute(customConfigFile)) {
+      if (nova.workspace.path) {
+        customConfigFile = nova.path.join(nova.workspace.path, customConfigFile)
+      } else {
+        // No workspace to anchor the path against — the service would
+        // resolve it against its own (extension-dir) cwd. Treat the
+        // setting as unset instead of loading a stray file.
+        log.warning(
+          `prettier.config.file is relative but no workspace is open — ignoring "${customConfigFile}"`,
+        )
+        customConfigFile = null
+      }
     }
 
     const pathForConfig = document.path || nova.workspace.path
@@ -582,6 +588,7 @@ class Formatter {
       document,
       saving,
       pathForConfig,
+      customConfigFile,
     )
     if (shouldApplyDefaultConfig === null && !flags.force) return []
 
@@ -883,7 +890,13 @@ class Formatter {
     await this.applyResult(editor, formatted, cursorOffset)
   }
 
-  async shouldApplyDefaultConfig(syntaxKey, document, saving, pathForConfig) {
+  async shouldApplyDefaultConfig(
+    syntaxKey,
+    document,
+    saving,
+    pathForConfig,
+    customConfigFile,
+  ) {
     // Don't format-on-save ignore syntaxes.
     if (
       saving &&
@@ -895,7 +908,12 @@ class Formatter {
       return null
     }
 
-    let hasConfig = false
+    // An explicitly configured custom config file counts as "config
+    // exists" — skip the hasConfig probe (and its IPC round-trip) so
+    // format-on-save.ignore-without-config doesn't skip saves when the
+    // project itself has no config file but the user pointed the
+    // extension at one.
+    let hasConfig = customConfigFile != null
 
     if (document.isRemote) {
       // Don't format-on-save remote documents if they're ignored.
@@ -905,7 +923,7 @@ class Formatter {
       ) {
         return null
       }
-    } else {
+    } else if (!hasConfig) {
       // Try to resolve configuration using Prettier for non-remote documents.
       // 1) Wait for didStart handshake
       const ready = await this.isReady
