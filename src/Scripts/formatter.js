@@ -825,15 +825,18 @@ class Formatter {
     // newCursor may be a number or undefined/null. Prettier returns -1 when
     // the cursor cannot be mapped onto the formatted output (e.g. the
     // surrounding text was rewritten), which is not a valid document offset.
+    // Keep this in a per-call local: a shared field could be overwritten by a
+    // concurrent format for another editor while we await editor.edit below,
+    // restoring the wrong cursor.
+    let cursorOffset = editor.selectedRange.start
     if (newCursor == null || newCursor < 0) {
       // Prettier really couldn’t compute a position
-      this._cursorOffset = editor.selectedRange.start
       log.debug(
-        `Prettier returned no cursor (${newCursor ?? 'null/undefined'}); falling back to editor position ${this._cursorOffset}`,
+        `Prettier returned no cursor (${newCursor ?? 'null/undefined'}); falling back to editor position ${cursorOffset}`,
       )
     } else {
       // A numeric cursor — trust it
-      this._cursorOffset = newCursor
+      cursorOffset = newCursor
       log.debug('New Cursor Position:', newCursor)
     }
 
@@ -872,7 +875,7 @@ class Formatter {
     }
 
     // 7) Finally apply
-    await this.applyResult(editor, formatted)
+    await this.applyResult(editor, formatted, cursorOffset)
   }
 
   async shouldApplyDefaultConfig(syntaxKey, document, saving, pathForConfig) {
@@ -1093,7 +1096,7 @@ class Formatter {
     }
   }
 
-  async applyResult(editor, formatted) {
+  async applyResult(editor, formatted, cursorOffset) {
     log.info(`Applying formatted changes to ${editor.document.path}`)
 
     // Restoring a single cursor would destroy multi-cursor setups and
@@ -1111,11 +1114,12 @@ class Formatter {
 
     if (hasComplexSelection) return
 
-    const cursorOffset =
-      this._cursorOffset != null ? this._cursorOffset : editor.selectedRange.end
+    // Fall back to the editor’s position when no cursor was threaded in.
+    const offset =
+      cursorOffset != null ? cursorOffset : editor.selectedRange.end
 
-    editor.selectedRanges = [new Range(cursorOffset, cursorOffset)]
-    editor.scrollToPosition(cursorOffset)
+    editor.selectedRanges = [new Range(offset, offset)]
+    editor.scrollToPosition(offset)
   }
 
   async replace(editor, formatted) {
