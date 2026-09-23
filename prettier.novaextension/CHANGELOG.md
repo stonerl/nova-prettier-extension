@@ -1,3 +1,12 @@
+## 3.9.5 - 2026-09-23
+
+### Fixed
+
+- **Formatting failed in projects without a Prettier config file**
+  - An empty config resolution crashed the service before any format
+    ran (present since the config-plugin reporting introduced in
+    3.9.0).
+
 ## 3.9.4 - 2026-09-23
 
 ### Added
