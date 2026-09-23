@@ -23,6 +23,7 @@
  */
 
 const fs = require('fs')
+const os = require('os')
 const path = require('path')
 
 const {
@@ -254,10 +255,77 @@ async function nativeSuite() {
   }
 }
 
+async function configlessSuite() {
+  console.log('\n== Config-less project: resolveConfig null must not crash ==')
+  // A fixture under tests/ inherits the repo root .prettierrc via
+  // Prettier's directory walk-up, so the null-config case can only be
+  // reproduced in a directory outside the repository.
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'prettier-configless-'))
+  try {
+    fs.writeFileSync(path.join(tmpDir, 'file.json'), '{"a": 1}\n')
+
+    const formatParams = (plugins) => ({
+      original: '{"a": 1}\n',
+      pathForConfig: path.join(tmpDir, 'file.json'),
+      ignorePath: null,
+      options: {
+        parser: 'json',
+        filepath: path.join(tmpDir, 'file.json'),
+        cursorOffset: 0,
+        ...(plugins?.length ? { plugins } : {}),
+      },
+      withCursor: true,
+    })
+
+    const client = createServiceClient({ cwd: tmpDir })
+    try {
+      await client.waitForStart()
+
+      // Bundled mode: bundled plugins injected + no config anywhere above
+      const bundled = await client.requestRaw(
+        'format',
+        formatParams([
+          path.join(EXT_MODULES, 'prettier-plugin-ejs', 'index.js'),
+        ]),
+      )
+      check(
+        'bundled mode: formats without a config file',
+        bundled.formatted === '{ "a": 1 }\n',
+        bundled,
+      )
+      check(
+        'bundled mode: no error, no report fields',
+        bundled.error === undefined &&
+          bundled.unresolvedPlugins === undefined &&
+          bundled.disabledPlugins === undefined,
+        bundled,
+      )
+
+      // Native mode: no injected plugins + no config anywhere above
+      const native = await client.requestRaw('format', formatParams())
+      check(
+        'native mode: formats without a config file',
+        native.formatted === '{ "a": 1 }\n',
+        native,
+      )
+      check(
+        'native mode: no error, no report fields',
+        native.error === undefined && native.loadedPlugins === undefined,
+        native,
+      )
+    } finally {
+      await client.kill()
+    }
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true })
+  }
+}
+
 async function main() {
   requireBuiltArtifacts()
   await bundledSuite()
   await nativeSuite()
+  await configlessSuite()
 
   console.log(
     `\n${failed === 0 ? 'All checks passed.' : `${failed} check(s) failed.`}`,

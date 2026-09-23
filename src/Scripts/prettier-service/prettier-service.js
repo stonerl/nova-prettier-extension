@@ -308,9 +308,14 @@ class PrettierService extends FormattingService {
       if (this._configCache.has(pathForConfig)) {
         inferredConfig = this._configCache.get(pathForConfig)
       } else {
-        inferredConfig = await this.prettier.resolveConfig(pathForConfig, {
-          editorconfig: true,
-        })
+        // resolveConfig returns null when no config file (and, with
+        // editorconfig enabled, no .editorconfig) exists anywhere above
+        // the file — normalize before caching so downstream shape
+        // assumptions hold.
+        inferredConfig =
+          (await this.prettier.resolveConfig(pathForConfig, {
+            editorconfig: true,
+          })) ?? {}
         this._configCache.set(pathForConfig, inferredConfig)
       }
     }
