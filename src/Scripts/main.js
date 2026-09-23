@@ -88,6 +88,9 @@ class PrettierExtension {
 
     // In-flight stop/start cycle (singleflight — see _runRestartCycle)
     this._restartCycle = null
+    // Set when a trigger joins an in-flight cycle, so the cycle can
+    // schedule one more run after finishing instead of dropping it.
+    this._restartCycleQueued = false
   }
 
   get preferBundled() {
@@ -483,7 +486,14 @@ class PrettierExtension {
    * @returns {Promise<void>}
    */
   _runRestartCycle() {
-    if (this._restartCycle) return this._restartCycle
+    if (this._restartCycle) {
+      // Trigger arrived while a cycle was already running — remember it
+      // so a fresh cycle runs after this one finishes, otherwise it
+      // would be silently dropped (e.g. npm install finishing mid-cycle
+      // never re-resolves the module path).
+      this._restartCycleQueued = true
+      return this._restartCycle
+    }
 
     this._restartCycle = (async () => {
       await this.formatter.waitForPendingFormats()
@@ -491,6 +501,10 @@ class PrettierExtension {
       await this.startFormatter()
     })().finally(() => {
       this._restartCycle = null
+      if (this._restartCycleQueued) {
+        this._restartCycleQueued = false
+        this.debouncedModulePathDidChange()
+      }
     })
     return this._restartCycle
   }
@@ -745,6 +759,8 @@ class PrettierExtension {
     this.configDisposables = []
   }
 }
+
+exports.PrettierExtension = PrettierExtension
 
 exports.activate = async function () {
   try {
