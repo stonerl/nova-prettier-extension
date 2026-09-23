@@ -28,8 +28,33 @@ const BUNDLED_PRETTIER = path.join(
 )
 
 /**
+ * Distinctive strings introduced by each bundled patch — same list and
+ * rationale as PATCH_SIGNATURES in src/Scripts/module-resolver.js.
+ */
+const PATCH_SIGNATURES = [
+  ['node_modules/prettier-plugin-sh/lib/index.cjs', 'node?.Pos?.Offset ?? 0'],
+  [
+    'node_modules/@prettier/plugin-xml/src/parser.js',
+    'typeof node?.location?.startOffset !== "number"',
+  ],
+  [
+    'node_modules/prettier-plugin-sql/lib/index.js',
+    '32 MiB in bytes (characters)',
+  ],
+  [
+    'node_modules/prettier-plugin-toml/lib/index.js',
+    '32 MiB in bytes (characters)',
+  ],
+]
+
+const EXTENSION_DIR = path.join(ROOT, 'prettier.novaextension')
+
+/**
  * Assert that the built service and the bundled Prettier module exist,
- * with actionable guidance when they don't.
+ * with actionable guidance when they don't. Also makes sure the bundled
+ * plugin patches are applied — npm ≥ 11 skips postinstall scripts, so a
+ * plain `npm install` leaves the plugins unpatched and cursor tracking
+ * crashes on some of them.
  */
 function requireBuiltArtifacts() {
   const fs = require('fs')
@@ -46,6 +71,37 @@ function requireBuiltArtifacts() {
       'Bundled Prettier module not found. Run `npm install --omit=dev` inside prettier.novaextension/ first.',
     )
     process.exit(1)
+  }
+
+  const patchPackage = path.join(
+    EXTENSION_DIR,
+    'node_modules',
+    'patch-package',
+    'dist',
+    'index.js',
+  )
+
+  const allApplied = PATCH_SIGNATURES.every(([relativeFile, signature]) => {
+    try {
+      return fs
+        .readFileSync(path.join(EXTENSION_DIR, relativeFile), 'utf8')
+        .includes(signature)
+    } catch {
+      return false
+    }
+  })
+
+  if (!allApplied && fs.existsSync(patchPackage)) {
+    console.log('Applying bundled patches (patch-package)…')
+    try {
+      require('child_process').execSync(`node "${patchPackage}"`, {
+        cwd: EXTENSION_DIR,
+        stdio: 'inherit',
+        timeout: 60000,
+      })
+    } catch (err) {
+      console.error('Applying bundled patches failed:', err.message)
+    }
   }
 }
 

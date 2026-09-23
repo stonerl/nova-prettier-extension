@@ -640,10 +640,6 @@ class Formatter {
         if (isPluginEnabled(PLUGIN_DESCRIPTORS.ejs.configKey)) {
           plugins.push(PLUGIN_DESCRIPTORS.ejs.pluginPath)
         }
-        if (tailwindSyntaxesEnabled && tailwindPluginEnabled) {
-          plugins.push(PLUGIN_DESCRIPTORS.tailwind.pluginPath)
-        }
-        return
       }
 
       // prettier-plugin-tailwindcss must be loaded last.
@@ -837,7 +833,13 @@ class Formatter {
     // 3) Error or missing parser
     if (error) {
       return this._handlePrettierError(
-        error,
+        // The service serializes thrown errors as plain objects over
+        // JSON-RPC. Rehydrate a real Error so thrown values render their
+        // message in logs and notifications instead of "[object Object]".
+        Object.assign(
+          new Error(error.message ?? 'Unknown Prettier error'),
+          error,
+        ),
         missingParser,
         saving,
         document.path,

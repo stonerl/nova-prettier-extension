@@ -15,7 +15,8 @@
  * - mock-project/         – declares bundled, resolvable, unresolvable,
  *                           load-crashing and runtime-crashing plugins
  * - mock-project-native/  – resolvable + runtime-crashing plugins (native mode)
- * - mock-project-healthy/ – single healthy external plugin (native mode)
+ * - mock-project-healthy/ – external plugins incl. a cursor-crashing one
+ *                           (native mode, exercises the cursorless retry)
  *
  * `node_modules` symlinks into `deps/` are created on demand — the
  * handmade plugins are committed, no network install needed.
@@ -132,8 +133,8 @@ async function bundledSuite() {
       result.disabledPlugins,
     )
     check(
-      'cursor offset preserved',
-      typeof result.cursorOffset === 'number' && result.cursorOffset >= 0,
+      'cursor dropped after recovery attempts (client falls back)',
+      result.cursorOffset === undefined,
       result.cursorOffset,
     )
 
@@ -216,19 +217,27 @@ async function nativeSuite() {
       again.error?.message,
     )
 
-    // 4) Healthy project → success, external plugin reported as loaded.
+    // 4) Healthy project → success, externals reported as loaded. The
+    //    fixture also declares `cursor-crashy`, whose locStart() throws —
+    //    so every cursor-tracked format crashes and the service must
+    //    retry once without cursor tracking.
     const healthy = await client.requestRaw(
       'format',
       formatOptions(MOCK_HEALTHY),
     )
     check(
-      'healthy native project formats',
-      healthy.formatted === '{ "a": 1 }\n',
+      'cursor-mapping crash retried without cursor → formatted',
+      healthy.formatted === '{\n  "a": 1\n}\n',
       healthy,
     )
     check(
-      'loadedPlugins == [my-esm-plugin]',
-      jsonEqual(healthy.loadedPlugins, ['my-esm-plugin']),
+      'cursor offset dropped after cursor-mapping crash',
+      healthy.cursorOffset === undefined,
+      healthy.cursorOffset,
+    )
+    check(
+      'loadedPlugins == [my-esm-plugin, cursor-crashy]',
+      jsonEqual(healthy.loadedPlugins, ['my-esm-plugin', 'cursor-crashy']),
       healthy.loadedPlugins,
     )
     // The healthy fixture declares the plugin in tuple form

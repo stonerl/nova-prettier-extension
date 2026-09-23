@@ -162,6 +162,116 @@ async function installPackages(directory) {
 }
 
 /**
+ * Distinctive strings introduced by each bundled patch. Reading them is
+ * enough to tell whether a patch is applied — the extension only holds a
+ * read-only filesystem entitlement, so "applied" state can't be tracked
+ * with a marker file. Each check runs against its own file, so repeated
+ * strings across patches are unambiguous.
+ */
+const PATCH_SIGNATURES = [
+  {
+    file: ['node_modules', 'prettier-plugin-sh', 'lib', 'index.cjs'],
+    signature: 'node?.Pos?.Offset ?? 0',
+  },
+  {
+    file: ['node_modules', '@prettier', 'plugin-xml', 'src', 'parser.js'],
+    signature: 'typeof node?.location?.startOffset !== "number"',
+  },
+  {
+    file: ['node_modules', 'prettier-plugin-sql', 'lib', 'index.js'],
+    signature: '32 MiB in bytes (characters)',
+  },
+  {
+    file: ['node_modules', 'prettier-plugin-toml', 'lib', 'index.js'],
+    signature: '32 MiB in bytes (characters)',
+  },
+]
+
+/**
+ * True when every bundled patch's signature is present in the installed
+ * files.
+ *
+ * @param {string} extensionPath – directory containing node_modules
+ * @returns {boolean}
+ */
+function areBundledPatchesApplied(extensionPath) {
+  return PATCH_SIGNATURES.every(({ file, signature }) => {
+    try {
+      const filePath = nova.path.join(extensionPath, ...file)
+      const stats = nova.fs.stat(filePath)
+      if (!stats || stats.isDirectory()) return false
+
+      const openedFile = nova.fs.open(filePath, 'r')
+      try {
+        return openedFile.read().includes(signature)
+      } finally {
+        openedFile.close()
+      }
+    } catch (err) {
+      log.warn(`Could not check patch state of ${file.join('/')}`, err)
+      return false
+    }
+  })
+}
+
+/**
+ * Applies the bundled patches with patch-package.
+ *
+ * npm ≥ 11 blocks postinstall scripts by default, so patches can no
+ * longer rely on the `postinstall: patch-package` hook — newer npm
+ * versions leave every bundled plugin unpatched after a plain install.
+ * patch-package runs as a subprocess (plain process entitlement, no
+ * filesystem entitlement needed); whether anything must run is decided
+ * by read-only signature checks on the patched files.
+ *
+ * @param {string} extensionPath – directory containing node_modules and patches/
+ */
+async function applyBundledPatches(extensionPath) {
+  const patchPackageEntry = nova.path.join(
+    extensionPath,
+    'node_modules',
+    'patch-package',
+    'dist',
+    'index.js',
+  )
+
+  if (!nova.fs.stat(patchPackageEntry)) {
+    log.warn('patch-package not found — skipping bundled patch application')
+    return
+  }
+
+  if (areBundledPatchesApplied(extensionPath)) {
+    log.debug('Bundled patches already applied.')
+    return
+  }
+
+  log.info('Applying bundled patches (patch-package)…')
+
+  let resolve, reject
+  const promise = new Promise((_resolve, _reject) => {
+    resolve = _resolve
+    reject = _reject
+  })
+
+  const process = new Process('/usr/bin/env', {
+    args: ['node', patchPackageEntry],
+    cwd: extensionPath,
+  })
+
+  handleProcessResult(process, reject, resolve, 60000)
+  process.start()
+
+  try {
+    await promise
+    log.info('Bundled patches applied.')
+  } catch (err) {
+    // Non-fatal: unpatched plugins surface as ordinary format errors, and
+    // the next resolution retries the application.
+    log.warn('Applying bundled patches failed', err)
+  }
+}
+
+/**
  * Recursively removes a file or directory tree via the Nova file-system
  * API. Note that stat() follows symlinks, so an entry that is itself a
  * symlink to a directory would be recursed into — safe for npm's `.bin`,
@@ -169,18 +279,28 @@ async function installPackages(directory) {
  *
  * @param {string} path – file or directory to remove
  */
-function removeTree(path) {
+async function removeTree(path) {
   const stats = nova.fs.stat(path)
   if (!stats) return
 
-  if (stats.isDirectory()) {
-    for (const entry of nova.fs.listdir(path)) {
-      removeTree(nova.path.join(path, entry))
-    }
-    nova.fs.rmdir(path)
-  } else {
-    nova.fs.remove(path)
-  }
+  // The extension only holds a read-only filesystem entitlement, so
+  // deletion must happen in a subprocess (plain process entitlement).
+  // `rm -rf` recurses on its own, which also avoids following npm's .bin
+  // symlinks one level too far.
+  let resolve, reject
+  const promise = new Promise((_resolve, _reject) => {
+    resolve = _resolve
+    reject = _reject
+  })
+
+  const process = new Process('/usr/bin/env', {
+    args: ['rm', '-rf', path],
+  })
+
+  handleProcessResult(process, reject, resolve, 30000)
+  process.start()
+
+  return promise
 }
 
 /**
@@ -191,9 +311,9 @@ function removeTree(path) {
  *
  * @param {string} directory – extension directory containing node_modules
  */
-function clearStaleBinLinks(directory) {
+async function clearStaleBinLinks(directory) {
   try {
-    removeTree(nova.path.join(directory, 'node_modules', '.bin'))
+    await removeTree(nova.path.join(directory, 'node_modules', '.bin'))
   } catch (err) {
     // Non-fatal: npm recreates .bin and usually copes with leftovers.
     log.warn('Failed to clear stale node_modules/.bin links', err)
@@ -424,7 +544,7 @@ module.exports = async function () {
 
           for (let attempt = 1; attempt <= MAX_INSTALL_ATTEMPTS; attempt++) {
             try {
-              clearStaleBinLinks(nova.extension.path)
+              await clearStaleBinLinks(nova.extension.path)
               await installPackages(nova.extension.path)
               break
             } catch (err) {
@@ -444,6 +564,11 @@ module.exports = async function () {
         }
       }
     }
+
+    // Apply the bundled patches before returning — covers both a fresh
+    // install above and a pre-existing node_modules that was installed
+    // with an npm version that skipped postinstall scripts.
+    await applyBundledPatches(nova.extension.path)
 
     log.info('Using bundled Prettier.')
     return prettierPath

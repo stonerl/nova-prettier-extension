@@ -110,9 +110,9 @@ class PrettierService extends FormattingService {
     if (ignored) return { ignored: true }
     if (!config.parser) return { missingParser: true }
 
-    const runFormat = (cfg) => {
+    const runFormat = (cfg, useCursor) => {
       // If withCursor flag is true and a cursor offset was provided, use formatWithCursor
-      if (withCursor && typeof cfg.cursorOffset === 'number') {
+      if (useCursor && typeof cfg.cursorOffset === 'number') {
         // formatWithCursor returns an object with both formatted code and new cursorOffset
         return this.prettier.formatWithCursor(original, cfg)
       }
@@ -130,13 +130,31 @@ class PrettierService extends FormattingService {
     const externalEntries = pluginReport?.externalEntries ?? []
 
     try {
-      const result = await runFormat(config)
+      const result = await runFormat(config, withCursor)
       return this._withPluginReport(result, pluginReport)
     } catch (err) {
-      if (externalEntries.length === 0) return this._errorResult(err)
+      let lastError = err
+
+      // A crash while mapping the cursor (some plugins' locStart/locEnd
+      // are not cursor-safe) must not lose the whole format: retry once
+      // without cursor tracking. The client already falls back to the
+      // editor position when no cursor offset comes back.
+      if (withCursor && typeof config.cursorOffset === 'number') {
+        try {
+          const result = await runFormat(config, false)
+          return this._withPluginReport(result, pluginReport)
+        } catch (retryErr) {
+          lastError = retryErr
+        }
+      }
+
+      if (externalEntries.length === 0) return this._errorResult(lastError)
 
       // Identify the failing plugin by dropping one candidate at a time
       // (bounded), then fall back to disabling all remaining externals.
+      // All recovery attempts run without cursor tracking — the cursor
+      // crash path above was already tried, and cursorless results keep
+      // the diagnosis clean.
       const MAX_CULPRIT_ATTEMPTS = 3
       const cleared = []
 
@@ -154,7 +172,7 @@ class PrettierService extends FormattingService {
               (entry) => !dropped.includes(entry),
             ),
           }
-          const result = await runFormat(configWithoutCandidate)
+          const result = await runFormat(configWithoutCandidate, false)
           return this._withPluginReport(result, pluginReport, [
             pluginReport.externalNames[
               pluginReport.externalEntries.indexOf(candidate)
@@ -176,7 +194,7 @@ class PrettierService extends FormattingService {
             (entry) => !cleared.includes(entry),
           ),
         }
-        const result = await runFormat(configWithoutExternals)
+        const result = await runFormat(configWithoutExternals, false)
         const names = cleared.map(
           (entry) =>
             pluginReport.externalNames[

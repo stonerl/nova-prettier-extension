@@ -124,6 +124,13 @@ node tests/service-smoke.test.js       # bundled merge + native passthrough mode
 node tests/external-plugins.test.js    # disabled bundled plugin → project copy used
 ```
 
+> npm ≥ 11 skips postinstall scripts, so a plain install leaves the bundled
+> plugins unpatched. The test helper applies the bundled patches
+> automatically; to apply them manually: `node
+prettier.novaextension/node_modules/patch-package/dist/index.js` (run
+> from `prettier.novaextension/`). At runtime the extension does this
+> itself after every bundled install.
+
 The first run of `external-plugins.test.js` installs the test fixture’s
 dependencies (`@prettier/plugin-xml`, `prettier-plugin-properties`) into
 `tests/fixtures/external-plugin-project/` — network access is required once.
