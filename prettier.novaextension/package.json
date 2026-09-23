@@ -19,7 +19,7 @@
     "@shufo/prettier-plugin-blade": "^1.16.2",
     "@zackad/prettier-plugin-twig": "^0.17.0",
     "patch-package": "^8.0.1",
-    "prettier": "^3.9.8",
+    "prettier": "^3.9.9",
     "prettier-plugin-astro": "^1.0.1",
     "prettier-plugin-ejs": "^1.0.3",
     "prettier-plugin-java": "^2.10.4",
