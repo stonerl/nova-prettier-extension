@@ -434,12 +434,85 @@ async function customConfigSuite() {
   }
 }
 
+async function editorconfigSuite() {
+  console.log(
+    '\n== .editorconfig-only project: hasConfig true + config effect ==',
+  )
+  // Runs in tmpdirs so the repo's own .prettierrc never interferes.
+  // An .editorconfig-only project is exactly the case where hasConfig
+  // must report true: it resolves with editorconfig enabled, matching
+  // getConfig (format-on-save ignore-without-config depends on it).
+  const tmpWith = fs.mkdtempSync(
+    path.join(os.tmpdir(), 'prettier-editorconfig-'),
+  )
+  const tmpWithout = fs.mkdtempSync(
+    path.join(os.tmpdir(), 'prettier-editorconfig-'),
+  )
+  try {
+    fs.writeFileSync(path.join(tmpWith, 'file.json'), '{"a": {"b": 1}}\n')
+    fs.writeFileSync(
+      path.join(tmpWith, '.editorconfig'),
+      // max_line_length maps to printWidth and forces a wrap, so the
+      // tab indentation (indent_style) is visible in the output.
+      '[*]\nindent_style = tab\nmax_line_length = 10\n',
+    )
+    fs.writeFileSync(path.join(tmpWithout, 'file.json'), '{"a": {"b": 1}}\n')
+
+    const formatParams = (dir) => ({
+      original: '{"a": {"b": 1}}\n',
+      pathForConfig: path.join(dir, 'file.json'),
+      ignorePath: null,
+      options: {
+        parser: 'json',
+        filepath: path.join(dir, 'file.json'),
+        cursorOffset: 0,
+      },
+      withCursor: false,
+    })
+
+    const client = createServiceClient({ cwd: tmpWith })
+    try {
+      await client.waitForStart()
+
+      // 1) hasConfig sees the .editorconfig
+      const has = await client.requestRaw('hasConfig', {
+        pathForConfig: path.join(tmpWith, 'file.json'),
+      })
+      check('hasConfig: true for .editorconfig-only project', has === true, has)
+
+      // 2) getConfig applies the .editorconfig (indent_style = tab)
+      const formatted = await client.requestRaw('format', formatParams(tmpWith))
+      check(
+        '.editorconfig applied (tabs in output)',
+        formatted.formatted !== undefined && formatted.formatted.includes('\t'),
+        formatted,
+      )
+
+      // 3) Negative control: no config file anywhere above
+      const noConfig = await client.requestRaw('hasConfig', {
+        pathForConfig: path.join(tmpWithout, 'file.json'),
+      })
+      check(
+        'hasConfig: false without any config file',
+        noConfig === false,
+        noConfig,
+      )
+    } finally {
+      await client.kill()
+    }
+  } finally {
+    fs.rmSync(tmpWith, { recursive: true, force: true })
+    fs.rmSync(tmpWithout, { recursive: true, force: true })
+  }
+}
+
 async function main() {
   requireBuiltArtifacts()
   await bundledSuite()
   await nativeSuite()
   await configlessSuite()
   await customConfigSuite()
+  await editorconfigSuite()
 
   console.log(
     `\n${failed === 0 ? 'All checks passed.' : `${failed} check(s) failed.`}`,
