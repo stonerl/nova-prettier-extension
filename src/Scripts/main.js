@@ -593,7 +593,6 @@ class PrettierExtension {
       'typescript',
       'tsx',
       'graphql',
-      'handlebars',
     ])
 
     // 3) Bail out if this syntax isn’t in our set
@@ -610,7 +609,7 @@ class PrettierExtension {
       )
       req.body = nova.localize(
         'prettier.notification.unsupportedSyntax.body',
-        '“Format Selection” isn’t available for this file type. Supported syntaxes: JavaScript, TypeScript, GraphQL, and Handlebars.\n\nClicking “Dismiss” will disable the command for unsupported syntaxes.',
+        '“Format Selection” isn’t available for this file type. Supported syntaxes: JavaScript, TypeScript, and GraphQL.\n\nClicking “Dismiss” will disable the command for unsupported syntaxes.',
         'notification',
       )
       req.actions = [
