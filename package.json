@@ -19,7 +19,12 @@
     "prepare:submission": "npm run build && rm -rf prettier.novaextension/node_modules",
     "prepare:testfiles": "node scripts/scramble-testfiles.js",
     "strings:copy-translations": "node scripts/copy-translated-strings.js",
-    "strings:extract": "node scripts/extract-strings.js"
+    "strings:extract": "node scripts/extract-strings.js",
+    "test:setup": "npm run build && npm install --omit=dev --prefix prettier.novaextension",
+    "test:restart-cycle": "node tests/restart-cycle.test.js",
+    "test:service": "node tests/service-smoke.test.js",
+    "test:external-plugins": "node tests/external-plugins.test.js",
+    "test": "npm run test:setup && npm run test:restart-cycle && npm run test:service && npm run test:external-plugins"
   },
   "devDependencies": {
     "@babel/parser": "^7.29.9",

@@ -118,8 +118,15 @@ The service’s plugin handling is covered by smoke tests that spawn the built
 Prettier service and talk to it over JSON-RPC.
 
 ```bash
-npm run build
-npm install --omit=dev --prefix prettier.novaextension
+npm test
+```
+
+`npm test` builds the extension, installs the bundled runtime dependencies
+(`npm install --omit=dev --prefix prettier.novaextension`), and runs the smoke
+tests. The individual suites can also be run directly after `npm run test:setup`:
+
+```bash
+node tests/restart-cycle.test.js       # trailing-trigger coalescing regression
 node tests/service-smoke.test.js       # bundled merge + native passthrough modes
 node tests/external-plugins.test.js    # disabled bundled plugin → project copy used
 ```
