@@ -272,7 +272,9 @@ class PrettierService extends FormattingService {
    * @returns {Promise<boolean>}          – True if a config was found, else false
    */
   async hasConfig({ pathForConfig }) {
-    const config = await this.prettier.resolveConfig(pathForConfig)
+    const config = await this.prettier.resolveConfig(pathForConfig, {
+      editorconfig: true,
+    })
     return config !== null
   }
 
