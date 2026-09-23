@@ -1,3 +1,35 @@
+## 3.9.4 - 2026-09-23
+
+### Added
+
+- **Plugins declared in your project's Prettier config now work with the
+  bundled Prettier**
+  - Plugins the extension also bundles use the bundled version; all
+    others load from your project's `node_modules` — including monorepo
+    subpackages, pnpm layouts and ESM-only plugins.
+  - Disabling a bundled plugin makes Prettier⁺ use your project's
+    installation of it.
+  - Plugins that fail to load or crash while formatting are skipped, and
+    the format is retried without them; a one-time notification names
+    the affected plugins and the config file declaring them.
+
+### Fixed
+
+- **HTML and HTML (EJS) documents silently not formatting**
+  - A stray early return aborted formatting for `html` and `html+ejs`
+    before any request was sent.
+- **Formats lost when cursor tracking crashed**
+  - Prettier⁺ now retries once without cursor tracking and keeps your
+    editor position.
+- **Bundled plugin patches now apply reliably**
+  - npm 12 skips `postinstall` scripts by default (npm 11.16+ already
+    warns), leaving bundled plugins unpatched — crashing shell and
+    Dockerfile formatting when the cursor is tracked. Prettier⁺ now
+    applies its patches itself whenever the bundled Prettier is set up.
+- **Readable error messages**
+  - Formatting errors report their actual message instead of
+    `[object Object]`.
+
 ## 3.9.3 - 2026-09-22
 
 ### Fixed
