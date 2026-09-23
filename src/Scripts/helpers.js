@@ -26,7 +26,13 @@ class ProcessError extends Error {
  */
 function extractPath(uri) {
   try {
-    return new URL(uri).pathname
+    const url = new URL(uri)
+    try {
+      return decodeURIComponent(url.pathname)
+    } catch {
+      // Malformed percent-sequence — keep raw pathname
+      return url.pathname
+    }
   } catch {
     return uri
   }
