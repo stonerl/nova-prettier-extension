@@ -5,3 +5,4 @@ prettier.novaextension/config.json
 prettier.novaextension/configWorkspace.json
 prettier.novaextension/*.lproj/
 prettier.novaextension/Scripts/
+tests/fixtures/
