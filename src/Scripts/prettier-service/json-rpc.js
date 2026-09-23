@@ -363,8 +363,29 @@ class JsonRpcService {
    * @private
    */
   async _writeFrame(frame) {
-    if (!this.writeStream.write(frame)) {
-      await once(this.writeStream, 'drain')
+    const stream = this.writeStream
+    if (stream.destroyed) {
+      throw new Error('Write stream destroyed')
+    }
+    if (stream.write(frame)) return
+
+    // Back-pressure: wait for 'drain', but bail out if the stream is
+    // closed or destroyed first — otherwise the write queue would be
+    // wedged forever (e.g. client killed the service mid-write).
+    const ac = new AbortController()
+    const { signal } = ac
+    const drain = once(stream, 'drain', { signal })
+    const closed = once(stream, 'close', { signal }).then(() => {
+      throw new Error('Write stream closed before drain')
+    })
+    // Loser of the race gets aborted → rejects with AbortError.
+    // Swallow so it never becomes an unhandled rejection.
+    drain.catch(() => {})
+    closed.catch(() => {})
+    try {
+      await Promise.race([drain, closed])
+    } finally {
+      ac.abort()
     }
   }
 
@@ -388,6 +409,9 @@ class JsonRpcService {
     this.readStream.unpipe(this.parser)
     this.parser.removeAllListeners()
     this.handlers.clear()
+    // Reject any pending back-pressure waits so the write queue
+    // unwinds instead of hanging.
+    this.writeStream.destroy()
   }
 }
 
