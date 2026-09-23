@@ -197,6 +197,8 @@ class Formatter {
     this._lastCustomConfigErrorPath = null
     /** true while a planned stop/restart cycle is in progress */
     this._restarting = false
+    /** handle for the 5s force-stop timer scheduled in stop() */
+    this._forceStopTimer = null
 
     this.setupIsReadyPromise()
   }
@@ -354,7 +356,8 @@ class Formatter {
     proc.terminate()
 
     // If it hasn’t exited in 5s, force it
-    setTimeout(() => {
+    this._forceStopTimer = setTimeout(() => {
+      this._forceStopTimer = null
       // still pending?
       if (this._isStoppedPromise) {
         log.error('Prettier did NOT exit in 5000ms, forcing stop.')
@@ -402,6 +405,8 @@ class Formatter {
 
     // 1) Wake up anyone awaiting stop()
     if (this._resolveIsStoppedPromise) {
+      clearTimeout(this._forceStopTimer)
+      this._forceStopTimer = null
       this._resolveIsStoppedPromise()
       this._isStoppedPromise = null
     }
