@@ -257,9 +257,14 @@ function debouncePromise(fn, timeoutMs) {
   const debounced = (...args) => {
     clearTimeout(timer)
     timer = setTimeout(() => {
-      Promise.resolve(fn(...args)).finally(() => {
-        timer = null
-      })
+      timer = null
+      // Fire-and-forget: debounced() has no return value and callers
+      // never await it, so rejections are logged instead of leaking
+      // as unhandled rejections. resolve().then() also converts sync
+      // throws from fn into logged rejections.
+      Promise.resolve()
+        .then(() => fn(...args))
+        .catch((err) => log.error('Debounced task failed:', err))
     }, timeoutMs)
   }
 
