@@ -1,3 +1,50 @@
+## 3.9.6 - 2026-09-23
+
+### Fixed
+
+- **Custom config file handling**
+  - `prettier.config.file` relative paths are now resolved against the
+    workspace — previously they were read relative to the extension's
+    working directory and silently failed.
+  - All config formats work now (JSON, YAML, TOML, JavaScript…). The
+    custom config file is loaded by Prettier itself instead of being
+    parsed as JSON client-side.
+  - A custom config file that fails to load now shows a notification
+    instead of silently formatting without it.
+- **Format Selection menu matched the wrong syntax list**
+  - The command was hidden from the menu for `.tsx` files.
+  - Handlebars was offered although no parser is bundled — selecting it
+    would always have failed with an error.
+- **Prettier service could stop responding**
+  - When the extension side disconnected while a large format response
+    was being written, the service's write queue could wait forever and
+    wedge all further communication; it now aborts cleanly.
+- **Prettier changes during a service restart were lost**
+  - A trigger arriving while a restart was already running (e.g. `npm
+install` finishing mid-restart) is no longer dropped; the restart
+    runs once more afterwards.
+- **`.editorconfig`-only projects counted as "no config"**
+  - With _Format on Save → Ignore files without config_ enabled, saving
+    was skipped although Prettier would use the `.editorconfig`.
+- **Wrong cursor position after concurrent formats**
+  - Two editors formatting at the same time (one save, one manual
+    format) could end up with the other document's cursor.
+
+### Performance
+
+- Bundled package verification now runs its `npm ls` checks in
+  parallel, speeding up extension startup when the bundled Prettier is
+  (re)set up.
+
+### Development
+
+- Removed dead code and an unreachable error handler.
+- Debounced background tasks log their failures instead of leaking
+  unhandled rejections.
+- New npm scripts: `npm test` runs the restart-cycle, service and
+  external-plugin test suites; regression tests added for restart
+  coalescing and `.editorconfig` config detection.
+
 ## 3.9.5 - 2026-09-23
 
 ### Fixed
