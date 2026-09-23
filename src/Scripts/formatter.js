@@ -1127,19 +1127,6 @@ class Formatter {
     editor.scrollToPosition(offset)
   }
 
-  async replace(editor, formatted) {
-    const { document } = editor
-
-    const cursorPosition = editor.selectedRange.end
-    const documentRange = new Range(0, document.length)
-
-    await editor.edit((e) => {
-      e.replace(documentRange, formatted)
-    })
-
-    editor.selectedRanges = [new Range(cursorPosition, cursorPosition)]
-  }
-
   _handlePrettierError(error, missingParser, saving, filePath) {
     const isParserError = error.message.includes("Couldn't resolve parser")
 

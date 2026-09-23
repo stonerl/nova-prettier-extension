@@ -430,29 +430,22 @@ module.exports = async function () {
       nova.path.join(nova.extension.path, 'package-lock.json'),
     )
 
+    const packageJsonPath = nova.path.join(nova.extension.path, 'package.json')
+
     let declaredPackages = {}
 
     try {
-      const packageJsonPath = nova.path.join(
-        nova.extension.path,
-        'package.json',
-      )
-
+      const file = nova.fs.open(packageJsonPath, 'r') // Open the file for reading
+      let json
       try {
-        const file = nova.fs.open(packageJsonPath, 'r') // Open the file for reading
-        let json
-        try {
-          json = JSON.parse(file.read()) // Parse the JSON string
-        } finally {
-          file.close()
-        }
+        json = JSON.parse(file.read()) // Parse the JSON string
+      } finally {
+        file.close()
+      }
 
-        declaredPackages = {
-          ...(json.dependencies || {}),
-          ...(json.optionalDependencies || {}),
-        }
-      } catch (err) {
-        log.warn('Could not read or parse package.json', err)
+      declaredPackages = {
+        ...(json.dependencies || {}),
+        ...(json.optionalDependencies || {}),
       }
     } catch (err) {
       log.warn('Could not read or parse package.json', err)

@@ -276,21 +276,6 @@ function debouncePromise(fn, timeoutMs) {
   return debounced
 }
 
-/**
- * Returns true if the running Nova version is at least the given version.
- *
- * @param {number} major    – required major version
- * @param {number} minor    – optional minor version (defaults to 0)
- * @param {number} patch    – optional patch version (defaults to 0)
- * @returns {boolean}
- */
-function minNovaVersion(major, minor = 0, patch = 0) {
-  const [a = 0, b = 0, c = 0] = nova.version
-  if (a !== major) return a > major
-  if (b !== minor) return b > minor
-  return c >= patch
-}
-
 // Cache of promises for each CLI tool’s “--version” lookup.
 // This ensures that multiple calls to getCliVersion('npm') or getCliVersion('node')
 // return the same in‐flight or resolved promise, avoiding spawning the process more than once.
@@ -356,7 +341,6 @@ module.exports = {
   handleProcessResult,
   isDebugLoggingEnabled,
   log,
-  minNovaVersion,
   observeConfigWithWorkspaceOverride,
   observeEmptyArrayCleanup,
   ProcessError,
