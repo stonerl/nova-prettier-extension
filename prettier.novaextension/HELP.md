@@ -7,6 +7,7 @@
 - Configuration
   - Configuration Methods
   - Configuration Precedence
+- Plugins from Your Project
 - Ignoring Files
 - Working with Remote Files
 - Troubleshooting
@@ -112,6 +113,41 @@ You can configure Prettier⁺ in three ways:
 > `General → Ignore Configuration Files` settings, Prettier⁺ will
 > **always use the Nova UI options** — unless a custom config
 > file is set, which still takes priority.
+
+## Plugins from Your Project
+
+Plugins declared in your Prettier config file’s `plugins` array are supported
+in both module resolution modes:
+
+- **Project-local Prettier** — your plugins load natively, exactly like the
+  Prettier CLI does.
+
+- **Explicit Prettier module path** (global or custom install) — your plugins
+  load like they do with the Prettier CLI. Prettier⁺ additionally resolves
+  declared plugins to absolute paths starting at the formatted file’s
+  directory, so plugins in monorepo subpackages are found reliably. Errors
+  from broken plugins surface just like the CLI’s.
+
+- **Bundled Prettier** — Prettier⁺ merges your declared plugins with its
+  bundled set:
+
+  - Plugins installed in your project’s `node_modules` are resolved and
+    loaded from there. This works in monorepo subpackages and with pnpm
+    layouts, and includes ESM-only plugins.
+  - Plugins that Prettier⁺ also bundles are replaced by the bundled version,
+    so the bundled Prettier core always runs against compatible plugins.
+    If you disable a bundled plugin in the extension settings and your
+    project provides it, your project’s version is used.
+  - Plugins that can’t be found anywhere are skipped, and formatting
+    continues with the bundled equivalents. Prettier⁺ shows a notification
+    listing them once per session.
+  - If a project plugin fails while formatting (usually a version
+    incompatibility with the bundled Prettier core), Prettier⁺ retries the
+    formatting without it and notifies you.
+
+> Plugin resolution happens when the service starts or when your project’s
+> `package.json` or Prettier config changes — newly installed plugins are
+> picked up automatically.
 
 ## Ignoring Files
 

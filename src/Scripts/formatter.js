@@ -191,6 +191,8 @@ class Formatter {
     this._latestRequestIds = new Map()
     /** @type {Set<Promise>} format requests currently in flight */
     this._pendingFormats = new Set()
+    /** @type {Set<string>} config-declared plugins already reported as crashed */
+    this._disabledPluginsNotified = new Set()
     /** true while a planned stop/restart cycle is in progress */
     this._restarting = false
 
@@ -787,26 +789,34 @@ class Formatter {
       ignored,
       missingParser,
       cursorOffset: newCursor,
-      configPlugins,
+      loadedPlugins,
+      unresolvedPlugins,
+      disabledPlugins,
+      configFile,
     } = result
 
-    // The service reports the plugins declared in the user's config
-    // whenever bundled plugins were sent. Filter out declarations already
-    // satisfied by the bundled set (matched by package name in the bundled
-    // path) — only genuinely unsupported plugins should notify.
-    if (configPlugins?.length) {
-      const unsupportedPlugins = configPlugins.filter(
-        (declared) =>
-          typeof declared !== 'string' ||
-          !plugins.some((bundled) => bundled.includes(declared)),
+    // The service classifies the plugins declared in the user's config
+    // whenever bundled plugins were injected:
+    // - loadedPlugins: resolved from the project's node_modules and active
+    // - unresolvedPlugins: not bundled and not found in the project — the
+    //   bundled equivalents (if any) are used instead
+    // - disabledPlugins: crashed while formatting — the service retried
+    //   without them
+    if (loadedPlugins?.length) {
+      log.info(
+        `Loaded Prettier plugins from your project: ${loadedPlugins.join(', ')}`,
       )
+    }
 
-      if (unsupportedPlugins.length > 0) {
-        log.info(
-          `Your Prettier config declares plugins (${unsupportedPlugins.join(', ')}) — Prettier⁺ formats with its bundled equivalents instead.`,
-        )
-        this.showConfigPluginsNotice()
-      }
+    if (unresolvedPlugins?.length) {
+      log.info(
+        `Unresolved Prettier config plugins: ${unresolvedPlugins.join(', ')}`,
+      )
+      this.showConfigPluginsNotice(unresolvedPlugins, configFile)
+    }
+
+    if (disabledPlugins?.length) {
+      this.showDisabledPluginsNotice(disabledPlugins)
     }
 
     // newCursor may be a number or undefined/null. Prettier returns -1 when
@@ -919,24 +929,70 @@ class Formatter {
 
   /**
    * One-time-per-session notice that the user's own config file declares
-   * plugins which Prettier⁺ replaced with its bundled equivalents.
+   * plugins which Prettier⁺ doesn't bundle and couldn't find in the
+   * project — formatting continues with the bundled equivalents.
    */
-  showConfigPluginsNotice() {
+  showConfigPluginsNotice(unresolvedPlugins, configFile) {
     if (this._configPluginsNoticeShown) return
     this._configPluginsNoticeShown = true
+
+    const body =
+      nova.localize(
+        'prettier.notification.config-plugins.body',
+        'Your Prettier config file declares plugins that Prettier⁺ doesn’t bundle and couldn’t find in your project. Formatting continues with the bundled equivalents.',
+        'notification',
+      ) +
+      `\n\n${unresolvedPlugins.join('\n')}` +
+      (configFile
+        ? `\n\n${nova.localize(
+            'prettier.notification.config-plugins.file',
+            'Declared in:',
+            'notification',
+          )} ${configFile}`
+        : '')
 
     showNotification({
       id: 'prettier-config-plugins',
       title: nova.localize(
         'prettier.notification.config-plugins.title',
-        'Prettier⁺ Is Using Its Own Plugins',
+        'Some Config Plugins Not Loaded',
         'notification',
       ),
-      body: nova.localize(
-        'prettier.notification.config-plugins.body',
-        'Your Prettier config file declares plugins. Prettier⁺ ignores those declarations and formats with its own bundled plugins instead — you can keep the config file for command-line use.',
+      body,
+    })
+  }
+
+  /**
+   * One-time-per-plugin notice that a project plugin crashed while
+   * formatting — the service retried without it.
+   *
+   * @param {string[]} disabledPlugins – declared specifiers of the plugins
+   */
+  showDisabledPluginsNotice(disabledPlugins) {
+    const pending = disabledPlugins.filter(
+      (name) => !this._disabledPluginsNotified.has(name),
+    )
+    if (pending.length === 0) return
+
+    for (const name of pending) this._disabledPluginsNotified.add(name)
+
+    log.error(
+      `Formatting without project plugin(s) after a load failure: ${pending.join(', ')}`,
+    )
+
+    showNotification({
+      id: 'prettier-disabled-plugins',
+      title: nova.localize(
+        'prettier.notification.disabled-plugins.title',
+        'Plugins Disabled For This Format',
         'notification',
       ),
+      body:
+        nova.localize(
+          'prettier.notification.disabled-plugins.body',
+          'Prettier⁺ couldn’t load the following plugins from your project — possibly because they’re incompatible with the bundled Prettier version — and formatted without them:',
+          'notification',
+        ) + `\n\n${pending.join('\n')}`,
     })
   }
 

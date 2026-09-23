@@ -58,6 +58,8 @@ Java, Laravel Blade, Liquid, PHP, Shell, SQL, Tailwind CSS, TOML, Twig, and XML
   and [.prettierignore](https://prettier.io/docs/ignore) files.
 - **Plugin Usage:** Utilizes Prettier and any plugins installed in your project,
   or defaults to the bundled Prettier and plugins if none are installed.
+  Plugins declared in your project’s Prettier config are loaded from your
+  project’s `node_modules` when they aren’t bundled with the extension.
 
 ## Bundled Plugins
 
@@ -109,6 +111,28 @@ aligned with official Prettier releases. Versions are formatted as `a.b.c`, wher
   (used for fixes or enhancements unrelated to the Prettier core).
 
 For example, `3.5.4` uses Prettier `v3.5.x` and is the fourth extension build.
+
+## Testing
+
+The service’s plugin handling is covered by smoke tests that spawn the built
+Prettier service and talk to it over JSON-RPC.
+
+```bash
+npm run build
+npm install --omit=dev --prefix prettier.novaextension
+node tests/service-smoke.test.js       # bundled merge + native passthrough modes
+node tests/external-plugins.test.js    # disabled bundled plugin → project copy used
+```
+
+The first run of `external-plugins.test.js` installs the test fixture’s
+dependencies (`@prettier/plugin-xml`, `prettier-plugin-properties`) into
+`tests/fixtures/external-plugin-project/` — network access is required once.
+
+To verify the fallback manually in Nova: open
+`tests/fixtures/external-plugin-project/` as a project, disable a bundled
+plugin (XML or Properties) in the extension settings, and format the
+matching fixture file (`test.xml` / `test.properties`). The Extension
+Console then logs that the plugin was loaded from your project.
 
 ## Contributing Translations
 

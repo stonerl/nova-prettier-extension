@@ -1,0 +1,12 @@
+{
+  "plugins": [
+    "prettier-plugin-ejs",
+    "prettier-plugin-tailwindcss",
+    "no-such-plugin-x",
+    ["no-such-tuple-plugin", { "tupleOption": true }],
+    "./local-plugin.js",
+    "my-esm-plugin",
+    "crashy-plugin",
+    "runtime-crashy"
+  ]
+}

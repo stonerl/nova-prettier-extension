@@ -1,0 +1,10 @@
+{
+  "name": "external-plugin-project",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Test fixture: project-local plugins used via the Prettier config's plugins array",
+  "dependencies": {
+    "@prettier/plugin-xml": "^3.4.2",
+    "prettier-plugin-properties": "^0.3.1"
+  }
+}

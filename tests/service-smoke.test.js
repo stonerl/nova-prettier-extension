@@ -1,0 +1,262 @@
+/**
+ * service-smoke.test.js — Smoke tests for the Prettier service's
+ * config-plugin handling (bundled merge + native passthrough modes)
+ *
+ * @license MIT
+ * @author Toni Förster
+ * @copyright © 2026 Toni Förster
+ *
+ * Plain Node script — no test framework. Exits non-zero on failure.
+ *
+ * Requires `npm run build` and `npm install --omit=dev` inside
+ * prettier.novaextension/ (see tests/helpers/json-rpc-client.js).
+ *
+ * Fixtures (tests/fixtures/):
+ * - mock-project/         – declares bundled, resolvable, unresolvable,
+ *                           load-crashing and runtime-crashing plugins
+ * - mock-project-native/  – resolvable + runtime-crashing plugins (native mode)
+ * - mock-project-healthy/ – single healthy external plugin (native mode)
+ *
+ * `node_modules` symlinks into `deps/` are created on demand — the
+ * handmade plugins are committed, no network install needed.
+ */
+
+const fs = require('fs')
+const path = require('path')
+
+const {
+  requireBuiltArtifacts,
+  createServiceClient,
+} = require('./helpers/json-rpc-client.js')
+
+const FIXTURES = path.join(__dirname, 'fixtures')
+const MOCK_PROJECT = path.join(FIXTURES, 'mock-project')
+const MOCK_NATIVE = path.join(FIXTURES, 'mock-project-native')
+const MOCK_HEALTHY = path.join(FIXTURES, 'mock-project-healthy')
+const EXT_MODULES = path.join(
+  __dirname,
+  '..',
+  'prettier.novaextension',
+  'node_modules',
+)
+
+let failed = 0
+function check(name, ok, detail) {
+  console.log(`${ok ? 'PASS' : 'FAIL'}: ${name}`)
+  if (!ok) {
+    failed++
+    if (detail !== undefined) {
+      console.log(` → ${JSON.stringify(detail).slice(0, 500)}`)
+    }
+  }
+}
+
+function jsonEqual(value, expected) {
+  return JSON.stringify(value) === JSON.stringify(expected)
+}
+
+/**
+ * Link `deps/` as `node_modules` so Node's resolution finds the handmade
+ * plugins. Idempotent; the symlink is never committed.
+ */
+function ensureNodeModulesSymlink(fixtureDir, linkTarget) {
+  const link = path.join(fixtureDir, 'node_modules')
+  const stats = fs.lstatSync(link, { throwIfNoEntry: false })
+  if (stats?.isSymbolicLink()) {
+    if (fs.readlinkSync(link) === linkTarget) return
+    fs.unlinkSync(link)
+  } else if (stats) {
+    fs.rmSync(link, { recursive: true })
+  }
+  fs.symlinkSync(linkTarget, link, 'dir')
+}
+
+async function bundledSuite() {
+  console.log('\n== Bundled mode: merge, classification, isolation ==')
+  ensureNodeModulesSymlink(MOCK_PROJECT, 'deps')
+
+  const client = createServiceClient({ cwd: MOCK_PROJECT })
+  try {
+    await client.waitForStart()
+
+    // The client injects bundled plugin paths (simulating enabled bundled
+    // plugins for a JSON document).
+    const result = await client.requestRaw('format', {
+      original: '{"a": 1}\n',
+      pathForConfig: path.join(MOCK_PROJECT, 'file.json'),
+      ignorePath: null,
+      options: {
+        parser: 'json',
+        filepath: path.join(MOCK_PROJECT, 'file.json'),
+        cursorOffset: 0,
+        plugins: [
+          path.join(EXT_MODULES, 'prettier-plugin-ejs', 'index.js'),
+          path.join(
+            EXT_MODULES,
+            'prettier-plugin-tailwindcss',
+            'dist',
+            'index.mjs',
+          ),
+        ],
+      },
+      withCursor: true,
+    })
+
+    check(
+      'formatted output correct',
+      result.formatted === '{ "a": 1 }\n',
+      result,
+    )
+    check(
+      'loadedPlugins == [my-esm-plugin, runtime-crashy]',
+      jsonEqual(result.loadedPlugins, ['my-esm-plugin', 'runtime-crashy']),
+      result.loadedPlugins,
+    )
+    check(
+      'unresolvedPlugins == [no-such-plugin-x, no-such-tuple-plugin]',
+      jsonEqual(result.unresolvedPlugins, [
+        'no-such-plugin-x',
+        'no-such-tuple-plugin',
+      ]),
+      result.unresolvedPlugins,
+    )
+    check(
+      'config file path reported for unresolved plugins',
+      typeof result.configFile === 'string' &&
+        result.configFile.endsWith('.prettierrc.json'),
+      result.configFile,
+    )
+    check(
+      'disabledPlugins == [crashy-plugin, runtime-crashy]',
+      jsonEqual(result.disabledPlugins, ['crashy-plugin', 'runtime-crashy']),
+      result.disabledPlugins,
+    )
+    check(
+      'cursor offset preserved',
+      typeof result.cursorOffset === 'number' && result.cursorOffset >= 0,
+      result.cursorOffset,
+    )
+
+    // Bundled-wins: both declared bundled plugins must NOT appear in the
+    // report — they were replaced by the injected bundled paths.
+    check(
+      'bundled declarations not reported as external',
+      !result.loadedPlugins?.includes('prettier-plugin-ejs') &&
+        !result.loadedPlugins?.includes('prettier-plugin-tailwindcss'),
+      result.loadedPlugins,
+    )
+  } finally {
+    await client.kill()
+  }
+}
+
+async function nativeSuite() {
+  console.log(
+    '\n== Native mode (explicit path / project Prettier): resolve-or-passthrough ==',
+  )
+  ensureNodeModulesSymlink(MOCK_NATIVE, '../mock-project/deps')
+  ensureNodeModulesSymlink(MOCK_HEALTHY, '../mock-project/deps')
+
+  const client = createServiceClient({ cwd: MOCK_NATIVE })
+  try {
+    await client.waitForStart()
+
+    const formatOptions = (project) => ({
+      original: '{"a": 1}\n',
+      pathForConfig: path.join(project, 'file.json'),
+      ignorePath: null,
+      options: {
+        parser: 'json',
+        filepath: path.join(project, 'file.json'),
+        cursorOffset: 0,
+      },
+      withCursor: true,
+    })
+
+    // 1) Unresolvable declaration → passthrough → Prettier's native
+    //    resolution error. No retry, no notices.
+    const mixed = await client.requestRaw('format', formatOptions(MOCK_PROJECT))
+    check(
+      'unresolvable passthrough → native resolve error',
+      typeof mixed.error?.message === 'string' &&
+        mixed.error.message.includes(
+          "Cannot find package 'prettier-plugin-ejs'",
+        ),
+      mixed.error?.message,
+    )
+    check(
+      'no report fields injected on native error',
+      mixed.loadedPlugins === undefined &&
+        mixed.unresolvedPlugins === undefined &&
+        mixed.disabledPlugins === undefined,
+      mixed,
+    )
+
+    // 2) Resolvable runtime-crashing plugin → native error surfaces.
+    const crashy = await client.requestRaw('format', formatOptions(MOCK_NATIVE))
+    check(
+      'runtime crasher → native error surfaced',
+      typeof crashy.error?.message === 'string' &&
+        crashy.error.message.includes('runtime boom'),
+      crashy.error?.message,
+    )
+    check(
+      'no retry / no notices for native runtime crash',
+      crashy.disabledPlugins === undefined &&
+        crashy.unresolvedPlugins === undefined,
+      crashy,
+    )
+
+    // 3) Repeat request — config/plugin caches stay clean after errors.
+    const again = await client.requestRaw('format', formatOptions(MOCK_NATIVE))
+    check(
+      'repeat request consistent after errors',
+      typeof again.error?.message === 'string' &&
+        again.error.message.includes('runtime boom'),
+      again.error?.message,
+    )
+
+    // 4) Healthy project → success, external plugin reported as loaded.
+    const healthy = await client.requestRaw(
+      'format',
+      formatOptions(MOCK_HEALTHY),
+    )
+    check(
+      'healthy native project formats',
+      healthy.formatted === '{ "a": 1 }\n',
+      healthy,
+    )
+    check(
+      'loadedPlugins == [my-esm-plugin]',
+      jsonEqual(healthy.loadedPlugins, ['my-esm-plugin']),
+      healthy.loadedPlugins,
+    )
+    // The healthy fixture declares the plugin in tuple form
+    // `["my-esm-plugin", {}]` — tuple specifiers must classify, resolve
+    // and load like plain strings, with the options entry preserved.
+    check(
+      'tuple-form declaration resolved from tuple options',
+      healthy.configFile === undefined &&
+        healthy.unresolvedPlugins === undefined,
+      healthy,
+    )
+  } finally {
+    await client.kill()
+  }
+}
+
+async function main() {
+  requireBuiltArtifacts()
+  await bundledSuite()
+  await nativeSuite()
+
+  console.log(
+    `\n${failed === 0 ? 'All checks passed.' : `${failed} check(s) failed.`}`,
+  )
+  process.exit(failed === 0 ? 0 : 1)
+}
+
+main().catch((err) => {
+  console.error(err)
+  process.exit(1)
+})
