@@ -9,6 +9,8 @@
   "prettier.notification.config-plugins.body": "",
   "prettier.notification.config-plugins.file": "",
   "prettier.notification.config-plugins.title": "",
+  "prettier.notification.custom-config-error.title": "",
+  "prettier.notification.custom-config-error.body": "",
   "prettier.notification.disabled-plugins.title": "",
   "prettier.notification.disabled-plugins.body": "",
   "prettier.notification.fileTooLarge.title": "",

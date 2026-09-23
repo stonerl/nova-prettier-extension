@@ -9,6 +9,8 @@
   "prettier.notification.config-plugins.body": "Ihre Prettier-Konfigurationsdatei deklariert Plugins, die Prettier⁺ weder mitliefert noch in Ihrem Projekt finden konnte. Formatiert wird weiterhin mit den integrierten Plugins.",
   "prettier.notification.config-plugins.file": "Deklariert in:",
   "prettier.notification.config-plugins.title": "Einige Konfigurations-Plugins wurden nicht geladen",
+  "prettier.notification.custom-config-error.title": "",
+  "prettier.notification.custom-config-error.body": "",
   "prettier.notification.disabled-plugins.title": "Plugins für diese Formatierung deaktiviert",
   "prettier.notification.disabled-plugins.body": "Prettier⁺ konnte die folgenden Plugins aus Ihrem Projekt nicht laden – möglicherweise sind sie mit der integrierten Prettier-Version inkompatibel – und hat ohne sie formatiert:",
   "prettier.notification.fileTooLarge.title": "Dokument zu groß",

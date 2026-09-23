@@ -90,12 +90,14 @@ class PrettierService extends FormattingService {
    *   { error: { name: string, message: string, stack: string } }
    * >} – plus, when the user's config declares plugins:
    *   `{ loadedPlugins: string[], unresolvedPlugins?: string[], disabledPlugins?: string[] }`
+   *   and, when the client's custom config file failed to load:
+   *   `configError: { path: string, message: string }`
    * @throws {never} Formatting errors are caught and returned in `result.error`, so this method never throws
    */
   async format({ original, pathForConfig, ignorePath, options, withCursor }) {
-    let ignored, config, pluginReport
+    let ignored, config, pluginReport, configError
     try {
-      ;({ ignored, config, pluginReport } = await this.getConfig({
+      ;({ ignored, config, pluginReport, configError } = await this.getConfig({
         pathForConfig,
         ignorePath,
         options,
@@ -131,7 +133,7 @@ class PrettierService extends FormattingService {
 
     try {
       const result = await runFormat(config, withCursor)
-      return this._withPluginReport(result, pluginReport)
+      return this._withPluginReport(result, pluginReport, [], configError)
     } catch (err) {
       let lastError = err
 
@@ -142,7 +144,7 @@ class PrettierService extends FormattingService {
       if (withCursor && typeof config.cursorOffset === 'number') {
         try {
           const result = await runFormat(config, false)
-          return this._withPluginReport(result, pluginReport)
+          return this._withPluginReport(result, pluginReport, [], configError)
         } catch (retryErr) {
           lastError = retryErr
         }
@@ -173,11 +175,16 @@ class PrettierService extends FormattingService {
             ),
           }
           const result = await runFormat(configWithoutCandidate, false)
-          return this._withPluginReport(result, pluginReport, [
-            pluginReport.externalNames[
-              pluginReport.externalEntries.indexOf(candidate)
+          return this._withPluginReport(
+            result,
+            pluginReport,
+            [
+              pluginReport.externalNames[
+                pluginReport.externalEntries.indexOf(candidate)
+              ],
             ],
-          ])
+            configError,
+          )
         } catch {
           // the candidate wasn't (the only) culprit — keep it dropped and
           // move on to the next one
@@ -201,7 +208,7 @@ class PrettierService extends FormattingService {
               pluginReport.externalEntries.indexOf(entry)
             ],
         )
-        return this._withPluginReport(result, pluginReport, names)
+        return this._withPluginReport(result, pluginReport, names, configError)
       } catch (retryErr) {
         return this._errorResult(retryErr)
       }
@@ -209,17 +216,21 @@ class PrettierService extends FormattingService {
   }
 
   /**
-   * Attach the config-plugin classification to a format result, keeping the
-   * payload lean: only non-empty lists are sent.
+   * Attach the config-plugin classification and any custom-config load
+   * error to a format result, keeping the payload lean: only non-empty
+   * lists are sent.
    *
    * @param {object} result
    * @param {object|null} pluginReport – from getConfig
    * @param {string[]} [extraDisabled] – names disabled additionally (e.g. by
    *                                     the format-time retry)
+   * @param {object|null} [configError] – custom config load failure
+   *                                      ({ path, message }) from getConfig
    * @returns {object}
    */
-  _withPluginReport(result, pluginReport, extraDisabled = []) {
-    if (!pluginReport) return result
+  _withPluginReport(result, pluginReport, extraDisabled = [], configError) {
+    if (!pluginReport && !configError) return result
+    if (!pluginReport) return { ...result, configError }
     const disabled = [...pluginReport.disabledNames, ...extraDisabled]
     return {
       ...result,
@@ -272,12 +283,15 @@ class PrettierService extends FormattingService {
    * @param {string}      params.pathForConfig  – Base path for locating config
    * @param {string|null} params.ignorePath     – Path to ignore-file (or null)
    * @param {object}      params.options        – Raw options from the RPC payload
-   * @returns {Promise<{ ignored: boolean, config: object, pluginReport?: object }>}
+   * @returns {Promise<{ ignored: boolean, config: object, pluginReport?: object, configError?: object }>}
    *   - { ignored: true } if the file is in .prettierignore
    *   - otherwise `{ ignored: false, config }` where `config` is the final Prettier options
    *   - `pluginReport` (only when the client injected bundled plugins and the
    *     config declares plugins): classification of the declared plugins —
    *   `{ plugins, externalEntries, externalNames, unresolved }`
+   *   - `configError` (only when the client's explicit custom config file
+   *     failed to load): `{ path, message }` — formatting continues with
+   *     the remaining options
    */
   async getConfig({ pathForConfig, ignorePath, options }) {
     let info = {}
@@ -304,7 +318,26 @@ class PrettierService extends FormattingService {
     }
 
     let inferredConfig = {}
-    if (!options._customConfigFile && !options._ignoreConfigFile) {
+    let configError
+    if (options._customConfigFile) {
+      // The client points at an explicit config file. Prettier's own
+      // resolution loads it (JSON, YAML, TOML, JS…), replacing the old
+      // client-side JSON.parse, which silently dropped every other format.
+      try {
+        inferredConfig =
+          (await this.prettier.resolveConfig(pathForConfig, {
+            config: options._customConfigFile,
+            editorconfig: true,
+          })) ?? {}
+      } catch (err) {
+        // Surface the failure to the client (which shows a notification);
+        // formatting continues with the remaining options.
+        configError = {
+          path: options._customConfigFile,
+          message: err?.message ?? String(err),
+        }
+      }
+    } else if (!options._ignoreConfigFile) {
       if (this._configCache.has(pathForConfig)) {
         inferredConfig = this._configCache.get(pathForConfig)
       } else {
@@ -377,7 +410,7 @@ class PrettierService extends FormattingService {
       }
     }
 
-    return { ignored: false, config, pluginReport }
+    return { ignored: false, config, pluginReport, configError }
   }
 
   /**

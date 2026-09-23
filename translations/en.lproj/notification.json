@@ -9,6 +9,8 @@
   "prettier.notification.config-plugins.body": "Your Prettier config file declares plugins that Prettier⁺ doesn’t bundle and couldn’t find in your project. Formatting continues with the bundled equivalents.",
   "prettier.notification.config-plugins.file": "Declared in:",
   "prettier.notification.config-plugins.title": "Some Config Plugins Not Loaded",
+  "prettier.notification.custom-config-error.title": "Custom Config File Failed to Load",
+  "prettier.notification.custom-config-error.body": "Formatting continues without the custom Prettier config file. Fix the file or clear the setting, then format again.",
   "prettier.notification.disabled-plugins.title": "Plugins Disabled For This Format",
   "prettier.notification.disabled-plugins.body": "Prettier⁺ couldn’t load the following plugins from your project — possibly because they’re incompatible with the bundled Prettier version — and formatted without them:",
   "prettier.notification.fileTooLarge.title": "Document Too Large",

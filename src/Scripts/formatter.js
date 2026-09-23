@@ -193,6 +193,8 @@ class Formatter {
     this._pendingFormats = new Set()
     /** @type {Set<string>} config-declared plugins already reported as crashed */
     this._disabledPluginsNotified = new Set()
+    /** path of the custom config file the last load-failure notice covered */
+    this._lastCustomConfigErrorPath = null
     /** true while a planned stop/restart cycle is in progress */
     this._restarting = false
 
@@ -554,29 +556,19 @@ class Formatter {
 
     cancelNotification('prettier-unsupported-syntax')
 
-    // Read the custom config file path from settings.
-    const customConfigFile = getConfigWithWorkspaceOverride(
+    // Read the custom config file path from settings. A relative path is
+    // resolved against the workspace — the same way main.js watches the
+    // file — because Nova's fs APIs resolve relative paths against the
+    // extension's working directory, not the workspace.
+    let customConfigFile = getConfigWithWorkspaceOverride(
       'prettier.config.file',
     )
-
-    let customFileConfig = {}
-
-    // If a custom config file path is provided, use Nova's file handling.
-    if (customConfigFile) {
-      try {
-        const file = await nova.fs.open(customConfigFile, 'r')
-        // Read all lines and join them with newline characters.
-        const lines = await file.readlines()
-        file.close()
-        const fileContent = lines.join('\n')
-        // Parse the JSON content into an object.
-        customFileConfig = JSON.parse(fileContent)
-        log.info('Custom configuration loaded successfully:')
-      } catch (error) {
-        log.error(
-          `Error reading or parsing custom config file at "${customConfigFile}": ${error}`,
-        )
-      }
+    if (
+      customConfigFile &&
+      nova.workspace.path &&
+      !nova.path.isAbsolute(customConfigFile)
+    ) {
+      customConfigFile = nova.path.join(nova.workspace.path, customConfigFile)
     }
 
     const pathForConfig = document.path || nova.workspace.path
@@ -653,8 +645,11 @@ class Formatter {
       parser: this.getParserForSyntax(syntaxKey),
       ...(plugins.length > 0 ? { plugins } : {}),
       ...(document.path ? { filepath: document.path } : {}),
+      // The custom config file is resolved by the service via Prettier's
+      // own config resolution (JSON, YAML, TOML, JS…). Nothing to merge
+      // client-side — the service layers it in as the inferred config.
       ...(customConfigFile
-        ? customFileConfig
+        ? {}
         : ignoreConfigFile || shouldApplyDefaultConfig
           ? getDefaultConfig()
           : {}),
@@ -789,6 +784,7 @@ class Formatter {
       unresolvedPlugins,
       disabledPlugins,
       configFile,
+      configError,
     } = result
 
     // The service classifies the plugins declared in the user's config
@@ -813,6 +809,17 @@ class Formatter {
 
     if (disabledPlugins?.length) {
       this.showDisabledPluginsNotice(disabledPlugins)
+    }
+
+    // The service couldn't load the user's custom config file — surface
+    // it visibly instead of silently formatting without it. Once the
+    // config loads again (e.g. after the user fixes it), the notice is
+    // cancelled.
+    if (configError) {
+      this.showCustomConfigErrorNotice(configError)
+    } else {
+      cancelNotification('prettier-custom-config-error')
+      this._lastCustomConfigErrorPath = null
     }
 
     // newCursor may be a number or undefined/null. Prettier returns -1 when
@@ -961,6 +968,38 @@ class Formatter {
         'notification',
       ),
       body,
+    })
+  }
+
+  /**
+   * Notice that the user's custom config file (prettier.config.file)
+   * couldn't be read or parsed by the service — formatting continues
+   * without it. Shown once per failing path; cancelled when the config
+   * loads successfully again.
+   *
+   * @param {{ path: string, message: string }} configError – from the service
+   */
+  showCustomConfigErrorNotice(configError) {
+    log.error(
+      `Error loading custom config file at "${configError.path}": ${configError.message}`,
+    )
+
+    if (this._lastCustomConfigErrorPath === configError.path) return
+    this._lastCustomConfigErrorPath = configError.path
+
+    showNotification({
+      id: 'prettier-custom-config-error',
+      title: nova.localize(
+        'prettier.notification.custom-config-error.title',
+        'Custom Config File Failed to Load',
+        'notification',
+      ),
+      body:
+        nova.localize(
+          'prettier.notification.custom-config-error.body',
+          'Formatting continues without the custom Prettier config file. Fix the file or clear the setting, then format again.',
+          'notification',
+        ) + `\n\n${configError.path}\n${configError.message}`,
     })
   }
 

@@ -321,11 +321,125 @@ async function configlessSuite() {
   }
 }
 
+async function customConfigSuite() {
+  console.log(
+    '\n== Custom config file: explicit resolveConfig + error report ==',
+  )
+  // Exercises the service-side resolution of the client's custom config
+  // file (prettier.config.file) — JSON, YAML, JS and a missing file.
+  // Runs in a tmpdir so the repo's own .prettierrc never interferes.
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'prettier-custom-'))
+  try {
+    fs.writeFileSync(path.join(tmpDir, 'file.json'), '{"a": {"b": 1}}\n')
+    fs.writeFileSync(
+      path.join(tmpDir, 'custom.json'),
+      JSON.stringify({ useTabs: true, printWidth: 10 }),
+    )
+    fs.writeFileSync(
+      path.join(tmpDir, 'custom.yaml'),
+      'useTabs: true\nprintWidth: 10\n',
+    )
+    fs.writeFileSync(
+      path.join(tmpDir, 'custom.js'),
+      'module.exports = { useTabs: true, printWidth: 10 }\n',
+    )
+
+    const formatParams = (customConfigFile) => ({
+      original: '{"a": {"b": 1}}\n',
+      pathForConfig: path.join(tmpDir, 'file.json'),
+      ignorePath: null,
+      options: {
+        parser: 'json',
+        filepath: path.join(tmpDir, 'file.json'),
+        cursorOffset: 0,
+        _customConfigFile: customConfigFile,
+      },
+      withCursor: false,
+    })
+
+    const client = createServiceClient({ cwd: tmpDir })
+    try {
+      await client.waitForStart()
+
+      // 1) JSON custom config — tabWidth-independent: useTabs visible in
+      //    the nested indentation.
+      const jsonConfig = await client.requestRaw(
+        'format',
+        formatParams(path.join(tmpDir, 'custom.json')),
+      )
+      check(
+        'custom JSON config applied (tabs in output)',
+        jsonConfig.formatted !== undefined &&
+          jsonConfig.formatted.includes('\t'),
+        jsonConfig,
+      )
+      check(
+        'custom JSON config: no error, no configError',
+        jsonConfig.error === undefined && jsonConfig.configError === undefined,
+        jsonConfig,
+      )
+
+      // 2) YAML custom config — the old client-side JSON.parse dropped
+      //    this format silently.
+      const yamlConfig = await client.requestRaw(
+        'format',
+        formatParams(path.join(tmpDir, 'custom.yaml')),
+      )
+      check(
+        'custom YAML config applied (tabs in output)',
+        yamlConfig.formatted !== undefined &&
+          yamlConfig.formatted.includes('\t'),
+        yamlConfig,
+      )
+      check(
+        'custom YAML config: no error, no configError',
+        yamlConfig.error === undefined && yamlConfig.configError === undefined,
+        yamlConfig,
+      )
+
+      // 3) JS custom config
+      const jsConfig = await client.requestRaw(
+        'format',
+        formatParams(path.join(tmpDir, 'custom.js')),
+      )
+      check(
+        'custom JS config applied (tabs in output)',
+        jsConfig.formatted !== undefined && jsConfig.formatted.includes('\t'),
+        jsConfig,
+      )
+
+      // 4) Missing custom config file → configError, formatting continues
+      //    with the remaining options.
+      const missing = await client.requestRaw(
+        'format',
+        formatParams(path.join(tmpDir, 'does-not-exist.json')),
+      )
+      check(
+        'missing custom config file → configError reported',
+        missing.configError?.path ===
+          path.join(tmpDir, 'does-not-exist.json') &&
+          typeof missing.configError.message === 'string',
+        missing.configError,
+      )
+      check(
+        'missing custom config file: formatting continues',
+        missing.formatted === '{ "a": { "b": 1 } }\n',
+        missing,
+      )
+    } finally {
+      await client.kill()
+    }
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true })
+  }
+}
+
 async function main() {
   requireBuiltArtifacts()
   await bundledSuite()
   await nativeSuite()
   await configlessSuite()
+  await customConfigSuite()
 
   console.log(
     `\n${failed === 0 ? 'All checks passed.' : `${failed} check(s) failed.`}`,
