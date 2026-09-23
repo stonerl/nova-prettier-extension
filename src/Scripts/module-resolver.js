@@ -116,8 +116,8 @@ async function findModuleWithNPM(directory, module) {
 }
 
 /**
- * Verifies installed packages one by one with a single `npm ls` spawn per
- * package, mirroring the original resolution semantics.
+ * Verifies installed packages, one `npm ls` spawn per package, all in
+ * parallel, mirroring the original resolution semantics.
  *
  * @param {string}   directory       – cwd for the npm ls invocations
  * @param {string[]} packageNames    – package names to verify
@@ -125,21 +125,20 @@ async function findModuleWithNPM(directory, module) {
  *                                      (missing, outdated, INVALID, MAXDEPTH)
  */
 async function verifyBundledPackages(directory, packageNames) {
-  const brokenPackages = []
-
-  for (const pkg of packageNames) {
-    try {
-      const resolved = await findModuleWithNPM(directory, pkg)
-      if (!resolved || !resolved.correctVersion) {
-        brokenPackages.push(pkg)
+  const results = await Promise.all(
+    packageNames.map(async (pkg) => {
+      try {
+        const resolved = await findModuleWithNPM(directory, pkg)
+        if (!resolved || !resolved.correctVersion) return pkg
+        return null
+      } catch (err) {
+        log.warn(`Failed to verify package "${pkg}":`, err)
+        return pkg
       }
-    } catch (err) {
-      log.warn(`Failed to verify package "${pkg}":`, err)
-      brokenPackages.push(pkg)
-    }
-  }
+    }),
+  )
 
-  return brokenPackages
+  return results.filter(Boolean)
 }
 
 async function installPackages(directory) {
