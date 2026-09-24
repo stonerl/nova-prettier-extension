@@ -25,33 +25,8 @@ Java, Laravel Blade, Liquid, PHP, Shell, SQL, Tailwind CSS, TOML, Twig, and XML
   even when Nova misidentifies it. Blade, Java, SQL, and more are correctly handled
   out of the box.
 - **Language Support:** Supports all Prettier-supported languages, including
-  `Angular`,
-  `CSS`,
-  `Flow`,
-  `GraphQL`,
-  `HTML`,
-  `JavaScript`,
-  `JSON`,
-  `JSX`,
-  `Less`,
-  `Markdown`,
-  `SCSS`,
-  `TypeScript`,
-  `Vue`, and
-  `YAML` —
-  plus additional ones via bundled plugins, such as
-  `Astro`,
-  `EJS`,
-  `Java`,
-  `Laravel Blade`,
-  `Liquid`,
-  `PHP`,
-  `Shell`,
-  `SQL`,
-  `Tailwind CSS`,
-  `TOML`,
-  `Twig`, and
-  `XML`.
+  `Angular`, `CSS`, `Flow`, `GraphQL`, `HTML`, `JavaScript`, `JSON`, `JSX`, `Less`, `Markdown`, `SCSS`, `TypeScript`, `Vue`, and `YAML` — plus additional ones via bundled plugins, such as
+  `Astro`, `EJS`, `Java`, `Laravel Blade`, `Liquid`, `PHP`, `Shell`, `SQL`, `Tailwind CSS`, `TOML`, `Twig`, and `XML`.
 
 - **Configuration Support:** Compatible with [standard Prettier configuration](https://prettier.io/docs/configuration),
   and [.prettierignore](https://prettier.io/docs/ignore) files.
