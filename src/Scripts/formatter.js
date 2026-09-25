@@ -13,6 +13,7 @@ const {
   getConfigWithWorkspaceOverride,
   isDebugLoggingEnabled,
   log,
+  spawnNode,
 } = require('./helpers.js')
 
 const { showNotification, cancelNotification } = require('./notifications.js')
@@ -251,20 +252,28 @@ class Formatter {
     })
     this._startHandshake = handshake
 
-    const proc = new Process('/usr/bin/env', {
-      args: [
-        'node',
-        nova.path.join(
-          nova.extension.path,
-          'Scripts',
-          'prettier-service',
-          'prettier-service.js',
-        ),
-        this.modulePath,
-      ],
-      stdio: 'jsonrpc',
-      cwd: nova.workspace.path,
-    })
+    let proc
+    try {
+      proc = await spawnNode(
+        [
+          nova.path.join(
+            nova.extension.path,
+            'Scripts',
+            'prettier-service',
+            'prettier-service.js',
+          ),
+          this.modulePath,
+        ],
+        { stdio: 'jsonrpc', cwd: nova.workspace.path },
+      )
+    } catch (err) {
+      // No Node.js runtime is available — settle the handshake so it
+      // doesn't dangle, then surface the failure to the retry loop.
+      this._startHandshake = null
+      this._rejectStartHandshake(err)
+      throw err
+    }
+
     this.prettierService = proc
 
     // Stale-process guard: a superseded process's late events must never

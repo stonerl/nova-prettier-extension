@@ -14,6 +14,8 @@ const {
   getNpmVersion,
   handleProcessResult,
   log,
+  spawnNode,
+  spawnNpm,
 } = require('./helpers.js')
 
 const { showNotification } = require('./notifications.js')
@@ -72,23 +74,15 @@ function findModuleWithFileSystem(directory, module) {
 }
 
 async function findModuleWithNPM(directory, module) {
+  const process = await spawnNpm(
+    ['ls', String(module), '--parseable', '--long', '--depth', '0'],
+    { cwd: directory },
+  )
+
   let resolve, reject
   const promise = new Promise((_resolve, _reject) => {
     resolve = _resolve
     reject = _reject
-  })
-
-  const process = new Process('/usr/bin/env', {
-    args: [
-      'npm',
-      'ls',
-      String(module),
-      '--parseable',
-      '--long',
-      '--depth',
-      '0',
-    ],
-    cwd: directory,
   })
 
   process.onStdout((result) => {
@@ -142,15 +136,14 @@ async function verifyBundledPackages(directory, packageNames) {
 }
 
 async function installPackages(directory) {
+  const process = await spawnNpm(['install', '--omit=dev'], {
+    cwd: directory,
+  })
+
   let resolve, reject
   const promise = new Promise((_resolve, _reject) => {
     resolve = _resolve
     reject = _reject
-  })
-
-  const process = new Process('/usr/bin/env', {
-    args: ['npm', 'install', '--omit=dev'],
-    cwd: directory,
   })
 
   // npm install can legitimately take a while — give it 5 minutes.
@@ -246,15 +239,14 @@ async function applyBundledPatches(extensionPath) {
 
   log.info('Applying bundled patches (patch-package)…')
 
+  const process = await spawnNode([patchPackageEntry], {
+    cwd: extensionPath,
+  })
+
   let resolve, reject
   const promise = new Promise((_resolve, _reject) => {
     resolve = _resolve
     reject = _reject
-  })
-
-  const process = new Process('/usr/bin/env', {
-    args: ['node', patchPackageEntry],
-    cwd: extensionPath,
   })
 
   handleProcessResult(process, reject, resolve, 60000)

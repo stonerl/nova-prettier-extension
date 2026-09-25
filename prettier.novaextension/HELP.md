@@ -2,6 +2,7 @@
 
 - General
   - Prettier Module Resolution
+  - Node.js Runtime
   - Override Behavior Precedence
   - Settings Precedence
 - Configuration
@@ -44,6 +45,23 @@ However, Prettier⁺ will automatically prefer another version if found:
 
    If your project contains a `prettier` installation in `node_modules`, it will
    be used automatically.
+
+### Node.js Runtime
+
+Prettier⁺ runs its formatting engine on Node.js. It finds Node.js and npm in
+this order:
+
+1. **System installation** — anything on the `PATH` Nova inherits from your
+   login shell (Homebrew, an installer package, or a Node version manager
+   like nvm).
+2. **Nova-managed Node.js** — if no Node.js is on the `PATH`, Prettier⁺ uses
+   the copy that Nova installs and manages itself. Nova provides one when
+   you install an npm-based language server, for example the TypeScript
+   Language Server under _Settings → Languages_ (also listed under
+   _Settings → Tools → Installed Tools_).
+
+No separate Node.js installation is required as long as one of the two is
+available.
 
 ### Override Behavior Precedence
 

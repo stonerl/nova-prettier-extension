@@ -34,6 +34,10 @@ Java, Laravel Blade, Liquid, PHP, Shell, SQL, Tailwind CSS, TOML, Twig, and XML
   or defaults to the bundled Prettier and plugins if none are installed.
   Plugins declared in your project’s Prettier config are loaded from your
   project’s `node_modules` when they aren’t bundled with the extension.
+- **Nova-Managed Node.js:** If Node.js isn’t on your `PATH`, Prettier⁺ falls
+  back to the copy of Node.js that Nova installs and manages for its language
+  servers (for example when you install the TypeScript language server under
+  _Settings → Languages_). No separate Node.js installation is required.
 
 ## Bundled Plugins
 
@@ -101,6 +105,7 @@ tests. The individual suites can also be run directly after `npm run test:setup`
 
 ```bash
 node tests/restart-cycle.test.js       # trailing-trigger coalescing regression
+node tests/runtime-resolver.test.js    # Node.js/npm runtime detection + fallbacks
 node tests/service-smoke.test.js       # bundled merge + native passthrough modes
 node tests/external-plugins.test.js    # disabled bundled plugin → project copy used
 ```
