@@ -516,6 +516,30 @@ function resolveNodeRuntime() {
 }
 
 /**
+ * Composes the environment for a managed-mode subprocess. npm runs
+ * package lifecycle scripts (e.g. postinstall) through `sh -c`, which
+ * resolves `node` on the child’s PATH — without the managed install’s
+ * directory prepended, installs fail with exit code 127 even though
+ * npm itself runs. The parent environment’s PATH is preserved so other
+ * binaries (git, …) keep resolving.
+ *
+ * @param {string} nodePath  – absolute path to the managed node binary
+ * @param {object} [extraEnv] – caller-provided environment overrides
+ * @returns {object}
+ */
+function managedProcessEnv(nodePath, extraEnv) {
+  const nodeDirectory = nodePath.slice(0, nodePath.lastIndexOf('/'))
+  const basePATH =
+    (nova.environment && nova.environment.PATH) ||
+    '/usr/bin:/bin:/usr/sbin:/sbin'
+
+  return {
+    ...(extraEnv || {}),
+    PATH: `${nodeDirectory}:${basePATH}`,
+  }
+}
+
+/**
  * Configures an un-started Nova Process running node with the given
  * arguments, preferring the PATH lookup and falling back to Nova’s
  * managed Node.js installation. Throws when no runtime is available.
@@ -535,7 +559,11 @@ async function spawnNode(args, options = {}) {
   if (runtime.mode === 'env') {
     return new Process('/usr/bin/env', { ...options, args: ['node', ...args] })
   }
-  return new Process(runtime.nodePath, { ...options, args: [...args] })
+  return new Process(runtime.nodePath, {
+    ...options,
+    env: managedProcessEnv(runtime.nodePath, options.env),
+    args: [...args],
+  })
 }
 
 /**
@@ -560,6 +588,7 @@ async function spawnNpm(args, options = {}) {
   }
   return new Process(runtime.nodePath, {
     ...options,
+    env: managedProcessEnv(runtime.nodePath, options.env),
     args: [runtime.npmPath, ...args],
   })
 }

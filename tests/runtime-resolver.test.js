@@ -93,7 +93,10 @@ function makeNovaShim({ home, extensionPath, files = {}, dirs = [] }) {
     inDevMode: () => false,
     version: [14, 0, 0],
     versionString: '14.0',
-    environment: home === undefined ? {} : { HOME: home },
+    environment:
+      home === undefined
+        ? {}
+        : { HOME: home, PATH: '/usr/local/bin:/usr/bin:/bin' },
     config: { get: () => null },
     workspace: { config: { get: () => null }, path: null },
     notifications: { cancel: () => {}, post: () => {} },
@@ -187,6 +190,11 @@ async function envPathWins() {
       nodeProc.options.cwd === '/tmp',
     nodeProc,
   )
+  check(
+    'env mode injects no environment overrides',
+    nodeProc.options.env === undefined,
+    nodeProc.options.env,
+  )
 
   const npmProc = await helpers.spawnNpm(['install', '--omit=dev'])
   check(
@@ -248,6 +256,21 @@ async function managedViaToolsBin() {
       npmProc.options.args[1] === 'install',
     npmProc,
   )
+  check(
+    'managed npm PATH prepends the binary directory',
+    npmProc.options.env.PATH === `${TOOLS}/bin:/usr/local/bin:/usr/bin:/bin`,
+    npmProc.options.env,
+  )
+  check(
+    'caller-provided env overrides survive the merge',
+    (await helpers
+      .spawnNpm(['install'], { env: { DEBUG: '1' } })
+      .then(
+        (p) =>
+          p.options.env.DEBUG === '1' &&
+          p.options.env.PATH.startsWith(`${TOOLS}/bin:`),
+      )) === true,
+  )
 
   const nodeProc = await helpers.spawnNode(['--version'])
   check(
@@ -255,6 +278,11 @@ async function managedViaToolsBin() {
     nodeProc.command === nodeBin &&
       nodeProc.options.args.join(' ') === '--version',
     nodeProc,
+  )
+  check(
+    'managed node PATH prepends the binary directory',
+    nodeProc.options.env.PATH === `${TOOLS}/bin:/usr/local/bin:/usr/bin:/bin`,
+    nodeProc.options.env,
   )
 
   check(
@@ -305,6 +333,14 @@ async function managedViaReceipt() {
       runtime.npmPath === npmBin,
     runtime,
   )
+
+  const nodeProc = await helpers.spawnNode(['--version'])
+  check(
+    'receipt PATH prepends the versioned bin directory',
+    nodeProc.options.env.PATH ===
+      `${versionDir}/bin:/usr/local/bin:/usr/bin:/bin`,
+    nodeProc.options.env,
+  )
 }
 
 async function managedViaDirectoryScan() {
@@ -336,6 +372,14 @@ async function managedViaDirectoryScan() {
       runtime.nodePath === nodeBin &&
       runtime.npmPath === npmBin,
     runtime,
+  )
+
+  const npmProc = await helpers.spawnNpm(['install'])
+  check(
+    'scan PATH prepends the versioned bin directory',
+    npmProc.options.env.PATH ===
+      `${versionDir}/bin:/usr/local/bin:/usr/bin:/bin`,
+    npmProc.options.env,
   )
 }
 
