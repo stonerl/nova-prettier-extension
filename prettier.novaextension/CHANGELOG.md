@@ -1,3 +1,15 @@
+## 3.9.7 - 2026-09-25
+
+### Added
+
+- **Formatting now works without Node.js installed on your Mac**
+  - If Node.js or npm are missing from your `PATH`, Prettier⁺ now uses
+    the copy of Node.js that Nova installs and manages for its language
+    servers (e.g. when you install the TypeScript Language Server under
+    _Settings → Languages_).
+  - Installing Node.js via Nova is picked up automatically — no restart
+    or system-wide installation required.
+
 ## 3.9.6 - 2026-09-23
 
 ### Fixed
