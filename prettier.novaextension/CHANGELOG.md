@@ -1,3 +1,13 @@
+## 3.9.8 - 2026-09-25
+
+### Fixed
+
+- **Bundled Prettier installation failed when using Nova-managed Node.js**
+  - Package installs (e.g. the bundled Prettier's dependencies) run small
+    install scripts that look up Node.js on their own `PATH`. Prettier⁺
+    now makes the managed Node.js available to them, so the bundled
+    Prettier sets up correctly without a system-wide install.
+
 ## 3.9.7 - 2026-09-25
 
 ### Added
