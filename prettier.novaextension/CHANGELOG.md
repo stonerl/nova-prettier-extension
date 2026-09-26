@@ -1,3 +1,28 @@
+## 3.9.9 - 2026-09-26
+
+### Changed
+
+- Updated `prettier-plugin-sh` to version `0.20.2`.
+- Updated `prettier-plugin-astro` to version `1.1.0`.
+
+### Added
+
+- **New shell option: `simplify`**
+  - Removes redundant shell syntax (e.g. `[[ -z "$x" ]]` becomes
+    `[[ -z $x ]]`).
+- **Astro: `astroAllowShorthand` is now a three-way choice**
+  - _Preserve_ keeps attributes exactly as written, so
+    shorthand (`{value}`) and full form (`value={value}`) can co-exist
+    — this matches the plugin's new default behavior.
+  - _Shorthand_ normalizes matching attributes to `{value}`.
+  - _Full Form_ always expands them to `value={value}`.
+
+### Fixed
+
+- **Shell variant dropdown showed "None" in global settings**
+  - The unset state now displays as _Default (Bash)_ instead of
+    an empty entry.
+
 ## 3.9.8 - 2026-09-25
 
 ### Fixed
