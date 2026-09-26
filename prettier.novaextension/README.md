@@ -54,7 +54,7 @@ Java, Laravel Blade, Liquid, PHP, Shell, SQL, Tailwind CSS, TOML, Twig, and XML
 | [prettier-plugin-properties](https://github.com/eemeli/prettier-plugin-properties)                         | ✅ Enabled  | ⚠️ Recommended: [Java Language Definition](https://extensions.panic.com/extensions/me.frmr/me.frmr.JavaLanguage/) |
 | [prettier-plugin-sh](https://github.com/un-ts/prettier/tree/master/packages/sh)                            | ✅ Enabled  | –                                                                                                                 |
 | [prettier-plugin-sql](https://github.com/un-ts/prettier/tree/master/packages/sql)                          | ✅ Enabled  | ⚠️ Recommended: [SQL](https://extensions.panic.com/extensions/stonerl/stonerl.sql/)                               |
-| [prettier-plugin-tailwindcss](https://github.com/tailwindlabs/prettier-plugin-tailwindcss)                 | ➕ Optional | ⚠️ Recommended: [Tailwind CSS](https://extensions.panic.com/extensions/jasonplatts/jasonplatts.tailwindcss/)      |
+| [prettier-plugin-tailwindcss](https://github.com/tailwindlabs/prettier-plugin-tailwindcss)                 | ➕ Optional | ⚠️ Recommended: [Tailwind CSS](https://extensions.panic.com/extensions/garrill/garrill.tailwind/)                 |
 | [prettier-plugin-toml](https://github.com/un-ts/prettier/tree/master/packages/toml)                        | ✅ Enabled  | ⚠️ Recommended: [TOML](https://extensions.panic.com/extensions/com.neelyadav/com.neelyadav.toml/)                 |
 | [prettier-plugin-twig](https://github.com/zackad/prettier-plugin-twig)                                     | ✅ Enabled  | ⚠️ Recommended: [Twig](https://extensions.panic.com/extensions/tpmatthes/tpmatthes.Twig/)                         |
 
