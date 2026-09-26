@@ -249,6 +249,8 @@
   "Print programs in a way to save the most bytes possible. Indentation and comments are skipped, and extra whitespace is avoided when possible.": "",
   "Single Line": "",
   "Attempt to print programs in one line. Some newlines must still appear, such as those following comments or around here-documents.": "",
+  "Simplify": "",
+  "Simplify the syntax tree to remove redundant shell syntax.": "",
   "Function Next Line": "",
   "Place a function’s opening braces on the next line.": "",
   "prettier-plugin-sql": "",

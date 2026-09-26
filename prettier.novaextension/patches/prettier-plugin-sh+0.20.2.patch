@@ -1,8 +1,8 @@
 diff --git a/node_modules/prettier-plugin-sh/lib/index.cjs b/node_modules/prettier-plugin-sh/lib/index.cjs
-index b6d89d0..87e97b0 100644
+index bed7cce..acda7dc 100644
 --- a/node_modules/prettier-plugin-sh/lib/index.cjs
 +++ b/node_modules/prettier-plugin-sh/lib/index.cjs
-@@ -573,7 +573,42 @@ function hasPragma(text) {
+@@ -573,7 +573,43 @@ function hasPragma(text) {
  const dockerfileParser = {
    astFormat: "dockerfile",
    hasPragma,
@@ -31,6 +31,7 @@ index b6d89d0..87e97b0 100644
 +        recoverErrors: options.recoverErrors,
 +        useTabs: options.useTabs,
 +        tabWidth: options.tabWidth,
++        simplify: options.simplify,
 +        indent,
 +        binaryNextLine: true,
 +        switchCaseIndent: true,
@@ -46,7 +47,7 @@ index b6d89d0..87e97b0 100644
    locStart: () => 0,
    locEnd: (node) => node.length
  };
-@@ -586,63 +621,20 @@ const getFormatDockerfileContents = () => __async(null, null, function* () {
+@@ -586,65 +622,20 @@ const getFormatDockerfileContents = () => __async(null, null, function* () {
    return formatDockerfileContents_;
  });
  const dockerPrinter = {
@@ -62,6 +63,7 @@ index b6d89d0..87e97b0 100644
 -      // printer options
 -      useTabs,
 -      tabWidth,
+-      simplify,
 -      indent = useTabs ? 0 : tabWidth != null ? tabWidth : 2,
 -      binaryNextLine = true,
 -      switchCaseIndent = true,
@@ -89,6 +91,7 @@ index b6d89d0..87e97b0 100644
 -          recoverErrors,
 -          useTabs,
 -          tabWidth,
+-          simplify,
 -          indent,
 -          binaryNextLine,
 -          switchCaseIndent,

@@ -104,6 +104,7 @@ module.exports = {
     'keepComments',
     'minify',
     'singleLine',
+    'simplify',
     'functionNextLine',
   ],
 

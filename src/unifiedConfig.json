@@ -2227,6 +2227,26 @@
             }
           },
           {
+            "key": "prettier.plugins.prettier-plugin-sh.simplify",
+            "title": "Simplify",
+            "description": "Simplify the syntax tree to remove redundant shell syntax.",
+            "link": "https://github.com/un-ts/prettier/tree/master/packages/sh#options",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
             "key": "prettier.plugins.prettier-plugin-sh.functionNextLine",
             "title": "Function Next Line",
             "description": "Place a function’s opening braces on the next line.",
