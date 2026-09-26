@@ -20,7 +20,7 @@
     "@zackad/prettier-plugin-twig": "^0.17.0",
     "patch-package": "^8.0.1",
     "prettier": "^3.9.9",
-    "prettier-plugin-astro": "^1.0.1",
+    "prettier-plugin-astro": "^1.1.0",
     "prettier-plugin-ejs": "^1.0.3",
     "prettier-plugin-java": "^2.10.4",
     "prettier-plugin-nginx": "^2.0.0",

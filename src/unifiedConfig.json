@@ -1042,22 +1042,26 @@
           },
           {
             "key": "prettier.plugins.prettier-plugin-astro.astroAllowShorthand",
-            "title": "Allow Shorthand",
-            "description": "Enable/disable attribute shorthand if attribute name and expression are the same.",
+            "title": "Attribute Shorthand",
+            "description": "Controls attribute shorthand for attributes whose name and expression match. Preserve keeps attributes exactly as written, so shorthand and full form can co-exist. Shorthand normalizes matching attributes to the shorthand form ({value}). Full Form always expands them (value={value}).",
             "link": "https://github.com/withastro/prettier-plugin-astro#astro-allow-shorthand",
+            "type": "enum",
+            "radio": false,
             "config": {
-              "type": "boolean",
-              "default": false
+              "default": null,
+              "values": [
+                [null, "Preserve"],
+                [true, "Shorthand"],
+                [false, "Full Form"]
+              ]
             },
             "configWorkspace": {
-              "type": "enum",
-              "radio": false,
+              "default": null,
               "values": [
                 [null, "Global Setting"],
-                [true, "Enabled"],
-                [false, "Disabled"]
-              ],
-              "default": null
+                [true, "Shorthand"],
+                [false, "Full Form"]
+              ]
             }
           },
           {
@@ -2068,9 +2072,9 @@
             "type": "enum",
             "radio": false,
             "config": {
-              "placeholder": "Plugin Default (Bash)",
               "default": null,
               "values": [
+                [null, "Default (Bash)"],
                 ["bash", "Bash"],
                 ["posix", "POSIX / sh"],
                 ["mksh", "mksh (Korn Shell)"],
@@ -2079,7 +2083,6 @@
               ]
             },
             "configWorkspace": {
-              "placeholder": "Global Setting",
               "default": null,
               "values": [
                 [null, "Global Setting"],
