@@ -36,5 +36,9 @@
   "prettier.notification.format-error.title": "Error While Formatting",
   "prettier.notification.format-error.body": "\n\nSee the Extension Console for more info.",
   "prettier.notification.runtimeMissing.title": "Missing Runtime Tools",
-  "prettier.notification.runtimeMissing.body": "Please install Node.js (which includes npm) and ensure it’s on your PATH so Prettier⁺ can resolve correctly. Then restart Nova to apply the change."
+  "prettier.notification.runtimeMissing.body": "Please install Node.js (which includes npm) and ensure it’s on your PATH so Prettier⁺ can resolve correctly. Then restart Nova to apply the change.",
+  "prettier.notification.reason.module-not-found": "Prettier could not be loaded from {path}. The installation may be incomplete — try reinstalling your project’s dependencies.",
+  "prettier.notification.reason.timed-out": "A Node.js process didn’t respond within {seconds} seconds. Your Mac may be under heavy load — try restarting Prettier once it settles.",
+  "prettier.notification.reason.exited": "The Prettier service exited during startup (exit code {code}).",
+  "prettier.notification.reason.label": "Reason:"
 }

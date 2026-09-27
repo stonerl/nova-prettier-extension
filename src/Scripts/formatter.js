@@ -16,7 +16,12 @@ const {
   spawnNode,
 } = require('./helpers.js')
 
-const { showNotification, cancelNotification } = require('./notifications.js')
+const {
+  showNotification,
+  cancelNotification,
+  describeFailure,
+  withReason,
+} = require('./notifications.js')
 
 const pluginPaths = require('./prettier-plugins.js')
 
@@ -200,6 +205,11 @@ class Formatter {
     this._lastCustomConfigErrorPath = null
     /** true while a planned stop/restart cycle is in progress */
     this._restarting = false
+    /** most recent failure since the service last started, for notifications */
+    this._lastFailure = null
+    /** whether _lastFailure is a specific reason (crash/timeout/start fail)
+        — generic exit-code reasons may be refreshed by newer failures */
+    this._lastFailureIsSpecific = false
     /** handle for the 5s force-stop timer scheduled in stop() */
     this._forceStopTimer = null
 
@@ -300,6 +310,8 @@ class Formatter {
     proc.onNotify('didStart', () => {
       if (!isCurrent()) return
       log.info('Prettier service started successfully')
+      this._lastFailure = null
+      this._lastFailureIsSpecific = false
       if (this._resolveIsReadyPromise) this._resolveIsReadyPromise(true)
       this._resolveStartHandshake()
     })
@@ -333,11 +345,11 @@ class Formatter {
         }
       }
 
-      this._rejectStartHandshake(
-        new Error(
-          `Prettier service did not signal startup within ${START_TIMEOUT_MS}ms`,
-        ),
+      this._lastFailure = new Error(
+        `Prettier service did not signal startup within ${START_TIMEOUT_MS}ms`,
       )
+      this._lastFailureIsSpecific = true
+      this._rejectStartHandshake(this._lastFailure)
     }, START_TIMEOUT_MS)
 
     try {
@@ -450,7 +462,16 @@ class Formatter {
       return
     }
 
-    // 6) Non-zero exit → unexpected crash.
+    // 6) Non-zero exit → unexpected crash. Keep a more specific reason
+    //    (e.g. from didCrash or startDidFail) if one was already recorded;
+    //    a stale generic exit-code reason is refreshed by the newer exit.
+    if (!this._lastFailure || !this._lastFailureIsSpecific) {
+      this._lastFailure = new Error(
+        `Prettier service exited unexpectedly (exit code ${exitCode})`,
+      )
+      this._lastFailureIsSpecific = false
+    }
+
     //    If we’ve already crashed recently, show an error instead of restarting forever.
     if (this.prettierServiceCrashedRecently) {
       return this.showServiceNotRunningError()
@@ -474,6 +495,10 @@ class Formatter {
     // surfacing the crash reason, which would otherwise be lost and
     // leave only an opaque IPC rejection behind.
     const { name, message, stack } = parameters ?? {}
+    this._lastFailure = new Error(
+      `${name ?? 'Error'}: ${message ?? 'no message'}`,
+    )
+    this._lastFailureIsSpecific = true
     log.error(
       `Prettier service crashed: ${name ?? 'Unknown'}: ${message ?? 'no message'}${stack ? `\n${stack}` : ''}`,
     )
@@ -481,6 +506,8 @@ class Formatter {
 
   prettierServiceStartDidFail({ parameters: error }) {
     if (this._resolveIsReadyPromise) this._resolveIsReadyPromise(false)
+    this._lastFailure = new Error(`${error.name}: ${error.message}`)
+    this._lastFailureIsSpecific = true
 
     // Wake the awaiting start() caller with the actual failure reason.
     if (this._startHandshake) {
@@ -495,10 +522,13 @@ class Formatter {
         'Can’t Load Prettier',
         'notification',
       ),
-      body: nova.localize(
-        'prettier.notification.could-not-load-prettier.body',
-        "Please ensure your Node.js installation is up to date. Additionally, check if the 'Prettier module' path is correctly set in your extension or project settings. For more details, refer to the error log in the Extension Console.",
-        'notification',
+      body: withReason(
+        nova.localize(
+          'prettier.notification.could-not-load-prettier.body',
+          "Please ensure your Node.js installation is up to date. Additionally, check if the 'Prettier module' path is correctly set in your extension or project settings. For more details, refer to the error log in the Extension Console.",
+          'notification',
+        ),
+        describeFailure(this._lastFailure),
       ),
       actions: [
         nova.localize(
@@ -529,10 +559,13 @@ class Formatter {
         'Prettier Stopped Running',
         'notification',
       ),
-      body: nova.localize(
-        'prettier.notification.stopped-running.body',
-        'If this problem persists, please report the issue through the Extension Library.',
-        'notification',
+      body: withReason(
+        nova.localize(
+          'prettier.notification.stopped-running.body',
+          'If this problem persists, please report the issue through the Extension Library.',
+          'notification',
+        ),
+        describeFailure(this._lastFailure),
       ),
       actions: [
         nova.localize(

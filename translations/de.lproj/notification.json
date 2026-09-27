@@ -36,5 +36,9 @@
   "prettier.notification.format-error.title": "Fehler beim Formatieren",
   "prettier.notification.format-error.body": "\n\nWeitere Informationen finden Sie in der Erweiterungskonsole.",
   "prettier.notification.runtimeMissing.title": "Fehlende Laufzeitwerkzeuge",
-  "prettier.notification.runtimeMissing.body": "Bitte installieren Sie Node.js (inklusive npm) und stellen Sie sicher, dass es in Ihrem PATH enthalten ist, damit Prettier⁺ es korrekt auflösen kann. Starten Sie anschließend Nova neu, damit die Änderung wirksam wird."
+  "prettier.notification.runtimeMissing.body": "Bitte installieren Sie Node.js (inklusive npm) und stellen Sie sicher, dass es in Ihrem PATH enthalten ist, damit Prettier⁺ es korrekt auflösen kann. Starten Sie anschließend Nova neu, damit die Änderung wirksam wird.",
+  "prettier.notification.reason.module-not-found": "",
+  "prettier.notification.reason.timed-out": "",
+  "prettier.notification.reason.exited": "",
+  "prettier.notification.reason.label": ""
 }

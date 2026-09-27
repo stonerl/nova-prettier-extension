@@ -36,5 +36,9 @@
   "prettier.notification.format-error.title": "",
   "prettier.notification.format-error.body": "",
   "prettier.notification.runtimeMissing.title": "",
-  "prettier.notification.runtimeMissing.body": ""
+  "prettier.notification.runtimeMissing.body": "",
+  "prettier.notification.reason.module-not-found": "",
+  "prettier.notification.reason.timed-out": "",
+  "prettier.notification.reason.exited": "",
+  "prettier.notification.reason.label": ""
 }
