@@ -157,9 +157,46 @@ async function findModuleWithNPM(directory, module) {
   return promise
 }
 
+function readJSON(path) {
+  const file = nova.fs.open(path, 'r')
+  try {
+    return JSON.parse(file.read())
+  } finally {
+    file.close()
+  }
+}
+
 /**
- * Verifies installed packages, one `npm ls` spawn per package, all in
- * parallel, mirroring the original resolution semantics.
+ * Checks a package against package-lock.json by reading files only: the
+ * installed package.json must exist and its version must match the
+ * version the lockfile pins. Spawns nothing, so it stays fast even when
+ * the machine is under heavy load.
+ *
+ * @param {string} directory – directory holding package-lock.json
+ * @param {object|null} lock – parsed package-lock.json (v2/v3), or null
+ * @param {string} pkg       – package name
+ * @returns {boolean}         – true when the install matches the lockfile
+ */
+function isPackageInstalledPerLockfile(directory, lock, pkg) {
+  const locked = lock?.packages?.[`node_modules/${pkg}`]
+  if (!locked?.version) return false
+
+  try {
+    const installed = readJSON(
+      nova.path.join(directory, 'node_modules', pkg, 'package.json'),
+    )
+    return installed.version === locked.version
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Verifies installed packages. Packages that match package-lock.json are
+ * accepted from the filesystem alone; only the rest fall back to `npm ls`,
+ * a few at a time so a loaded machine isn't hit with one node process per
+ * package (which made every check time out and forced a needless
+ * reinstall).
  *
  * @param {string}   directory       – cwd for the npm ls invocations
  * @param {string[]} packageNames    – package names to verify
@@ -167,20 +204,41 @@ async function findModuleWithNPM(directory, module) {
  *                                      (missing, outdated, INVALID, MAXDEPTH)
  */
 async function verifyBundledPackages(directory, packageNames) {
-  const results = await Promise.all(
-    packageNames.map(async (pkg) => {
+  let lock = null
+  try {
+    lock = readJSON(nova.path.join(directory, 'package-lock.json'))
+  } catch {
+    // no usable lockfile — every package goes through npm ls
+  }
+
+  const unverified = packageNames.filter(
+    (pkg) => !isPackageInstalledPerLockfile(directory, lock, pkg),
+  )
+  if (unverified.length === 0) return []
+
+  log.debug(`Verifying with npm: ${unverified.join(', ')}`)
+
+  const NPM_CONCURRENCY = 4
+  const broken = []
+  const queue = [...unverified]
+  const worker = async () => {
+    while (queue.length) {
+      const pkg = queue.shift()
       try {
         const resolved = await findModuleWithNPM(directory, pkg)
-        if (!resolved || !resolved.correctVersion) return pkg
-        return null
+        if (!resolved || !resolved.correctVersion) broken.push(pkg)
       } catch (err) {
         log.warn(`Failed to verify package "${pkg}":`, err)
-        return pkg
+        broken.push(pkg)
       }
-    }),
+    }
+  }
+  await Promise.all(
+    Array.from({ length: Math.min(NPM_CONCURRENCY, queue.length) }, worker),
   )
 
-  return results.filter(Boolean)
+  // Keep the caller's order for stable log output
+  return packageNames.filter((pkg) => broken.includes(pkg))
 }
 
 async function installPackages(directory) {
