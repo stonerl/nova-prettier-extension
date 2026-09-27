@@ -15,6 +15,7 @@ const findPrettier = require('./module-resolver.js')
 const {
   debouncePromise,
   getConfigWithWorkspaceOverride,
+  isInsideExtensionBundle,
   log,
   observeConfigWithWorkspaceOverride,
   observeEmptyArrayCleanup,
@@ -91,6 +92,15 @@ class PrettierExtension {
     // Set when a trigger joins an in-flight cycle, so the cycle can
     // schedule one more run after finishing instead of dropping it.
     this._restartCycleQueued = false
+
+    // Path the running service was last started with. Redundant triggers
+    // (e.g. config observers re-firing with unchanged values during
+    // startup) resolve to the same effective path — the stop/start is
+    // skipped instead of bouncing a healthy service.
+    this._runningModulePath = null
+    // Set by reloadPrettierConfig: config-file edits must restart the
+    // service even when the module path is unchanged.
+    this._forceRestart = false
   }
 
   get preferBundled() {
@@ -169,7 +179,14 @@ class PrettierExtension {
     this.configDisposables.push(
       ...observeConfigWithWorkspaceOverride(
         'prettier.module.path',
-        this.debouncedModulePathOrPreferBundledDidChangeFast,
+        // Log the trigger — this observer is otherwise silent, and Nova
+        // re-notifies it with unchanged values during startup.
+        (...args) => {
+          log.debug(
+            "Config 'prettier.module.path' notified — restart requested",
+          )
+          this.debouncedModulePathOrPreferBundledDidChangeFast(...args)
+        },
       ),
       ...observeConfigWithWorkspaceOverride(
         'prettier.module.preferBundled',
@@ -304,10 +321,12 @@ class PrettierExtension {
 
       nova.commands.register(
         'prettier.restart-service',
-        // An explicit restart command should also do a fresh resolution,
-        // not reuse the cached module path.
+        // An explicit restart should do a fresh resolution and always
+        // bounce the service — "restart" means restart, even if the
+        // resolved path turns out to be unchanged.
         async () => {
           this._needsResolution = true
+          this._forceRestart = true
           await this.modulePathDidChange()
         },
       ),
@@ -407,6 +426,7 @@ class PrettierExtension {
     for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
       try {
         await this.formatter.start(path)
+        this._runningModulePath = path
         return
       } catch (err) {
         if (attempt === MAX_ATTEMPTS) throw err
@@ -432,6 +452,9 @@ class PrettierExtension {
 
   async reloadPrettierConfig() {
     log.debug('Prettier config file changed — restarting Prettier…')
+    // Config-file edits must restart the service even when the module
+    // path is unchanged — mark the cycle as mandatory.
+    this._forceRestart = true
     // Delegate to modulePathDidChange so failures surface through
     // its existing notification handling instead of rejecting unhandled.
     await this.modulePathDidChange()
@@ -444,10 +467,19 @@ class PrettierExtension {
     this.debouncedReloadPrettierOnConfigChange()
   }
 
-  async npmPackageFileDidChange() {
+  async npmPackageFileDidChange(path) {
     if (this.preferBundled || this.modulePath) return
 
-    log.debug('npmPackageFileDidChange invoked')
+    // The bundled install itself writes package files into the extension
+    // bundle — those events are the extension's own doing and the
+    // running resolution already picks up their result, so a restart
+    // would only cause a redundant stop/start cycle.
+    if (isInsideExtensionBundle(path)) {
+      log.debug('Ignoring self-induced watcher event:', path)
+      return
+    }
+
+    log.debug('npmPackageFileDidChange invoked:', path)
     // package.json / lockfiles changed — the resolved module path may be
     // different now
     this._needsResolution = true
@@ -465,10 +497,17 @@ class PrettierExtension {
     this.debouncedModulePathOrPreferBundledDidChangeFast()
   }
 
-  async moduleProjectPrettierDidChange() {
+  async moduleProjectPrettierDidChange(path) {
     if (this.preferBundled || this.modulePath) return
 
-    log.debug('moduleProjectPrettierDidChange invoked')
+    // Same as above: events under the extension bundle are the bundled
+    // install's own writes, not a project Prettier appearing.
+    if (isInsideExtensionBundle(path)) {
+      log.debug('Ignoring self-induced watcher event:', path)
+      return
+    }
+
+    log.debug('moduleProjectPrettierDidChange invoked:', path)
     // node_modules/prettier changed — the resolved module path may be
     // different now
     this._needsResolution = true
@@ -476,11 +515,31 @@ class PrettierExtension {
   }
 
   /**
+   * True when a stop/start cycle would change nothing: no resolution was
+   * requested, the service is healthy, and the effective module path is
+   * the one the running service was started with. Config observers
+   * re-fire with unchanged values during startup (Nova re-notifies on
+   * config-store reloads) — without this check each notification bounces
+   * the service through a full stop/start.
+   *
+   * @private
+   * @returns {boolean}
+   */
+  _isRestartRedundant() {
+    if (this._forceRestart || this._needsResolution) return false
+    if (!this.formatter.isRunning()) return false
+
+    const effectivePath = this.modulePath ?? this._resolvedModulePath
+    return !!effectivePath && effectivePath === this._runningModulePath
+  }
+
+  /**
    * Runs one full stop/start cycle. Concurrent triggers coalesce into the
    * running cycle instead of spawning a second resolution/install — a
    * slow resolution (e.g. first-run npm install) combined with watcher
    * storms from npm's own writes would otherwise run them in parallel and
-   * fail with ENOTEMPTY races.
+   * fail with ENOTEMPTY races. Cycles that would change nothing (healthy
+   * service, same effective module path) are skipped entirely.
    *
    * @private
    * @returns {Promise<void>}
@@ -496,9 +555,40 @@ class PrettierExtension {
     }
 
     this._restartCycle = (async () => {
-      await this.formatter.waitForPendingFormats()
-      await this.formatter.stop()
-      await this.startFormatter()
+      // Phase 1: resolution — the service stays up, so formatting keeps
+      // working while npm ls runs. Only resolution-affecting triggers
+      // set _needsResolution; an explicitly configured module path makes
+      // resolution pointless.
+      if (this._needsResolution && !this.modulePath) {
+        try {
+          const path = await findPrettier()
+          this._resolvedModulePath = path
+        } finally {
+          this._needsResolution = false
+        }
+      }
+
+      // Phase 2: stop/start only when something actually changed — a
+      // trigger that resolves to the same path must not bounce a healthy
+      // service (this is what made save-formats go dark for seconds).
+      if (this._isRestartRedundant()) {
+        log.debug('Module path and config unchanged — skipping restart')
+        return
+      }
+
+      // Mark the restart as planned so a momentarily missing service
+      // doesn't surface the "Prettier Stopped Running" notification.
+      this.formatter._restarting = true
+      try {
+        await this.formatter.waitForPendingFormats()
+        await this.formatter.stop()
+        await this.startFormatter()
+        this._forceRestart = false
+      } finally {
+        // Never leave the flag set — otherwise genuine failures would be
+        // silently suppressed for the rest of the session.
+        this.formatter._restarting = false
+      }
     })().finally(() => {
       this._restartCycle = null
       if (this._restartCycleQueued) {
@@ -510,11 +600,18 @@ class PrettierExtension {
   }
 
   async modulePathDidChange() {
-    // Mark the restart as planned so a momentarily missing service doesn't
-    // surface the "Prettier Stopped Running" notification, and wait for any
-    // in-flight format requests (e.g. a save-triggered format) to settle
-    // before stopping the service.
-    this.formatter._restarting = true
+    // Diagnostic: one line per trigger showing exactly why the cycle
+    // will run (or be skipped) — Nova re-notifies config observers with
+    // unchanged values during startup, which used to bounce the service.
+    const effectivePath = this.modulePath ?? this._resolvedModulePath
+    log.debug(
+      `Restart requested — needsResolution: ${this._needsResolution}, ` +
+        `forceRestart: ${this._forceRestart}, ` +
+        `serviceRunning: ${this.formatter.isRunning()}, ` +
+        `pathMatchesRunning: ${
+          !!effectivePath && effectivePath === this._runningModulePath
+        }`,
+    )
     try {
       await this._runRestartCycle()
     } catch (err) {
@@ -570,10 +667,6 @@ class PrettierExtension {
         ),
       })
       return
-    } finally {
-      // Never leave the flag set — otherwise genuine failures would be
-      // silently suppressed for the rest of the session.
-      this.formatter._restarting = false
     }
   }
 

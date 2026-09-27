@@ -282,6 +282,55 @@ function debouncePromise(fn, timeoutMs) {
   return debounced
 }
 
+/**
+ * Checks whether a path reported by a FileSystemWatcher lies inside the
+ * extension bundle. Events from there are the extension's own doing
+ * (the bundled npm install writes package files and node_modules into
+ * the bundle), so they must not trigger service restarts.
+ *
+ * Watcher callbacks report the modified path either as an absolute path
+ * or relative to the watched workspace. A relative path is resolved
+ * against the workspace; the extension directory is deliberately NOT
+ * used as a fallback base, because a generic event like `package.json`
+ * would then be attributed to the bundle even in a window whose
+ * workspace simply has its own package.json — dropping genuine user
+ * triggers.
+ *
+ * Containment is a plain string-prefix comparison instead of
+ * nova.path.relative(): the runtime's relative() can normalize via
+ * symlinks and then report "outside" for paths that are clearly inside
+ * (observed live), while the operands here are always clean, absolute,
+ * same-volume paths. None of the watch patterns can produce paths with
+ * `..` segments, so traversal handling is not needed.
+ *
+ * With no usable path at all the filter declines to match, so callers
+ * keep their previous behavior instead of losing events.
+ *
+ * @param {string} filePath – path as passed to the watcher callback
+ * @returns {boolean}
+ */
+function isInsideExtensionBundle(filePath) {
+  if (!filePath || typeof filePath !== 'string') return false
+
+  const extensionPath = nova.extension.path
+  if (!extensionPath) return false
+
+  // Defensive: tolerate a trailing separator on the bundle path.
+  const bundleRoot = extensionPath.endsWith('/')
+    ? extensionPath.slice(0, -1)
+    : extensionPath
+
+  let candidate
+  if (nova.path.isAbsolute(filePath)) {
+    candidate = filePath
+  } else {
+    if (!nova.workspace.path) return false
+    candidate = nova.path.join(nova.workspace.path, filePath)
+  }
+
+  return candidate === bundleRoot || candidate.startsWith(`${bundleRoot}/`)
+}
+
 // ---------------------------------------------------------------------------
 // Node/npm runtime resolution
 // ---------------------------------------------------------------------------
@@ -645,6 +694,7 @@ module.exports = {
   getNpmVersion,
   handleProcessResult,
   isDebugLoggingEnabled,
+  isInsideExtensionBundle,
   log,
   observeConfigWithWorkspaceOverride,
   observeEmptyArrayCleanup,

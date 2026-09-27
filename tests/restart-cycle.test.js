@@ -8,8 +8,9 @@
  * Plain Node script — no test framework. Exits non-zero on failure.
  *
  * Verifies that a trigger joining an in-flight restart cycle is not
- * dropped: after the running cycle finishes, exactly one more cycle
- * must run (regression for trailing-trigger coalescing).
+ * dropped (resolution requests always run a cycle), and that redundant
+ * triggers — healthy service, unchanged module path — skip the
+ * stop/start instead of bouncing a freshly started service.
  *
  * Stubs module-resolver.js, formatter.js and notifications.js via the
  * require cache before loading main.js, so no Nova APIs, npm or
@@ -103,11 +104,12 @@ const calls = {
   start: 0,
   resolve: 0,
 }
-const state = { stopGate: null }
+const state = { stopGate: null, resolveResult: '/fake/prettier' }
 
 function resetStubs() {
   for (const key of Object.keys(calls)) calls[key] = 0
   state.stopGate = null
+  state.resolveResult = '/fake/prettier'
 }
 
 function makeInstance() {
@@ -115,7 +117,7 @@ function makeInstance() {
 
   stubModule('module-resolver.js', async () => {
     calls.resolve++
-    return '/fake/prettier'
+    return state.resolveResult
   })
 
   stubModule('notifications.js', {
@@ -125,16 +127,22 @@ function makeInstance() {
   class FakeFormatter {
     constructor() {
       this._restarting = false
+      this._service = null
+    }
+    isRunning() {
+      return !!this._service
     }
     async waitForPendingFormats() {
       calls.waitForPendingFormats++
     }
     async stop() {
       calls.stop++
+      this._service = null
       if (state.stopGate) await state.stopGate.promise
     }
     async start() {
       calls.start++
+      this._service = {}
     }
   }
 
@@ -182,20 +190,93 @@ async function joinDuringRunningCycleSchedulesTrailingCycle() {
   await cycle1
   check('first cycle finished', calls.stop === 1, calls)
 
-  // The trailing cycle goes through the shortened debouncer (30ms).
-  await waitFor(
-    () =>
-      calls.stop === 2 &&
-      ext._restartCycle === null &&
-      !ext._restartCycleQueued,
-  )
-
-  check('trailing cycle ran (second stop/start)', calls.stop === 2, calls)
-  check('trailing cycle started the service again', calls.start === 2, calls)
+  // The trailing cycle goes through the shortened debouncer (30ms). The
+  // mid-cycle trigger's resolution request was consumed by the first
+  // cycle's startFormatter (it ran after the trigger set the flag), so
+  // the trailing cycle skips the stop/start instead of bouncing a
+  // freshly started service. The trigger was honored — by the extra
+  // resolution inside the first cycle.
+  await sleep(150)
   check(
-    'pending resolution flag consumed by a cycle',
+    'trailing cycle skipped the stop/start (trigger resolved in-cycle)',
+    calls.stop === 1 && calls.start === 1 && calls.resolve === 2,
+    calls,
+  )
+  check(
+    'pending resolution flag consumed by the first cycle',
     ext._needsResolution === false,
     ext._needsResolution,
+  )
+
+  // The regression this suite guards: a trigger that arrives after the
+  // cycle's resolution must not be dropped. A fresh resolution request
+  // resolving to a NEW path still runs a full cycle.
+  state.resolveResult = '/fake/prettier-2'
+  ext._needsResolution = true
+  await ext._runRestartCycle()
+  check(
+    'resolution to a changed path still triggers a full cycle',
+    calls.stop === 2 &&
+      calls.start === 2 &&
+      calls.resolve === 3 &&
+      ext._runningModulePath === '/fake/prettier-2',
+    calls,
+  )
+}
+
+async function samePathResolutionSkipsBounce() {
+  console.log('\n== Resolution to the same path skips the bounce ==')
+  const { ext, calls } = makeInstance()
+
+  await ext._runRestartCycle()
+  check('initial cycle ran', calls.stop === 1 && calls.start === 1, calls)
+
+  // A watched file was saved: trigger with a fresh resolution that
+  // yields the same path. The service must not bounce — formatting
+  // keeps working while the resolution runs.
+  ext._needsResolution = true
+  await ext._runRestartCycle()
+
+  check(
+    'same-path resolution did not bounce the service',
+    calls.stop === 1 && calls.start === 1 && calls.resolve === 2,
+    calls,
+  )
+}
+
+async function modulePathConfigChangeBouncesWithoutResolution() {
+  console.log('\n== Explicit module path change bounces without resolution ==')
+  const { ext, calls } = makeInstance()
+
+  await ext._runRestartCycle()
+  check('initial cycle ran', calls.stop === 1 && calls.start === 1, calls)
+
+  // The user configures an explicit module path — the observer fires
+  // the fast debouncer; the effective path differs from the running
+  // one, so the service must bounce WITHOUT running a resolution.
+  global.nova.workspace.config.get = (name) =>
+    name === 'prettier.module.path' ? '/fake/configured-prettier' : null
+
+  try {
+    await ext._runRestartCycle()
+  } finally {
+    global.nova.workspace.config.get = (_name) => null
+  }
+
+  check(
+    'module path config change bounced the service',
+    calls.stop === 2 && calls.start === 2,
+    calls,
+  )
+  check(
+    'no resolution ran for an explicit module path',
+    calls.resolve === 1,
+    calls,
+  )
+  check(
+    'service now runs the configured path',
+    ext._runningModulePath === '/fake/configured-prettier',
+    ext._runningModulePath,
   )
 }
 
@@ -216,9 +297,80 @@ async function noJoinMeansNoTrailingCycle() {
   check('no extra cycle without a join', calls.stop === 1, calls)
 }
 
+async function redundantTriggerSkipsRestart() {
+  console.log('\n== Redundant triggers skip the stop/start ==')
+  const { ext, calls } = makeInstance()
+
+  // Establish a running service with a resolved path.
+  await ext._runRestartCycle()
+  check('initial cycle ran', calls.stop === 1 && calls.start === 1, calls)
+  check(
+    'running module path recorded',
+    ext._runningModulePath === '/fake/prettier',
+    ext._runningModulePath,
+  )
+
+  // A trigger with no resolution request, healthy service and unchanged
+  // path (simulates Nova re-notifying config observers with unchanged
+  // values during startup) must not bounce the service.
+  await ext._runRestartCycle()
+
+  check(
+    'redundant trigger skipped the stop',
+    calls.stop === 1 && calls.start === 1,
+    calls,
+  )
+}
+
+async function forceRestartOverridesSkip() {
+  console.log('\n== Config reload forces a restart ==')
+  const { ext, calls } = makeInstance()
+
+  await ext._runRestartCycle()
+  check('initial cycle ran', calls.stop === 1 && calls.start === 1, calls)
+
+  ext._forceRestart = true
+  await ext._runRestartCycle()
+
+  check(
+    'config reload restarted the service despite unchanged path',
+    calls.stop === 2 && calls.start === 2,
+    calls,
+  )
+  check(
+    'force-restart flag consumed by the cycle',
+    ext._forceRestart === false,
+    ext._forceRestart,
+  )
+}
+
+async function deadServiceNeverSkips() {
+  console.log('\n== A dead service always restarts ==')
+  const { ext, calls } = makeInstance()
+
+  await ext._runRestartCycle()
+  check('initial cycle ran', calls.stop === 1 && calls.start === 1, calls)
+
+  // Simulate the service dying (formatter nulls its process handle).
+  ext.formatter._service = null
+
+  await ext._runRestartCycle()
+
+  check(
+    'dead service restarted without a resolution request',
+    calls.stop === 2 && calls.start === 2,
+    calls,
+  )
+}
+
 async function main() {
   await joinDuringRunningCycleSchedulesTrailingCycle()
   await noJoinMeansNoTrailingCycle()
+  await samePathResolutionSkipsBounce()
+  await redundantTriggerSkipsRestart()
+  await forceRestartOverridesSkip()
+  await deadServiceNeverSkips()
+  await modulePathConfigChangeBouncesWithoutResolution()
 
   console.log(
     `\n${failed === 0 ? 'All checks passed.' : `${failed} check(s) failed.`}`,

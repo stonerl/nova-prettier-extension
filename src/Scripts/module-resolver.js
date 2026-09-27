@@ -20,6 +20,11 @@ const {
 
 const { showNotification } = require('./notifications.js')
 
+const {
+  createInstallLock,
+  waitForBundledInstall,
+} = require('./install-lock.js')
+
 function findPathRecursively(directory, subPath, callback) {
   while (true) {
     const path = nova.path.join(directory, subPath)
@@ -311,40 +316,6 @@ async function clearStaleBinLinks(directory) {
   }
 }
 
-/**
- * Waits until another extension process's bundled-packages install is
- * done: either Prettier itself has appeared on disk, or the install lock
- * has gone stale — released by the holder, or no longer heartbeated by a
- * process Nova killed mid-install. Bails out after `ttlMs` at the latest.
- *
- * @param {string} prettierPath   – path of the bundled prettier module
- * @param {string} lockKey        – nova.workspace.context key holding the lock
- * @param {number} ttlMs          – overall wait deadline
- * @param {number} pollMs         – polling interval
- * @param {number} staleMs        – lock age after which the holder is
- *                                  considered dead (no heartbeat)
- */
-async function waitForBundledInstall(
-  prettierPath,
-  lockKey,
-  ttlMs,
-  pollMs = 250,
-  staleMs = 30000,
-) {
-  const deadline = Date.now() + ttlMs
-
-  while (Date.now() < deadline) {
-    // Prettier landed on disk — good enough to start loading
-    if (nova.fs.stat(nova.path.join(prettierPath, 'package.json'))) return
-
-    // Lock released (set to 0), or the holder stopped heartbeating
-    const lockTs = nova.workspace.context.get(lockKey) || 0
-    if (Date.now() - lockTs > staleMs) return
-
-    await new Promise((resolve) => setTimeout(resolve, pollMs))
-  }
-}
-
 module.exports = async function () {
   const nodeVersion = await getNodeVersion()
   const npmVersion = await getNpmVersion()
@@ -415,12 +386,6 @@ module.exports = async function () {
       'node_modules',
       'prettier',
     )
-    const nodeModulesExists = !!nova.fs.stat(
-      nova.path.join(nova.extension.path, 'node_modules'),
-    )
-    const lockfileExists = !!nova.fs.stat(
-      nova.path.join(nova.extension.path, 'package-lock.json'),
-    )
 
     const packageJsonPath = nova.path.join(nova.extension.path, 'package.json')
 
@@ -443,78 +408,108 @@ module.exports = async function () {
       log.warn('Could not read or parse package.json', err)
     }
 
-    // Cross-process install serialization. Nova reactivates the extension
-    // while npm install writes files into the bundle, and each fresh
-    // process would otherwise verify a mid-install tree and start its own
-    // npm install, racing the running one (ENOTEMPTY cleanup errors).
-    // The lock lives in the workspace context so it survives extension
-    // reloads; writing it is safe here because findPrettier runs through
-    // the async chain after activation has returned, not inside the
-    // deferred config-setup window. The holder heartbeats its timestamp
-    // while installing — if it dies (Nova killed the process), the lock
-    // goes stale after 30s instead of blocking waiters for the full TTL.
-    const INSTALL_LOCK_KEY = 'prettier.bundled.install.inProgress'
+    // Cross-process install serialization. Nova loads the extension once
+    // per workspace window, and every instance installs into the same
+    // bundle — a fresh install or an update has two or more processes
+    // verifying a mid-install tree and racing their own npm installs
+    // (ENOTEMPTY/EEXIST cleanup fights). The lock is a directory created
+    // atomically by a subprocess (mkdir), living inside nova.fs.tempdir(),
+    // which Nova documents as shared between instances of the same
+    // extension — the per-workspace context used previously could never
+    // see another window's lock. The lock writes go through subprocesses
+    // because the extension process itself is entitlement-blocked from
+    // nova.fs writes (in-process fs.open with 'x' silently failed); only
+    // the read-side staleness checks stay in-process. The holder
+    // heartbeats the directory's mtime while installing; if it dies (Nova
+    // killed the process), the lock goes stale after 30s instead of
+    // blocking waiters for the full TTL.
     const INSTALL_LOCK_TTL_MS = 5 * 60 * 1000
     const INSTALL_POLL_INTERVAL_MS = 250
     const INSTALL_HEARTBEAT_INTERVAL_MS = 10000
-    const INSTALL_LOCK_STALE_MS = 30000
 
-    const installLockHeld = () => {
-      const ts = nova.workspace.context.get(INSTALL_LOCK_KEY) || 0
-      return Date.now() - ts < INSTALL_LOCK_STALE_MS
-    }
+    const installLock = createInstallLock()
 
     const verifyPackages = () =>
       verifyBundledPackages(nova.extension.path, Object.keys(declaredPackages))
 
     // With node_modules or the lockfile missing, npm ls can't say
     // anything useful — treat every declared package as broken and go
-    // straight to the install path.
-    const missingDeps = !nodeModulesExists || !lockfileExists
-    let brokenPackages = missingDeps
-      ? Object.keys(declaredPackages)
-      : await verifyPackages()
+    // straight to the install path. Computed fresh on every use: after
+    // waiting for another process's install, node_modules may well have
+    // appeared — a stale value here caused an unnecessary reinstall.
+    const hasMissingDeps = () =>
+      !nova.fs.stat(nova.path.join(nova.extension.path, 'node_modules')) ||
+      !nova.fs.stat(nova.path.join(nova.extension.path, 'package-lock.json'))
 
-    if (brokenPackages.length > 0 && installLockHeld()) {
+    // Any install lock held by another process means the tree may be
+    // mid-write — verification against it is meaningless (npm writes
+    // package.json files early, so a half-installed tree can pass
+    // npm ls). Wait for the lock to clear BEFORE trusting verification.
+    if (installLock.isHeld()) {
       log.info(
         'Another extension process is already installing the bundled packages — waiting for it to finish…',
       )
       await waitForBundledInstall(
         prettierPath,
-        INSTALL_LOCK_KEY,
+        installLock,
         INSTALL_LOCK_TTL_MS,
         INSTALL_POLL_INTERVAL_MS,
       )
-
-      // The other process may have installed everything by now
-      brokenPackages = await verifyPackages()
     }
 
+    let missingDeps = hasMissingDeps()
+    let brokenPackages = missingDeps
+      ? Object.keys(declaredPackages)
+      : await verifyPackages()
+
     if (brokenPackages.length > 0) {
-      // The lock may have been acquired while we were verifying or
-      // waiting above — check once more before taking it ourselves.
-      if (installLockHeld()) {
+      let installReason = missingDeps
+        ? 'missing dependencies'
+        : `invalid or outdated packages: ${brokenPackages.join(', ')}`
+
+      // Take the lock ourselves. Losing the atomic create means another
+      // process grabbed it after our check above — wait for that
+      // install too, then re-verify.
+      let ownsInstallLock = await installLock.acquire()
+
+      if (!ownsInstallLock) {
+        log.info(
+          'Another extension process is already installing the bundled packages — waiting for it to finish…',
+        )
         await waitForBundledInstall(
           prettierPath,
-          INSTALL_LOCK_KEY,
+          installLock,
           INSTALL_LOCK_TTL_MS,
           INSTALL_POLL_INTERVAL_MS,
         )
-        brokenPackages = await verifyPackages()
-      }
 
-      if (brokenPackages.length > 0) {
-        const installReason = missingDeps
+        // Fresh state: the waited-out install may have fixed everything.
+        missingDeps = hasMissingDeps()
+        brokenPackages = missingDeps
+          ? Object.keys(declaredPackages)
+          : await verifyPackages()
+        installReason = missingDeps
           ? 'missing dependencies'
           : `invalid or outdated packages: ${brokenPackages.join(', ')}`
 
-        nova.workspace.context.set(INSTALL_LOCK_KEY, Date.now())
-        // Heartbeat while installing: fresh timestamp every 10s. Cleared
-        // with the lock in finally — and a killed process simply stops
+        if (brokenPackages.length > 0) {
+          ownsInstallLock = await installLock.acquire()
+        }
+      }
+
+      // Whether patches were already applied inside a lock we held —
+      // they must not run twice against a tree another process may now
+      // be installing into.
+      let patchesApplied = false
+
+      if (brokenPackages.length > 0 && ownsInstallLock) {
+        // Heartbeat while installing: fresh mtime every 10s. Cleared
+        // with the lock in finally — a killed process simply stops
         // heartbeating, which is what waiters detect.
-        const heartbeat = setInterval(() => {
-          nova.workspace.context.set(INSTALL_LOCK_KEY, Date.now())
-        }, INSTALL_HEARTBEAT_INTERVAL_MS)
+        const heartbeat = setInterval(
+          () => installLock.heartbeat(),
+          INSTALL_HEARTBEAT_INTERVAL_MS,
+        )
         try {
           log.info('Running npm install due to: ', installReason)
 
@@ -542,17 +537,42 @@ module.exports = async function () {
               )
             }
           }
+
+          // Patch while we still hold the lock: if we released first,
+          // another window could acquire it and start a fresh install
+          // while patch-package rewrites files.
+          await applyBundledPatches(nova.extension.path)
+          patchesApplied = true
         } finally {
           clearInterval(heartbeat)
-          nova.workspace.context.set(INSTALL_LOCK_KEY, 0)
+          installLock.release()
         }
+      } else if (brokenPackages.length > 0 && !ownsInstallLock) {
+        // Couldn't take the lock even after waiting (a healthy install
+        // outlived our TTL). Degrade to the old racing behavior rather
+        // than failing resolution outright — no worse than before the
+        // lock existed.
+        log.warn(
+          'Could not acquire the bundled-install lock — running npm install unlocked as a fallback.',
+        )
+        await clearStaleBinLinks(nova.extension.path)
+        await installPackages(nova.extension.path)
+        await applyBundledPatches(nova.extension.path)
+        patchesApplied = true
       }
-    }
 
-    // Apply the bundled patches before returning — covers both a fresh
-    // install above and a pre-existing node_modules that was installed
-    // with an npm version that skipped postinstall scripts.
-    await applyBundledPatches(nova.extension.path)
+      if (!patchesApplied) {
+        // Patch the just-installed tree we verified above. Safe: any
+        // held lock was waited out before verification, and we hold no
+        // lock ourselves anymore.
+        await applyBundledPatches(nova.extension.path)
+      }
+    } else {
+      // Verification passed with no lock held — but a pre-existing
+      // node_modules may have been installed with an npm version that
+      // skipped postinstall scripts.
+      await applyBundledPatches(nova.extension.path)
+    }
 
     log.info('Using bundled Prettier.')
     return prettierPath

@@ -217,6 +217,17 @@ class Formatter {
     })
   }
 
+  /**
+   * Cheap synchronous check whether the service process is alive.
+   * prettierService is nulled on exit, crash and stop, so this never
+   * reports a dead process as running.
+   *
+   * @returns {boolean}
+   */
+  isRunning() {
+    return !!this.prettierService
+  }
+
   get isReady() {
     if (!this._isReadyPromise) {
       // A planned stop/restart cycle (e.g. after a config file change) is
