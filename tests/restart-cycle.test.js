@@ -115,9 +115,11 @@ function resetStubs() {
 function makeInstance() {
   resetStubs()
 
-  stubModule('module-resolver.js', async () => {
-    calls.resolve++
-    return state.resolveResult
+  stubModule('module-resolver.js', {
+    findPrettier: async () => {
+      calls.resolve++
+      return state.resolveResult
+    },
   })
 
   stubModule('notifications.js', {
