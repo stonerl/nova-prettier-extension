@@ -10,7 +10,7 @@
 
 let prettierExtensionInstance = null
 
-const findPrettier = require('./module-resolver.js')
+const { findPrettier } = require('./module-resolver.js')
 
 const {
   debouncePromise,

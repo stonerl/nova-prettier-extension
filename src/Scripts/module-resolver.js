@@ -92,6 +92,33 @@ function isLoadableModule(modulePath) {
   return !!stats && stats.isFile()
 }
 
+// Broken project installs persist until the user fixes them, and every
+// resolution re-runs the guard — without deduping, each watcher-triggered
+// cycle re-prints the warn. First hit per path logs a full warn, repeats
+// drop to debug. Lives at module level so it survives across findPrettier
+// calls; resets naturally on extension reload.
+const warnedBrokenModulePaths = new Set()
+
+/**
+ * Warns about a broken project Prettier install, once per path — repeat
+ * hits within the same extension session are demoted to debug level.
+ *
+ * @param {string} modulePath – the skipped, unloadable module directory
+ */
+function warnBrokenProjectPrettier(modulePath) {
+  if (warnedBrokenModulePaths.has(modulePath)) {
+    log.debug(
+      `Project prettier at ${modulePath} is still unloadable — skipping (already reported).`,
+    )
+    return
+  }
+
+  warnedBrokenModulePaths.add(modulePath)
+  log.warn(
+    `Ignoring project prettier at ${modulePath} — no package.json found (broken install?) — using the bundled Prettier instead.`,
+  )
+}
+
 async function findModuleWithNPM(directory, module) {
   const process = await spawnNpm(
     ['ls', String(module), '--parseable', '--long', '--depth', '0'],
@@ -330,7 +357,7 @@ async function clearStaleBinLinks(directory) {
   }
 }
 
-module.exports = async function () {
+async function findPrettier() {
   const nodeVersion = await getNodeVersion()
   const npmVersion = await getNpmVersion()
 
@@ -365,9 +392,7 @@ module.exports = async function () {
     try {
       const fsResult = findModuleWithFileSystem(nova.workspace.path, 'prettier')
       if (fsResult && !isLoadableModule(fsResult)) {
-        log.warn(
-          `Ignoring project prettier at ${fsResult} — no package.json found (broken install?)`,
-        )
+        warnBrokenProjectPrettier(fsResult)
       } else if (fsResult) {
         log.info(`Loading project prettier (fs) at ${fsResult}`)
         return fsResult
@@ -384,9 +409,7 @@ module.exports = async function () {
     try {
       const npmResult = await findModuleWithNPM(nova.workspace.path, 'prettier')
       if (npmResult && !isLoadableModule(npmResult.path)) {
-        log.warn(
-          `Ignoring project prettier at ${npmResult.path} — no package.json found (broken install?)`,
-        )
+        warnBrokenProjectPrettier(npmResult.path)
       } else if (npmResult) {
         log.info(`Loading project prettier (npm) at ${npmResult.path}`)
         return npmResult.path
@@ -606,3 +629,5 @@ module.exports = async function () {
     throw err
   }
 }
+
+module.exports = { findPrettier, isLoadableModule }
