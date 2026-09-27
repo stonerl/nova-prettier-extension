@@ -524,6 +524,88 @@ async function editorconfigSuite() {
   }
 }
 
+/**
+ * hasConfig caching — the cache is shared with `getConfig` and stores the
+ * raw `resolveConfig` result (null = no config), so `hasConfig` must agree
+ * with what a subsequent format's getConfig resolves for the same path,
+ * including repeat calls hitting the cache. Runs in a tmpdir so the
+ * repo's own .prettierrc never interferes with the negative case.
+ */
+async function hasConfigSuite() {
+  console.log('\n== hasConfig: caching + shared cache semantics ==')
+
+  const tmpNoConfig = fs.mkdtempSync(
+    path.join(os.tmpdir(), 'prettier-noconfig-'),
+  )
+  try {
+    fs.writeFileSync(path.join(tmpNoConfig, 'file.json'), '{"a": 1}\n')
+
+    const client = createServiceClient({ cwd: MOCK_PROJECT })
+    try {
+      await client.waitForStart()
+
+      const fileJson = path.join(MOCK_PROJECT, 'file.json')
+
+      // Project has a .prettierrc.json — every call must report true.
+      const first = await client.requestRaw('hasConfig', {
+        pathForConfig: fileJson,
+      })
+      check(
+        'hasConfig: true when .prettierrc.json exists',
+        first === true,
+        first,
+      )
+
+      // Warm cache via format, then hasConfig again — the cached raw
+      // value (an object, not null) must still report true.
+      const format = await client.requestRaw('format', {
+        original: '{"a": 1}\n',
+        pathForConfig: fileJson,
+        ignorePath: null,
+        options: {
+          parser: 'json',
+          filepath: fileJson,
+          cursorOffset: 0,
+        },
+        withCursor: false,
+      })
+      check('format resolved config for the same path', format !== null, format)
+
+      const cached = await client.requestRaw('hasConfig', {
+        pathForConfig: fileJson,
+      })
+      check(
+        'hasConfig: true after getConfig warmed the cache',
+        cached === true,
+        cached,
+      )
+
+      // Negative control in a tmpdir — no config file anywhere above.
+      const noconfigFile = path.join(tmpNoConfig, 'file.json')
+      const firstMiss = await client.requestRaw('hasConfig', {
+        pathForConfig: noconfigFile,
+      })
+      check(
+        'hasConfig: false without any config file',
+        firstMiss === false,
+        firstMiss,
+      )
+      const secondMiss = await client.requestRaw('hasConfig', {
+        pathForConfig: noconfigFile,
+      })
+      check(
+        'hasConfig: false repeat (cached null)',
+        secondMiss === false,
+        secondMiss,
+      )
+    } finally {
+      await client.kill()
+    }
+  } finally {
+    fs.rmSync(tmpNoConfig, { recursive: true, force: true })
+  }
+}
+
 async function main() {
   requireBuiltArtifacts()
   await bundledSuite()
@@ -531,6 +613,7 @@ async function main() {
   await configlessSuite()
   await customConfigSuite()
   await editorconfigSuite()
+  await hasConfigSuite()
 
   console.log(
     `\n${failed === 0 ? 'All checks passed.' : `${failed} check(s) failed.`}`,

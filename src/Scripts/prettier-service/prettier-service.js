@@ -267,14 +267,24 @@ class PrettierService extends FormattingService {
   /**
    * Check whether Prettier would find a configuration file at the given path.
    *
+   * Shares `_configCache` with `getConfig` — the cache stores the raw
+   * `resolveConfig` result (null = no config file found), so both
+   * consumers read the same source of truth. Invalidation happens via
+   * service restarts triggered by the client's config watchers; the
+   * known `.editorconfig` staleness matches the format path's behavior.
+   *
    * @param {Object} params
    * @param {string} params.pathForConfig – Path to check for a Prettier config
    * @returns {Promise<boolean>}          – True if a config was found, else false
    */
   async hasConfig({ pathForConfig }) {
+    if (this._configCache.has(pathForConfig)) {
+      return this._configCache.get(pathForConfig) !== null
+    }
     const config = await this.prettier.resolveConfig(pathForConfig, {
       editorconfig: true,
     })
+    this._configCache.set(pathForConfig, config)
     return config !== null
   }
 
@@ -340,18 +350,18 @@ class PrettierService extends FormattingService {
         }
       }
     } else if (!options._ignoreConfigFile) {
+      // The cache stores the raw `resolveConfig` result (null when no
+      // config file and no .editorconfig exists above the path) so it can
+      // be shared with `hasConfig`. Normalize to an object here; the null
+      // distinguishes "no config" from a config that parses to `{}`.
       if (this._configCache.has(pathForConfig)) {
-        inferredConfig = this._configCache.get(pathForConfig)
+        inferredConfig = this._configCache.get(pathForConfig) ?? {}
       } else {
-        // resolveConfig returns null when no config file (and, with
-        // editorconfig enabled, no .editorconfig) exists anywhere above
-        // the file — normalize before caching so downstream shape
-        // assumptions hold.
-        inferredConfig =
-          (await this.prettier.resolveConfig(pathForConfig, {
-            editorconfig: true,
-          })) ?? {}
-        this._configCache.set(pathForConfig, inferredConfig)
+        const resolved = await this.prettier.resolveConfig(pathForConfig, {
+          editorconfig: true,
+        })
+        this._configCache.set(pathForConfig, resolved)
+        inferredConfig = resolved ?? {}
       }
     }
 
@@ -649,6 +659,39 @@ class PrettierService extends FormattingService {
   }
 }
 
+/**
+ * Warm up Prettier's core parsers by formatting a tiny sample with each
+ * one. The first format with a parser pays the module/JIT load cost —
+ * doing this right after startup moves it off the first save. Runs
+ * sequentially so the warmup never contends with early format requests,
+ * and each sample is independent: one failing parser must not abort the
+ * rest. Best-effort — every error is swallowed.
+ *
+ * @param {object} prettier – the loaded Prettier module
+ * @returns {Promise<void>}
+ */
+async function warmCoreParsers(prettier) {
+  const samples = [
+    ['typescript', 'const x: number = 1;\n'],
+    ['babel', 'const x = 1;\n'],
+    ['json', '{ "a": 1 }\n'],
+    ['css', 'a { color: red; }\n'],
+    ['html', '<div>hi</div>\n'],
+    ['markdown', '# Hello\n'],
+    ['yaml', 'a: 1\n'],
+    ['graphql', '{ field }\n'],
+  ]
+
+  for (const [parser, sample] of samples) {
+    try {
+      await prettier.format(sample, { parser })
+    } catch {
+      // A parser that doesn't ship in this Prettier build (or fails for
+      // any other reason) simply stays cold; saves handle it then.
+    }
+  }
+}
+
 let jsonRpcService
 ;(async () => {
   // 1) instantiate and register handlers
@@ -684,6 +727,13 @@ let jsonRpcService
 
     // 2) await the startup notification so we know it went out
     await jsonRpcService.notify('didStart')
+
+    // 2.5) Warm core parsers off the request path — deferred so the
+    // handshake stays unaffected and early format requests are served
+    // first.
+    setTimeout(() => {
+      warmCoreParsers(module).catch(() => {})
+    }, 0)
   } catch (err) {
     // if we failed during bootstrap, notify and exit
     if (jsonRpcService) {
