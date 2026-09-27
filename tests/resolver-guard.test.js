@@ -52,7 +52,12 @@ const BUNDLED_PRETTIER = `${EXTENSION}/node_modules/prettier`
  * dirs a set) plus Process emulation for the version probes and npm ls
  * spawns module-resolver.js performs.
  */
-function makeNovaShim({ workspaceModulePath = BROKEN_MODULE } = {}) {
+function makeNovaShim({
+  workspaceModulePath = BROKEN_MODULE,
+  lockfile = '{}',
+  extensionNpmLsExit = 0,
+  extensionDeps = ['prettier'],
+} = {}) {
   const files = new Map()
   const dirs = new Set()
 
@@ -79,15 +84,32 @@ function makeNovaShim({ workspaceModulePath = BROKEN_MODULE } = {}) {
   // Valid bundled tree in the extension directory.
   files.set(
     `${EXTENSION}/package.json`,
-    JSON.stringify({ dependencies: { prettier: '^3.0.0' } }),
+    JSON.stringify({
+      dependencies: Object.fromEntries(
+        extensionDeps.map((dep) => [dep, '^1.0.0']),
+      ),
+    }),
   )
-  files.set(`${EXTENSION}/package-lock.json`, '{}')
+  files.set(`${EXTENSION}/package-lock.json`, lockfile)
+  // Installed bundled package.json carries a real version so the
+  // lockfile-based fast path can compare against it.
   files.set(
     `${BUNDLED_PRETTIER}/package.json`,
-    JSON.stringify({ name: 'prettier' }),
+    JSON.stringify({ name: 'prettier', version: '3.0.0' }),
   )
   dirs.add(`${EXTENSION}/node_modules`)
   dirs.add(BUNDLED_PRETTIER)
+  // Every declared dependency is installed (package.json present) so
+  // the pool-drain test exercises the npm ls queue, not the
+  // no-spawn-missing short-circuit.
+  for (const dep of extensionDeps) {
+    if (dep === 'prettier') continue
+    files.set(
+      `${EXTENSION}/node_modules/${dep}/package.json`,
+      JSON.stringify({ name: dep, version: '1.0.0' }),
+    )
+    dirs.add(`${EXTENSION}/node_modules/${dep}`)
+  }
 
   const shim = {
     inDevMode: () => false,
@@ -132,6 +154,10 @@ function makeNovaShim({ workspaceModulePath = BROKEN_MODULE } = {}) {
         return { read: () => entry, close() {} }
       },
       remove() {},
+      // Test helper: mutate the file model after shim creation.
+      _remove(p) {
+        files.delete(p)
+      },
     },
   }
 
@@ -167,18 +193,42 @@ function makeNovaShim({ workspaceModulePath = BROKEN_MODULE } = {}) {
         stdout = '12.1.0'
       } else if (args[0] === 'npm' && args[1] === 'ls') {
         // `npm ls <pkg> --parseable` — the extension directory (the
-        // bundled tree) always verifies as healthy. The workspace lookup
-        // reports per `workspaceNpmLsStatus` so the correctVersion guard
-        // can be exercised; empty stdout = no workspace entry.
+        // bundled tree) reports per `extensionNpmLsExit` so the
+        // timeout-keep behavior can be exercised; healthy exit emits a
+        // matching line. The workspace lookup reports per
+        // `workspaceNpmLsStatus`; empty stdout = no workspace entry.
         const cwd = this.options.cwd || ''
         if (cwd === EXTENSION) {
-          stdout = `${BUNDLED_PRETTIER}:prettier@3.0.0:OK`
+          status = extensionNpmLsExit
+          if (status === 0) {
+            // One package per ls spawn — args[2] is the package name.
+            const pkg = args[2]
+            stdout = `${EXTENSION}/node_modules/${pkg}:${pkg}@1.0.0:OK`
+          }
         } else {
-          const status = nova.workspaceNpmLsStatus
-          if (status === 'OK' || status === 'INVALID') {
-            stdout = `${nova._workspaceModulePath}:prettier@3.0.0:${status}`
+          const lockStatus = nova.workspaceNpmLsStatus
+          if (lockStatus === 'OK' || lockStatus === 'INVALID') {
+            stdout = `${nova._workspaceModulePath}:prettier@3.0.0:${lockStatus}`
           }
         }
+      } else if (args[0] === 'npm' && args[1] === 'install') {
+        // The degraded-install fallback: resolves without touching the
+        // file model — the caller only cares that it doesn't throw.
+        status = 0
+      } else if (args[0] === 'mkdir') {
+        // Install-lock acquisition: exclusive create, fails on EEXIST.
+        const target = args[1]
+        if (dirs.has(target) || files.has(target)) status = 1
+        else dirs.add(target)
+      } else if (args[0] === 'touch') {
+        status = 0
+      } else if (args[0] === 'rmdir') {
+        dirs.delete(args[1])
+        status = 0
+      } else if (args[0] === 'rm') {
+        dirs.delete(args[1])
+        files.delete(args[1])
+        status = 0
       } else {
         status = 1
       }
@@ -390,12 +440,232 @@ async function healthyWorkspaceInstallStillLoads() {
   }
 }
 
+async function lockfileFastPathSkipsNpmLs() {
+  console.log('\n== lockfile-matched packages verify without npm ls ==')
+
+  // Lockfile pins the installed version — verification must succeed
+  // from the filesystem alone, without spawning a single npm ls.
+  const lockfile = JSON.stringify({
+    packages: { 'node_modules/prettier': { version: '3.0.0' } },
+  })
+  const novaShim = makeNovaShim({ lockfile })
+  const captured = { info: [], warn: [], error: [] }
+  const { resolver, restore } = loadResolver(novaShim, captured)
+
+  try {
+    const result = await resolver.findPrettier()
+
+    check(
+      'findPrettier resolves the bundled Prettier',
+      result === BUNDLED_PRETTIER,
+      result,
+    )
+
+    const lsSpawns = novaShim._processStub.created.filter(
+      (proc) =>
+        (proc.options.cwd || '') === EXTENSION &&
+        (proc.options.args || [])[1] === 'ls',
+    )
+    check('no npm ls spawned at all', lsSpawns.length === 0, lsSpawns.length)
+  } finally {
+    restore()
+  }
+}
+
+async function lockfileMismatchFallsBackToNpmLs() {
+  console.log('\n== lockfile version mismatch falls back to npm ls ==')
+
+  // Lockfile pins a different version — the package goes through npm
+  // ls, which reports it healthy, so it is kept (no reinstall).
+  const lockfile = JSON.stringify({
+    packages: { 'node_modules/prettier': { version: '9.9.9' } },
+  })
+  const novaShim = makeNovaShim({ lockfile })
+  const captured = { info: [], warn: [], error: [] }
+  const { resolver, restore } = loadResolver(novaShim, captured)
+
+  try {
+    const result = await resolver.findPrettier()
+
+    check(
+      'npm ls still accepts the installed copy',
+      result === BUNDLED_PRETTIER,
+      result,
+    )
+
+    const lsSpawns = novaShim._processStub.created.filter(
+      (proc) => (proc.options.args || [])[1] === 'ls',
+    )
+    check(
+      'npm ls was spawned for the mismatched package',
+      lsSpawns.length > 0,
+      lsSpawns.length,
+    )
+  } finally {
+    restore()
+  }
+}
+
+async function missingInstalledPackageIsBrokenWithoutNpmLs() {
+  console.log('\n== missing installed package is broken without npm ls ==')
+
+  // Bundled prettier has no package.json at all — reported broken
+  // directly, no npm ls, then the degraded install path recovers.
+  const novaShim = makeNovaShim({ lockfile: '{}' })
+  const captured = { info: [], warn: [], error: [] }
+  const { resolver, restore } = loadResolver(novaShim, captured)
+
+  try {
+    // The file model was built with the installed package.json present —
+    // remove it to simulate a broken install.
+    novaShim.fs._remove(`${BUNDLED_PRETTIER}/package.json`)
+
+    const result = await resolver.findPrettier()
+
+    check(
+      'degraded install path still resolves the bundled Prettier',
+      result === BUNDLED_PRETTIER,
+      result,
+    )
+
+    const lsSpawns = novaShim._processStub.created.filter(
+      (proc) =>
+        (proc.options.cwd || '') === EXTENSION &&
+        (proc.options.args || [])[1] === 'ls',
+    )
+    check(
+      'no npm ls spawned for the missing package',
+      lsSpawns.length === 0,
+      lsSpawns.length,
+    )
+
+    const installSpawns = novaShim._processStub.created.filter(
+      (proc) => (proc.options.args || [])[1] === 'install',
+    )
+    check('install ran instead', installSpawns.length > 0, installSpawns.length)
+  } finally {
+    restore()
+  }
+}
+
+async function timeoutKeepsInstalledPackage() {
+  console.log('\n== npm ls timeout keeps the installed package ==')
+
+  // npm ls exits -1 — the exact rejection handleProcessResult's timeout
+  // path produces. The package is installed (package.json exists), so it
+  // must be kept instead of triggering a reinstall.
+  const novaShim = makeNovaShim({ extensionNpmLsExit: -1 })
+  const captured = { info: [], warn: [], error: [] }
+  const { resolver, restore } = loadResolver(novaShim, captured)
+
+  try {
+    const result = await resolver.findPrettier()
+
+    check(
+      'timed-out verification keeps the installed package',
+      result === BUNDLED_PRETTIER,
+      result,
+    )
+
+    check(
+      'timeout is explained in the log',
+      // Package name comes from the verification input (test data) —
+      // the exact wording of the message must not matter.
+      captured.warn.some((line) => line.includes('package "prettier"')),
+      captured.warn,
+    )
+
+    const installSpawns = novaShim._processStub.created.filter(
+      (proc) => (proc.options.args || [])[1] === 'install',
+    )
+    check(
+      'no reinstall was triggered',
+      installSpawns.length === 0,
+      installSpawns.length,
+    )
+  } finally {
+    restore()
+  }
+}
+
+async function multiPackagePoolDrainsAllPackages() {
+  console.log('\n== worker pool drains more packages than it has workers ==')
+
+  // Six unverified packages against a four-worker pool: the queue must
+  // drain fully, each package verified exactly once, none dropped by
+  // the concurrency cap.
+  const deps = [
+    'prettier',
+    'prettier-plugin-astro',
+    'prettier-plugin-ejs',
+    'prettier-plugin-java',
+    'prettier-plugin-sql',
+    'prettier-plugin-toml',
+  ]
+  const novaShim = makeNovaShim({ extensionDeps: deps })
+  const captured = { info: [], warn: [], error: [] }
+  const { resolver, restore } = loadResolver(novaShim, captured)
+
+  try {
+    const result = await resolver.findPrettier()
+
+    check(
+      'all packages verified — bundled Prettier still resolves',
+      result === BUNDLED_PRETTIER,
+      result,
+    )
+
+    // One ls per package, none twice: the pool drained the queue
+    // without losing or duplicating work.
+    for (const dep of deps) {
+      const spawns = novaShim._processStub.created.filter(
+        (proc) =>
+          (proc.options.cwd || '') === EXTENSION &&
+          (proc.options.args || [])[1] === 'ls' &&
+          (proc.options.args || [])[2] === dep,
+      )
+      check(
+        `"${dep}" verified exactly once`,
+        spawns.length === 1,
+        spawns.length,
+      )
+    }
+
+    const totalLs = novaShim._processStub.created.filter(
+      (proc) =>
+        (proc.options.cwd || '') === EXTENSION &&
+        (proc.options.args || [])[1] === 'ls',
+    )
+    check(
+      'no extra spawns beyond one per package',
+      totalLs.length === deps.length,
+      totalLs.length,
+    )
+
+    const installSpawns = novaShim._processStub.created.filter(
+      (proc) => (proc.options.args || [])[1] === 'install',
+    )
+    check(
+      'no reinstall was triggered',
+      installSpawns.length === 0,
+      installSpawns.length,
+    )
+  } finally {
+    restore()
+  }
+}
+
 async function main() {
   predicateChecks()
   await brokenWorkspaceFallsBackToBundled()
   await warnFiresOncePerBrokenPath()
   await invalidWorkspaceInstallFallsBackToBundled()
   await healthyWorkspaceInstallStillLoads()
+  await lockfileFastPathSkipsNpmLs()
+  await lockfileMismatchFallsBackToNpmLs()
+  await missingInstalledPackageIsBrokenWithoutNpmLs()
+  await timeoutKeepsInstalledPackage()
+  await multiPackagePoolDrainsAllPackages()
 
   console.log(
     `\n${failed === 0 ? 'All checks passed.' : `${failed} check(s) failed.`}`,
