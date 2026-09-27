@@ -100,22 +100,24 @@ function isLoadableModule(modulePath) {
 const warnedBrokenModulePaths = new Set()
 
 /**
- * Warns about a broken project Prettier install, once per path — repeat
- * hits within the same extension session are demoted to debug level.
+ * Warns that a project Prettier install was skipped in favor of the
+ * bundled one, once per path — repeat hits within the same extension
+ * session are demoted to debug level.
  *
- * @param {string} modulePath – the skipped, unloadable module directory
+ * @param {string} modulePath – the skipped module directory
+ * @param {string} reason     – why the install is skipped, for the log
  */
-function warnBrokenProjectPrettier(modulePath) {
+function warnBrokenProjectPrettier(modulePath, reason) {
   if (warnedBrokenModulePaths.has(modulePath)) {
     log.debug(
-      `Project prettier at ${modulePath} is still unloadable — skipping (already reported).`,
+      `Project prettier at ${modulePath} is still unusable (${reason}) — skipping (already reported).`,
     )
     return
   }
 
   warnedBrokenModulePaths.add(modulePath)
   log.warn(
-    `Ignoring project prettier at ${modulePath} — no package.json found (broken install?) — using the bundled Prettier instead.`,
+    `Ignoring project prettier at ${modulePath} — ${reason} — using the bundled Prettier instead.`,
   )
 }
 
@@ -392,7 +394,10 @@ async function findPrettier() {
     try {
       const fsResult = findModuleWithFileSystem(nova.workspace.path, 'prettier')
       if (fsResult && !isLoadableModule(fsResult)) {
-        warnBrokenProjectPrettier(fsResult)
+        warnBrokenProjectPrettier(
+          fsResult,
+          'no package.json found (broken install?)',
+        )
       } else if (fsResult) {
         log.info(`Loading project prettier (fs) at ${fsResult}`)
         return fsResult
@@ -409,7 +414,19 @@ async function findPrettier() {
     try {
       const npmResult = await findModuleWithNPM(nova.workspace.path, 'prettier')
       if (npmResult && !isLoadableModule(npmResult.path)) {
-        warnBrokenProjectPrettier(npmResult.path)
+        warnBrokenProjectPrettier(
+          npmResult.path,
+          'no package.json found (broken install?)',
+        )
+      } else if (npmResult && !npmResult.correctVersion) {
+        // Same philosophy as the missing-package.json guard: an install
+        // npm ls reports as invalid or outdated must not take the service
+        // down (start would fail ×3 with no fallback). verifyBundledPackages
+        // already honors correctVersion this way — the callers now agree.
+        warnBrokenProjectPrettier(
+          npmResult.path,
+          'npm ls reports it as invalid or outdated',
+        )
       } else if (npmResult) {
         log.info(`Loading project prettier (npm) at ${npmResult.path}`)
         return npmResult.path

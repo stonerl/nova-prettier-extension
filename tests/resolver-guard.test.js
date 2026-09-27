@@ -52,7 +52,7 @@ const BUNDLED_PRETTIER = `${EXTENSION}/node_modules/prettier`
  * dirs a set) plus Process emulation for the version probes and npm ls
  * spawns module-resolver.js performs.
  */
-function makeNovaShim() {
+function makeNovaShim({ workspaceModulePath = BROKEN_MODULE } = {}) {
   const files = new Map()
   const dirs = new Set()
 
@@ -65,6 +65,16 @@ function makeNovaShim() {
   // package.json (pnpm symlink into an empty store entry).
   dirs.add(`${WORKSPACE}/node_modules`)
   dirs.add(BROKEN_MODULE)
+
+  // When the test overrides the workspace module path, that directory
+  // gets a real package.json so it IS loadable.
+  if (workspaceModulePath !== BROKEN_MODULE) {
+    files.set(
+      `${workspaceModulePath}/package.json`,
+      JSON.stringify({ name: 'prettier' }),
+    )
+    dirs.add(workspaceModulePath)
+  }
 
   // Valid bundled tree in the extension directory.
   files.set(
@@ -92,6 +102,14 @@ function makeNovaShim() {
     extension: { path: EXTENSION, globalStoragePath: '/tmp/nova-global' },
     notifications: { post: () => {}, cancel: () => {} },
     localize: (key, value) => value ?? key,
+    // What `npm ls prettier` reports for the workspace entry. 'NONE'
+    // means no entry at all (no stdout); 'OK'/'INVALID' produce a real
+    // ls line so the correctVersion guard can be exercised without
+    // extra file-model surgery.
+    workspaceNpmLsStatus: 'NONE',
+    // The module path the workspace npm ls entry reports. Defaults to
+    // the broken dir; the healthy-path test points it at a valid one.
+    _workspaceModulePath: workspaceModulePath,
     path: {
       isAbsolute: (p) => p.startsWith('/'),
       join: (...parts) => parts.filter((p) => p != null).join('/'),
@@ -148,14 +166,18 @@ function makeNovaShim() {
       } else if (args[0] === 'npm' && args[1] === '--version') {
         stdout = '12.1.0'
       } else if (args[0] === 'npm' && args[1] === 'ls') {
-        // `npm ls <pkg> --parseable` — valid only for the extension
-        // directory (the bundled tree); the broken workspace lookup
-        // prints nothing so the npm path is skipped.
+        // `npm ls <pkg> --parseable` — the extension directory (the
+        // bundled tree) always verifies as healthy. The workspace lookup
+        // reports per `workspaceNpmLsStatus` so the correctVersion guard
+        // can be exercised; empty stdout = no workspace entry.
         const cwd = this.options.cwd || ''
         if (cwd === EXTENSION) {
           stdout = `${BUNDLED_PRETTIER}:prettier@3.0.0:OK`
         } else {
-          stdout = ''
+          const status = nova.workspaceNpmLsStatus
+          if (status === 'OK' || status === 'INVALID') {
+            stdout = `${nova._workspaceModulePath}:prettier@3.0.0:${status}`
+          }
         }
       } else {
         status = 1
@@ -290,10 +312,90 @@ async function warnFiresOncePerBrokenPath() {
   }
 }
 
+async function invalidWorkspaceInstallFallsBackToBundled() {
+  console.log(
+    '\n== npm ls INVALID workspace install falls through to bundled ==',
+  )
+
+  // A loadable-but-INVALID workspace module: the file model is fine,
+  // only npm ls's status flags it — the correctVersion guard's case.
+  const invalidModule = `${WORKSPACE}/node_modules/prettier-invalid`
+  const novaShim = makeNovaShim({ workspaceModulePath: invalidModule })
+  const captured = { info: [], warn: [], error: [] }
+  const { resolver, restore } = loadResolver(novaShim, captured)
+
+  try {
+    novaShim.workspaceNpmLsStatus = 'INVALID'
+    const result = await resolver.findPrettier()
+
+    check(
+      'INVALID install is skipped — bundled Prettier takes over',
+      result === BUNDLED_PRETTIER,
+      result,
+    )
+
+    check(
+      'fallback warn names the npm ls reason',
+      captured.warn.some((line) =>
+        line.includes(
+          `Ignoring project prettier at ${invalidModule} — npm ls reports it as invalid or outdated`,
+        ),
+      ),
+      captured.warn,
+    )
+
+    // Repeat resolution against the still-flagged install — the
+    // npm-ls reason must not warn again.
+    await resolver.findPrettier()
+    const invalidWarnCount = captured.warn.filter((line) =>
+      line.includes('npm ls reports it as invalid or outdated'),
+    ).length
+
+    check(
+      'npm-ls reason warned once despite repeated resolutions',
+      invalidWarnCount === 1,
+      invalidWarnCount,
+    )
+  } finally {
+    restore()
+  }
+}
+
+async function healthyWorkspaceInstallStillLoads() {
+  console.log('\n== healthy workspace npm ls entry is still used ==')
+
+  // A loadable workspace prettier with a matching version must NOT be
+  // skipped by the correctVersion guard.
+  const validModule = `${WORKSPACE}/node_modules/prettier-valid`
+  const novaShim = makeNovaShim({ workspaceModulePath: validModule })
+  const captured = { info: [], warn: [], error: [] }
+  const { resolver, restore } = loadResolver(novaShim, captured)
+
+  try {
+    novaShim.workspaceNpmLsStatus = 'OK'
+    const result = await resolver.findPrettier()
+
+    check(
+      'loadable workspace install is loaded (npm path)',
+      result === validModule,
+      result,
+    )
+    check(
+      'no correctVersion warn logged',
+      !captured.warn.some((line) => line.includes('invalid or outdated')),
+      captured.warn,
+    )
+  } finally {
+    restore()
+  }
+}
+
 async function main() {
   predicateChecks()
   await brokenWorkspaceFallsBackToBundled()
   await warnFiresOncePerBrokenPath()
+  await invalidWorkspaceInstallFallsBackToBundled()
+  await healthyWorkspaceInstallStillLoads()
 
   console.log(
     `\n${failed === 0 ? 'All checks passed.' : `${failed} check(s) failed.`}`,
