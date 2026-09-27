@@ -1,3 +1,60 @@
+## 3.9.11 - 2026-09-28
+
+This release makes bundled-package installation and service startup
+robust across project windows and loaded machines. With contributions
+from [@StirStudios](https://github.com/StirStudios) — thanks for PRs
+#160, #161 and #162!
+
+### Fixed
+
+- **Multiple project windows no longer fight over installing the
+  bundled packages**
+  - Each Nova window runs its own extension process, and both used to
+    race their `npm install` into the same bundle — the installs
+    collided (ENOTEMPTY cleanup fights) and could leave `node_modules`
+    broken so dependencies never installed.
+  - A cross-process lock (created via subprocess, living in Nova's
+    shared temp directory) now serializes installs; a killed holder's
+    lock goes stale after 30 seconds and is taken over instead of
+    blocking waiters.
+- **Saving watched files no longer interrupts formatting**
+  - Watcher events caused by the extension's own package writes no
+    longer trigger service restarts, and restart cycles resolve the
+    module path while the service stays up — the stop/start only
+    happens when the resolved path actually changes, so formats are
+    never silently dropped during resolution.
+- **A broken project Prettier no longer takes the service down**
+  ([#160](https://github.com/StirStudios/nova-prettier-extension/pull/160))
+  - Project installs that can't be loaded (e.g. a pnpm symlink
+    pointing at an empty store entry, or `npm ls` reporting them
+    invalid) are skipped with a warning and the bundled Prettier takes
+    over, instead of failing to start on every attempt.
+- **Service starts reliably on busy machines**
+  ([#161](https://github.com/StirStudios/nova-prettier-extension/pull/161))
+  - Bundled-package verification used to spawn 16 `npm ls` processes
+    at once; under load they all timed out, every package was reported
+    broken and the forced reinstall timed out too — the service never
+    started. Packages are now verified against `package-lock.json`
+    from the filesystem alone (zero spawns on a healthy tree) and only
+    mismatches go through `npm ls`, at most four at a time. A timed-out
+    check keeps the installed package instead of triggering a
+    reinstall cascade.
+- **Failure notifications now explain why Prettier failed**
+  ([#162](https://github.com/StirStudios/nova-prettier-extension/pull/162))
+  - "Prettier Stopped Running", "Can't Load Prettier" and "Unable to
+    Start Prettier" append a Reason line — e.g. the missing module
+    path, a Node.js process timeout in seconds, or the exit code —
+    instead of generic text that required opening the Extension
+    Console.
+
+### Development
+
+- New unit test suites `tests/install-lock.test.js`,
+  `tests/watcher-filter.test.js`, `tests/resolver-guard.test.js` and
+  `tests/notifications.test.js` covering the install lock, the
+  watcher/restart hardening, the resolver guards and verification
+  logic, and the failure-reason helpers; all run as part of `npm test`.
+
 ## 3.9.10 - 2026-09-27
 
 ### Added
