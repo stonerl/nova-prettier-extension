@@ -222,6 +222,7 @@ const sqlAliases = new Set([
   'bigquery',
   'flinksql',
   'hiveql',
+  'mariadb',
   'mysql',
   'plsql',
   'postgresql',

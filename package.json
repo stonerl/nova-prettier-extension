@@ -23,9 +23,10 @@
     "test:setup": "npm run build && npm install --omit=dev --prefix prettier.novaextension",
     "test:restart-cycle": "node tests/restart-cycle.test.js",
     "test:runtime": "node tests/runtime-resolver.test.js",
+    "test:sql": "node tests/sql-dialects.test.js",
     "test:service": "node tests/service-smoke.test.js",
     "test:external-plugins": "node tests/external-plugins.test.js",
-    "test": "npm run test:setup && npm run test:restart-cycle && npm run test:runtime && npm run test:service && npm run test:external-plugins"
+    "test": "npm run test:setup && npm run test:sql && npm run test:restart-cycle && npm run test:runtime && npm run test:service && npm run test:external-plugins"
   },
   "devDependencies": {
     "@babel/parser": "^7.29.9",
