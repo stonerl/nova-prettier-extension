@@ -1,3 +1,39 @@
+## 3.9.10 - 2026-09-27
+
+### Added
+
+- **New SQL formatter option: Auto-Detect (now the default)**
+  - Picks `sql-formatter` for dialects it supports and automatically
+    falls back to `node-sql-parser` for the rest (e.g. FlinkSQL).
+  - Explicitly selected formatters are still honored; the language /
+    dialect options of whichever formatter is picked apply.
+
+### Fixed
+
+- **SQL formatting no longer crashes with an "Invalid language" error**
+  - Formatting a file whose dialect the selected SQL formatter does not
+    understand (e.g. FlinkSQL with `sql-formatter`) previously aborted
+    with a raw error notification. The format is now skipped and a
+    notification suggests the other formatter — or the new Auto-Detect
+    option, which never hits the mismatch.
+  - `node-sql-parser` silently formatted eight dialects as MySQL
+    (SQLite, PL/SQL, N1QL, Trino, Redshift, SingleStoreDB, SparkSQL and
+    DB2i); these are now skipped with the same notification.
+- **MariaDB files reported by the SQL extension format with the MariaDB
+  dialect**
+  - The SQL Language Extension now exposes an explicit `mariadb`
+    syntax, which previously fell back to Generic SQL; it now maps to
+    the MariaDB dialect for both SQL formatters.
+- **Removed the TiDB entry from the sql-formatter language dropdown**
+  - The bundled plugin version rejects `tidb`; selecting it previously
+    crashed formatting with the same "Invalid language" error.
+
+### Development
+
+- New unit test suite `tests/sql-dialects.test.js` covering SQL syntax
+  normalization, dialect resolution, the dialect/formatter support
+  matrix and Auto-Detect routing; runs as part of `npm test`.
+
 ## 3.9.9 - 2026-09-26
 
 ### Changed
