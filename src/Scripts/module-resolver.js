@@ -78,6 +78,20 @@ function findModuleWithFileSystem(directory, module) {
   return moduleResult ? moduleResult.path : null
 }
 
+/**
+ * True when the resolved module directory actually contains a package
+ * (a package.json file). Guards against broken installs — e.g. a pnpm
+ * symlink pointing at an empty store entry — which would otherwise be
+ * picked up and make the service fail to start on every attempt.
+ *
+ * @param {string} modulePath – resolved module directory
+ * @returns {boolean}
+ */
+function isLoadableModule(modulePath) {
+  const stats = nova.fs.stat(nova.path.join(modulePath, 'package.json'))
+  return !!stats && stats.isFile()
+}
+
 async function findModuleWithNPM(directory, module) {
   const process = await spawnNpm(
     ['ls', String(module), '--parseable', '--long', '--depth', '0'],
@@ -350,7 +364,11 @@ module.exports = async function () {
     // Try finding purely through file system first
     try {
       const fsResult = findModuleWithFileSystem(nova.workspace.path, 'prettier')
-      if (fsResult) {
+      if (fsResult && !isLoadableModule(fsResult)) {
+        log.warn(
+          `Ignoring project prettier at ${fsResult} — no package.json found (broken install?)`,
+        )
+      } else if (fsResult) {
         log.info(`Loading project prettier (fs) at ${fsResult}`)
         return fsResult
       }
@@ -365,7 +383,11 @@ module.exports = async function () {
     // Try npm as an alternative
     try {
       const npmResult = await findModuleWithNPM(nova.workspace.path, 'prettier')
-      if (npmResult) {
+      if (npmResult && !isLoadableModule(npmResult.path)) {
+        log.warn(
+          `Ignoring project prettier at ${npmResult.path} — no package.json found (broken install?)`,
+        )
+      } else if (npmResult) {
         log.info(`Loading project prettier (npm) at ${npmResult.path}`)
         return npmResult.path
       }
