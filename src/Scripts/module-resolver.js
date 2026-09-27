@@ -211,15 +211,28 @@ async function verifyBundledPackages(directory, packageNames) {
     // no usable lockfile — every package goes through npm ls
   }
 
-  const unverified = packageNames.filter(
-    (pkg) => !isPackageInstalledPerLockfile(directory, lock, pkg),
-  )
-  if (unverified.length === 0) return []
+  const broken = []
+  const unverified = []
+  for (const pkg of packageNames) {
+    if (isPackageInstalledPerLockfile(directory, lock, pkg)) continue
+    // Not installed at all — broken without asking npm.
+    if (
+      !nova.fs.stat(
+        nova.path.join(directory, 'node_modules', pkg, 'package.json'),
+      )
+    ) {
+      broken.push(pkg)
+    } else {
+      unverified.push(pkg)
+    }
+  }
+  if (unverified.length === 0) {
+    return packageNames.filter((pkg) => broken.includes(pkg))
+  }
 
   log.debug(`Verifying with npm: ${unverified.join(', ')}`)
 
   const NPM_CONCURRENCY = 4
-  const broken = []
   const queue = [...unverified]
   const worker = async () => {
     while (queue.length) {
@@ -228,6 +241,15 @@ async function verifyBundledPackages(directory, packageNames) {
         const resolved = await findModuleWithNPM(directory, pkg)
         if (!resolved || !resolved.correctVersion) broken.push(pkg)
       } catch (err) {
+        // A timeout says the machine is busy, not that the package is
+        // broken — it is installed (package.json exists), so keep it
+        // rather than forcing a reinstall that would time out as well.
+        if (err.status === -1) {
+          log.warn(
+            `Could not verify package "${pkg}" in time — assuming the installed copy is usable`,
+          )
+          continue
+        }
         log.warn(`Failed to verify package "${pkg}":`, err)
         broken.push(pkg)
       }
