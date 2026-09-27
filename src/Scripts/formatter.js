@@ -75,6 +75,8 @@ function utf8ByteLength(str) {
 const {
   getSqlDialectFromUriOrSyntax,
   getSqlParserDialect,
+  dialectSupportedBy,
+  resolveSqlFormatter,
 } = require('./sql.js')
 
 /**
@@ -702,19 +704,50 @@ class Formatter {
 
       // SQL plugin options depend on the configured formatter implementation
       if (syntaxKey === 'sql') {
-        const sqlFormatter = getConfigWithWorkspaceOverride(
+        let sqlFormatter = getConfigWithWorkspaceOverride(
           'prettier.plugins.prettier-plugin-sql.formatter',
         )
+        let autoDialect = null
+
+        // Anything not explicitly pinned ('auto', unset, or an unknown
+        // value) routes by dialect: sql-formatter preferred, falling
+        // back to node-sql-parser for dialects it rejects.
+        if (
+          sqlFormatter !== 'sql-formatter' &&
+          sqlFormatter !== 'node-sql-parser'
+        ) {
+          autoDialect = getSqlDialectFromUriOrSyntax(
+            document.uri,
+            document.syntax,
+          )
+          sqlFormatter = resolveSqlFormatter(autoDialect)
+
+          if (!sqlFormatter) {
+            log.info(
+              `SQL dialect "${autoDialect}" is not supported by any SQL formatter — formatting skipped`,
+            )
+            return []
+          }
+
+          log.debug(
+            `Auto-detected SQL dialect: ${autoDialect} → ${sqlFormatter}`,
+          )
+        }
 
         if (sqlFormatter === 'sql-formatter') {
           const config = { ...getSqlFormatterConfig() }
 
           if (config.language === 'auto') {
-            config.language = getSqlDialectFromUriOrSyntax(
-              document.uri,
-              document.syntax,
-            )
-            log.debug(`Auto-detected SQL dialect: ${config.language}`)
+            const dialect =
+              autoDialect ??
+              getSqlDialectFromUriOrSyntax(document.uri, document.syntax)
+
+            if (!dialectSupportedBy('sql-formatter', dialect)) {
+              return this.notifySqlDialectMismatch(dialect, 'sql-formatter')
+            }
+
+            config.language = dialect
+            log.debug(`Auto-detected SQL dialect: ${dialect}`)
           }
 
           Object.assign(options, config)
@@ -723,6 +756,14 @@ class Formatter {
 
           if (config.database === 'auto') {
             config.database = getSqlParserDialect(document.uri, document.syntax)
+
+            if (config.database === null) {
+              return this.notifySqlDialectMismatch(
+                getSqlDialectFromUriOrSyntax(document.uri, document.syntax),
+                'node-sql-parser',
+              )
+            }
+
             log.debug(`Using node-sql-parser dialect: ${config.database}`)
           }
 
@@ -1104,6 +1145,59 @@ class Formatter {
         ),
       ].join(''),
     })
+  }
+
+  /**
+   * Auto-detected SQL dialect isn't supported by the selected formatter
+   * implementation. Skips formatting and points the user at the other
+   * formatter, which does support the dialect, or at the Auto-Detect
+   * setting, which picks a supporting formatter on its own.
+   *
+   * The notification also fires for save-triggered runs: unlike the
+   * unsupported-syntax pattern, this is a config-level problem and the
+   * skip would otherwise be invisible. The shared notification id makes
+   * repeated attempts replace each other instead of stacking up.
+   *
+   * @param {string} dialect  The detected SQL dialect (e.g. 'flinksql')
+   * @param {'sql-formatter'|'node-sql-parser'} selected  The configured formatter
+   * @returns {Array} Empty edit description — formatting was skipped
+   */
+  notifySqlDialectMismatch(dialect, selected) {
+    const other =
+      selected === 'sql-formatter' ? 'node-sql-parser' : 'sql-formatter'
+
+    log.info(
+      `SQL dialect "${dialect}" is not supported by ${selected} — formatting skipped`,
+    )
+
+    showNotification({
+      id: 'prettier-sql-dialect-mismatch',
+      title: nova.localize(
+        'prettier.notification.sqlDialectMismatch.title',
+        'Unsupported SQL Dialect',
+        'notification',
+      ),
+      body: [
+        nova.localize(
+          'prettier.notification.sqlDialectMismatch.body.prefix',
+          'The ',
+          'notification',
+        ),
+        `“${dialect}”`,
+        nova.localize(
+          'prettier.notification.sqlDialectMismatch.body.middle',
+          ' dialect isn’t supported by the selected SQL formatter. Switch the SQL formatter to ',
+          'notification',
+        ),
+        `“${other}”`,
+        nova.localize(
+          'prettier.notification.sqlDialectMismatch.body.suffix',
+          ' in the extension settings, or set it to Auto-Detect to pick the formatter that supports this dialect.',
+          'notification',
+        ),
+      ].join(''),
+    })
+    return []
   }
 
   getParserForSyntax(syntax) {

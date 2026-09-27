@@ -146,6 +146,76 @@ function isSqlParserDialect(dialect) {
   return supportedSqlParserDialects.has(dialect)
 }
 
+// Dialects accepted by prettier-plugin-sql's `language` option for the
+// sql-formatter implementation (mirrors the plugin's own choice enum;
+// notably it does NOT include 'flinksql').
+const sqlFormatterDialects = new Set([
+  'sql',
+  'bigquery',
+  'clickhouse',
+  'db2',
+  'db2i',
+  'hive',
+  'mariadb',
+  'mysql',
+  'n1ql',
+  'plsql',
+  'postgresql',
+  'redshift',
+  'singlestoredb',
+  'snowflake',
+  'spark',
+  'sqlite',
+  'transactsql',
+  'tsql',
+  'trino',
+])
+
+/**
+ * Checks whether a SQL formatter implementation can handle a detected
+ * dialect. Used to guard the auto-detected dialect before it reaches
+ * prettier's option validation, so unsupported combinations surface as
+ * a friendly notification instead of a raw prettier error.
+ *
+ * For node-sql-parser, generic 'sql' counts as supported because it is
+ * the everyday case and falls back to the closest dialect ('mysql').
+ *
+ * @param {'sql-formatter'|'node-sql-parser'} formatter  Formatter implementation
+ * @param {string} dialect  The detected SQL dialect (e.g. 'mariadb', 'flinksql')
+ * @returns {boolean}       True if the formatter can format this dialect
+ */
+function dialectSupportedBy(formatter, dialect) {
+  if (formatter === 'sql-formatter') {
+    return sqlFormatterDialects.has(dialect)
+  }
+  if (formatter === 'node-sql-parser') {
+    if (dialect === 'sql') return true
+    return isSqlParserDialect(normalizeForSqlParser(dialect))
+  }
+  return false
+}
+
+/**
+ * Routes a detected SQL dialect to the formatter implementation that can
+ * handle it. sql-formatter is preferred (it covers most dialects);
+ * node-sql-parser is the fallback for dialects sql-formatter rejects,
+ * such as 'flinksql'.
+ *
+ * Returns null only when no formatter supports the dialect — a dead end
+ * that the cross-support test suite guards against.
+ *
+ * @param {string} dialect  The detected SQL dialect (e.g. 'mariadb', 'flinksql')
+ * @returns {'sql-formatter'|'node-sql-parser'|null}
+ */
+function resolveSqlFormatter(dialect) {
+  if (sqlFormatterDialects.has(dialect)) {
+    return 'sql-formatter'
+  }
+  return isSqlParserDialect(normalizeForSqlParser(dialect))
+    ? 'node-sql-parser'
+    : null
+}
+
 /**
  * Normalizes dialects for compatibility with node-sql-parser.
  * Maps alternative or shorthand values to their accepted form.
@@ -160,25 +230,32 @@ function normalizeForSqlParser(dialect) {
 
 /**
  * Resolves the SQL dialect to use with node-sql-parser based on file extension or provided syntax.
- * Falls back to 'mysql' if the detected dialect is not supported by node-sql-parser.
+ * Returns null if the detected dialect is not supported by node-sql-parser.
+ *
+ * Generic 'sql' falls back to 'mysql', the closest supported dialect —
+ * this is the everyday case and must not be treated as a mismatch.
  *
  * If a valid `syntax` is provided, it will be mapped directly to the corresponding SQL dialect.
  * If no valid `syntax` is provided, the function will resolve the dialect based on the file extension.
  *
- * @param {string} uri    The document URI (e.g., editor.document.uri)
+ * @param {string} uri    The document URI (e.g. editor.document.uri)
  * @param {string} [syntax=null]  The SQL syntax detected by the SQL extension, if available.
  *                                If provided, the function will map it directly to the appropriate SQL dialect.
- * @returns {string}      A safe dialect for node-sql-parser, either a supported SQL dialect or 'mysql' as a fallback
+ * @returns {string|null} A safe dialect for node-sql-parser, or null when the dialect is unsupported
  */
 function getSqlParserDialect(uri, syntax = null) {
   let dialect = getSqlDialectFromUriOrSyntax(uri, syntax)
   dialect = normalizeForSqlParser(dialect)
 
   if (!isSqlParserDialect(dialect)) {
+    if (dialect === 'sql') {
+      return 'mysql'
+    }
+
     log.debug(
-      `Dialect '${dialect}' not supported by node-sql-parser — falling back to 'mysql'`,
+      `Dialect '${dialect}' not supported by node-sql-parser — formatting skipped`,
     )
-    return 'mysql'
+    return null
   }
 
   return dialect
@@ -187,4 +264,6 @@ function getSqlParserDialect(uri, syntax = null) {
 module.exports = {
   getSqlDialectFromUriOrSyntax,
   getSqlParserDialect,
+  dialectSupportedBy,
+  resolveSqlFormatter,
 }

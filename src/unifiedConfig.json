@@ -2301,12 +2301,13 @@
           {
             "key": "prettier.plugins.prettier-plugin-sql.formatter",
             "title": "Formatter",
-            "description": "Specifies the formatter to use for SQL code formatting.",
+            "description": "Specifies the formatter to use for SQL code formatting. 'Auto-Detect' prefers sql-formatter and falls back to node-sql-parser for dialects it doesn't support (e.g. FlinkSQL).",
             "type": "enum",
             "radio": false,
             "config": {
-              "default": "sql-formatter",
+              "default": "auto",
               "values": [
+                ["auto", "Auto-Detect"],
                 ["sql-formatter", "sql-formatter"],
                 ["node-sql-parser", "node-sql-parser"]
               ]
@@ -2315,6 +2316,7 @@
               "default": null,
               "values": [
                 [null, "Global Setting"],
+                ["auto", "Auto-Detect"],
                 ["sql-formatter", "sql-formatter"],
                 ["node-sql-parser", "node-sql-parser"]
               ]
@@ -2330,7 +2332,7 @@
               {
                 "key": "prettier.plugins.prettier-plugin-sql.sql-formatter.language",
                 "title": "Language",
-                "description": "Sets the SQL dialect used for formatting. Choose 'Auto-Detect' to infer the dialect from the file extension (e.g., .pgsql → PostgreSQL, .sqlite → SQLite). Defaults to 'Generic SQL' if detection fails or the dialect is unsupported.",
+                "description": "Sets the SQL dialect used for formatting. Choose 'Auto-Detect' to infer the dialect from the file extension (e.g., .pgsql → PostgreSQL, .sqlite → SQLite). Defaults to 'Generic SQL' if detection fails.",
                 "link": "https://github.com/sql-formatter-org/sql-formatter/blob/master/docs/language.md",
                 "type": "enum",
                 "radio": false,
@@ -2344,7 +2346,6 @@
                     ["hive", "Apache Hive"],
                     ["mariadb", "MariaDB"],
                     ["mysql", "MySQL"],
-                    ["tidb", "TiDB"],
                     ["n1ql", "Couchbase N1QL"],
                     ["plsql", "Oracle PL/SQL"],
                     ["postgresql", "PostgreSQL"],
@@ -2370,7 +2371,6 @@
                     ["hive", "Apache Hive"],
                     ["mariadb", "MariaDB"],
                     ["mysql", "MySQL"],
-                    ["tidb", "TiDB"],
                     ["n1ql", "Couchbase N1QL"],
                     ["plsql", "Oracle PL/SQL"],
                     ["postgresql", "PostgreSQL"],
@@ -2626,7 +2626,7 @@
               {
                 "key": "prettier.plugins.prettier-plugin-sql.node-sql-parser.database",
                 "title": "Language",
-                "description": "Sets the SQL dialect used for parsing. Choose 'Auto-Detect' to infer the dialect from the file extension (e.g., .pgsql → PostgreSQL). Defaults to 'MySQL' if detection fails or the dialect is unsupported.",
+                "description": "Sets the SQL dialect used for parsing. Choose 'Auto-Detect' to infer the dialect from the file extension (e.g., .pgsql → PostgreSQL). Defaults to 'MySQL' for generic SQL.",
                 "type": "enum",
                 "radio": false,
                 "config": {

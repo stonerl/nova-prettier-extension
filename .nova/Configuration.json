@@ -5,6 +5,7 @@
     "prettier.novaextension\/Scripts\/*",
     "tests\/*"
   ],
+  "prettier.config.ignore" : true,
   "prettier.default-config.endOfLine" : "lf",
   "prettier.default-config.semi" : false,
   "prettier.default-config.singleQuote" : true,

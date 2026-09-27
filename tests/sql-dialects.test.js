@@ -178,8 +178,150 @@ function dialectResolutionForNodeSqlParser() {
   )
 
   check(
-    'unsupported dialect falls back to mysql',
-    sql.getSqlParserDialect('file:///w/query.n1ql', null) === 'mysql',
+    'generic sql silently falls back to mysql (everyday case, no mismatch)',
+    sql.getSqlParserDialect('file:///w/query.sql', null) === 'mysql',
+  )
+
+  check(
+    'unsupported distinct dialect resolves to null (formatting skipped)',
+    sql.getSqlParserDialect('file:///w/query.n1ql', null) === null,
+  )
+
+  check(
+    'plsql resolves to null for node-sql-parser',
+    sql.getSqlParserDialect('file:///w/query.plsql', 'plsql') === null,
+  )
+}
+
+function dialectFormatterCrossSupport() {
+  console.log('\n== dialect/formatter cross-support ==')
+
+  const { sql } = loadModules()
+
+  check(
+    'flinksql is not supported by sql-formatter (would crash prettier)',
+    sql.dialectSupportedBy('sql-formatter', 'flinksql') === false,
+  )
+
+  check(
+    'flinksql is supported by node-sql-parser',
+    sql.dialectSupportedBy('node-sql-parser', 'flinksql') === true,
+  )
+
+  for (const dialect of ['mariadb', 'mysql', 'postgresql', 'tsql', 'db2']) {
+    check(
+      `"${dialect}" is supported by both formatters`,
+      sql.dialectSupportedBy('sql-formatter', dialect) === true &&
+        sql.dialectSupportedBy('node-sql-parser', dialect) === true,
+    )
+  }
+
+  for (const dialect of [
+    'sqlite',
+    'plsql',
+    'n1ql',
+    'trino',
+    'redshift',
+    'singlestoredb',
+    'spark',
+    'db2i',
+  ]) {
+    check(
+      `"${dialect}" is sql-formatter-only (node-sql-parser would misformat it)`,
+      sql.dialectSupportedBy('sql-formatter', dialect) === true &&
+        sql.dialectSupportedBy('node-sql-parser', dialect) === false,
+    )
+  }
+
+  check(
+    'generic sql is handled by node-sql-parser via the mysql fallback',
+    sql.dialectSupportedBy('node-sql-parser', 'sql') === true,
+  )
+
+  // Union completeness: every dialect the resolver can emit must be
+  // supported by at least one formatter — no dead-end dialects.
+  const emittedDialects = [
+    'sql',
+    'tsql',
+    'postgresql',
+    'mysql',
+    'mariadb',
+    'hive',
+    'plsql',
+    'db2',
+    'db2i',
+    'sqlite',
+    'bigquery',
+    'snowflake',
+    'redshift',
+    'trino',
+    'singlestoredb',
+    'spark',
+    'n1ql',
+    'flinksql',
+  ]
+  const deadEnds = emittedDialects.filter(
+    (d) =>
+      !sql.dialectSupportedBy('sql-formatter', d) &&
+      !sql.dialectSupportedBy('node-sql-parser', d),
+  )
+  check(
+    'no emitted dialect is unsupported by both formatters',
+    deadEnds.length === 0,
+    deadEnds,
+  )
+}
+
+function autoFormatterRouting() {
+  console.log('\n== auto formatter routing ==')
+
+  const { sql } = loadModules()
+
+  check(
+    'flinksql routes to node-sql-parser',
+    sql.resolveSqlFormatter('flinksql') === 'node-sql-parser',
+  )
+
+  for (const dialect of ['sql', 'mariadb', 'plsql', 'trino', 'spark']) {
+    check(
+      `"${dialect}" routes to sql-formatter (preferred)`,
+      sql.resolveSqlFormatter(dialect) === 'sql-formatter',
+    )
+  }
+
+  check(
+    'unknown dialect routes to null (dead end)',
+    sql.resolveSqlFormatter('not-a-dialect') === null,
+  )
+
+  // Routing must agree with the support matrix for every emitted dialect.
+  const emittedDialects = [
+    'sql',
+    'tsql',
+    'postgresql',
+    'mysql',
+    'mariadb',
+    'hive',
+    'plsql',
+    'db2',
+    'db2i',
+    'sqlite',
+    'bigquery',
+    'snowflake',
+    'redshift',
+    'trino',
+    'singlestoredb',
+    'spark',
+    'n1ql',
+    'flinksql',
+  ]
+  const unroutable = emittedDialects.filter(
+    (d) => sql.resolveSqlFormatter(d) === null,
+  )
+  check(
+    'every emitted dialect routes to a formatter',
+    unroutable.length === 0,
+    unroutable,
   )
 }
 
@@ -187,6 +329,8 @@ async function main() {
   mariadbSyntaxNormalizesToSqlPluginKey()
   dialectResolutionForSqlFormatter()
   dialectResolutionForNodeSqlParser()
+  dialectFormatterCrossSupport()
+  autoFormatterRouting()
 
   console.log(
     `\n${failed === 0 ? 'All checks passed.' : `${failed} check(s) failed.`}`,
