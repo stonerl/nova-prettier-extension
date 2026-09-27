@@ -22,7 +22,11 @@ const {
   sanitizePrettierConfig,
 } = require('./helpers.js')
 
-const { showNotification } = require('./notifications.js')
+const {
+  showNotification,
+  describeFailure,
+  withReason,
+} = require('./notifications.js')
 const { Formatter } = require('./formatter.js')
 
 class PrettierExtension {
@@ -660,10 +664,13 @@ class PrettierExtension {
           'Unable to Start Prettier',
           'notification',
         ),
-        body: nova.localize(
-          'prettier.notification.prettier-start-failed.body',
-          'Please check the Extension Console for additional logs.',
-          'notification',
+        body: withReason(
+          nova.localize(
+            'prettier.notification.prettier-start-failed.body',
+            'Please check the Extension Console for additional logs.',
+            'notification',
+          ),
+          describeFailure(err),
         ),
       })
       return
