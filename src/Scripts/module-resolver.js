@@ -14,6 +14,7 @@ const {
   getNpmVersion,
   handleProcessResult,
   log,
+  readJsonFile,
   spawnNode,
   spawnNpm,
 } = require('./helpers.js')
@@ -157,15 +158,6 @@ async function findModuleWithNPM(directory, module) {
   return promise
 }
 
-function readJSON(path) {
-  const file = nova.fs.open(path, 'r')
-  try {
-    return JSON.parse(file.read())
-  } finally {
-    file.close()
-  }
-}
-
 /**
  * Checks a package against package-lock.json by reading files only: the
  * installed package.json must exist and its version must match the
@@ -181,14 +173,10 @@ function isPackageInstalledPerLockfile(directory, lock, pkg) {
   const locked = lock?.packages?.[`node_modules/${pkg}`]
   if (!locked?.version) return false
 
-  try {
-    const installed = readJSON(
-      nova.path.join(directory, 'node_modules', pkg, 'package.json'),
-    )
-    return installed.version === locked.version
-  } catch {
-    return false
-  }
+  const installed = readJsonFile(
+    nova.path.join(directory, 'node_modules', pkg, 'package.json'),
+  )
+  return !!installed && installed.version === locked.version
 }
 
 /**
@@ -204,12 +192,9 @@ function isPackageInstalledPerLockfile(directory, lock, pkg) {
  *                                      (missing, outdated, INVALID, MAXDEPTH)
  */
 async function verifyBundledPackages(directory, packageNames) {
-  let lock = null
-  try {
-    lock = readJSON(nova.path.join(directory, 'package-lock.json'))
-  } catch {
-    // no usable lockfile — every package goes through npm ls
-  }
+  // readJsonFile resolves null on any error (missing or unreadable
+  // lockfile) — every package then goes through npm ls.
+  const lock = readJsonFile(nova.path.join(directory, 'package-lock.json'))
 
   const broken = []
   const unverified = []
