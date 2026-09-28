@@ -14,11 +14,14 @@ const { findPrettier } = require('./module-resolver.js')
 
 const {
   debouncePromise,
+  getCliVersion,
   getConfigWithWorkspaceOverride,
+  getNpmVersion,
   isInsideExtensionBundle,
   log,
   observeConfigWithWorkspaceOverride,
   observeEmptyArrayCleanup,
+  readJsonFile,
   sanitizePrettierConfig,
 } = require('./helpers.js')
 
@@ -28,6 +31,7 @@ const {
   withReason,
 } = require('./notifications.js')
 const { Formatter } = require('./formatter.js')
+const pluginPaths = require('./prettier-plugins.js')
 
 class PrettierExtension {
   constructor() {
@@ -351,6 +355,10 @@ class PrettierExtension {
       }),
       nova.commands.register('prettier.open-help', () => {
         nova.extension.openHelp()
+      }),
+
+      nova.commands.register('prettier.info', async () => {
+        await this.showPrettierInfo()
       }),
     ]
 
@@ -686,6 +694,101 @@ class PrettierExtension {
 
   async editorWillSave(editor) {
     await this._formatEditor(editor, { isSaving: true })
+  }
+
+  /**
+   * Collects the lines for the Prettier Info command's message: which
+   * Prettier is used and where it came from, its version, the service
+   * state, Node/npm versions and the plugin picture.
+   *
+   * English-only on purpose — diagnostic output, mirroring the SQL
+   * extension's language-server info dialog.
+   *
+   * @private
+   * @returns {Promise<string[]>}
+   */
+  async _buildPrettierInfoLines() {
+    const lines = []
+
+    const explicit = this.modulePath
+    const preferBundled = this.preferBundled
+    const module = this.formatter._runningModulePath ?? this._resolvedModulePath
+
+    let source
+    if (explicit) {
+      const scope =
+        nova.workspace.config.get('prettier.module.path') != null
+          ? 'workspace setting'
+          : 'global setting'
+      source = `Explicit module path (${scope})`
+    } else if (preferBundled) {
+      source = 'Bundled (preferBundled forced)'
+    } else if (!module) {
+      source = 'Not resolved yet'
+    } else if (
+      module === nova.path.join(nova.extension.path, 'node_modules', 'prettier')
+    ) {
+      source = 'Bundled'
+    } else {
+      source = 'Project'
+    }
+    lines.push(`Source: ${source}`)
+
+    lines.push(`Module: ${module ?? 'not resolved yet'}`)
+
+    let version = null
+    if (module) {
+      version =
+        readJsonFile(nova.path.join(module, 'package.json'))?.version ?? null
+    }
+    lines.push(`Version: ${version ?? 'unknown'}`)
+
+    lines.push(
+      `Service: ${this.formatter.isRunning() ? 'running' : 'not running'}`,
+    )
+    const reason = describeFailure(this.formatter._lastFailure)
+    if (reason) lines.push(`Last failure: ${reason}`)
+
+    const [nodeVersion, npmVersion] = await Promise.all([
+      getCliVersion('node'),
+      getNpmVersion(),
+    ])
+    lines.push(`Node: ${nodeVersion} — npm: ${npmVersion}`)
+
+    const pluginVersions = Object.entries(pluginPaths).map(
+      ([name, pluginPath]) => {
+        const packagePath = nova.path.join(
+          nova.path.dirname(nova.path.dirname(pluginPath)),
+          'package.json',
+        )
+        const pkg = readJsonFile(packagePath)
+        return pkg?.version ? `${name} (${pkg.version})` : name
+      },
+    )
+    lines.push(`Bundled plugins: ${pluginVersions.join(', ') || 'none'}`)
+
+    lines.push(
+      `External plugins (last format): ${
+        this.formatter._lastLoadedPlugins.join(', ') || 'none seen this session'
+      }`,
+    )
+    lines.push(
+      `Unresolved plugins: ${
+        this.formatter._lastUnresolvedPlugins.join(', ') || 'none'
+      }`,
+    )
+    lines.push(
+      `Disabled plugins: ${
+        this.formatter._lastDisabledPlugins.join(', ') || 'none'
+      }`,
+    )
+
+    return lines
+  }
+
+  async showPrettierInfo() {
+    const lines = await this._buildPrettierInfoLines()
+    await nova.workspace.showInformativeMessage(lines.join('\n'))
   }
 
   async didInvokeFormatCommand(editor) {

@@ -210,6 +210,10 @@ class Formatter {
     /** whether _lastFailure is a specific reason (crash/timeout/start fail)
         — generic exit-code reasons may be refreshed by newer failures */
     this._lastFailureIsSpecific = false
+    /** external plugins seen in the most recent format, for Prettier Info */
+    this._lastLoadedPlugins = []
+    this._lastUnresolvedPlugins = []
+    this._lastDisabledPlugins = []
     /** handle for the 5s force-stop timer scheduled in stop() */
     this._forceStopTimer = null
 
@@ -900,6 +904,11 @@ class Formatter {
     //   bundled equivalents (if any) are used instead
     // - disabledPlugins: crashed while formatting — the service retried
     //   without them
+    // Keep the latest classification for the Prettier Info command.
+    this._lastLoadedPlugins = loadedPlugins ?? []
+    this._lastUnresolvedPlugins = unresolvedPlugins ?? []
+    this._lastDisabledPlugins = disabledPlugins ?? []
+
     if (loadedPlugins?.length) {
       log.info(
         `Loaded Prettier plugins from your project: ${loadedPlugins.join(', ')}`,

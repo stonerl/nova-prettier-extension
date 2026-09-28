@@ -414,6 +414,7 @@
   "Format Document (Forced)": "Format Document (Forced)",
   "Save Without Formatting": "Save Without Formatting",
   "Restart Prettier Service": "Restart Prettier Service",
+  "Prettier Info": "Prettier Info",
   "Reset Syntax Warnings": "Reset Syntax Warnings",
   "Prettier⁺ Help": "Prettier⁺ Help"
 }

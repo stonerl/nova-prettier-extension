@@ -50,6 +50,10 @@
         "shortcut": "cmd-ctrl-shift-r"
       },
       {
+        "title": "Prettier Info",
+        "command": "prettier.info"
+      },
+      {
         "title": "Reset Syntax Warnings",
         "command": "prettier.reset-suppressed-message",
         "when": "prettier.selectionUnsupportedDismissed"
