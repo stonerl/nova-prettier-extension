@@ -1,3 +1,31 @@
+## 3.9.14 - 2026-09-28
+
+### Fixed
+
+- **The "Check Ignore Pragma" setting now actually works**
+  - It shipped in the UI but was never read into format requests —
+    files with a `@noprettier`/`@noformat` pragma were still formatted.
+    Now wired into the request (supported by the bundled Prettier since
+    3.6).
+
+### Performance
+
+- **Less redundant work per format request**
+  - The service's `getFileInfo` call passed an unsupported `parser`
+    option Prettier silently ignored, while the internal configuration
+    search still ran. It now passes exactly the documented contract
+    (`resolveConfig: false`) — the redundant disk walk-up is gone,
+    results unchanged.
+
+### Development
+
+- New guard suites: `tests/options-coverage.test.js` (every exposed
+  setting must be wired into format requests; deprecated and deferred
+  options must stay out) and `tests/service-api.test.js` (locks the
+  documented `getFileInfo` contract); both run as part of `npm test`.
+- The Prettier service is now unit-testable (bootstrap guarded by
+  `require.main`, service class exported).
+
 ## 3.9.13 - 2026-09-28
 
 ### Fixed
