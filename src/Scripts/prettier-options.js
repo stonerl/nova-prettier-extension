@@ -13,6 +13,7 @@ module.exports = {
     'arrowParens',
     'bracketSameLine',
     'bracketSpacing',
+    'checkIgnorePragma',
     'embeddedLanguageFormatting',
     'endOfLine',
     'htmlWhitespaceSensitivity',
