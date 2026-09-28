@@ -1,0 +1,65 @@
+# Top-level values
+title = "Prettier TOML Sample"
+version = "1.2.3"
+enabled = true
+retries = 3
+timeout = 30.5
+created = 1979-05-27T07:32:00Z
+updated = 2024-12-31 23:59:59
+
+# Dotted keys and bare keys
+server.host = "127.0.0.1"
+server.port = 8080
+database."primary.host" = "db.example.com"
+
+# Tables
+[server]
+host = "localhost"
+ports = [80, 443, 8080]
+timeout = 5
+
+[server.ssl]
+enabled = true
+cert = "/etc/ssl/cert.pem"
+
+# Array of tables
+[[servers]]
+name = "alpha"
+ip = "10.0.0.1"
+
+[[servers]]
+name = "beta"
+ip = "10.0.0.2"
+
+# Inline tables
+point = { x = 1, y = 2 }
+colors = { primary = "#4a90e2", secondary = "#50e3c2" }
+
+# Arrays, including nested and multi-line
+matrix = [[1, 2], [3, 4]]
+users = ["alice", "bob", "charlie"]
+
+# Multiline basic string
+description = """
+This is a multiline
+ basic string with "quotes" and \t escapes.
+"""
+
+# Multiline literal string
+details = '''
+ No escapes here: C:\Users\nova
+'''
+
+# Escapes and unicode
+path = 'C:\temp\no\escapes'
+emoji = "🚀"
+
+# Empty structures
+empty_table = {}
+empty_array = []
+
+# Keys with special characters
+"complex key" = "value"
+
+# Trailing comment
+configured = true # trailing comment

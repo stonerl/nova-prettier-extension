@@ -79,3 +79,16 @@ empty_list: []
 config: # This comment follows a key
   path: /usr/local/bin
   enabled: true # Extra spacing here
+
+# Nested sequences
+matrix:
+  - [1, 2, 3]
+  - [4, 5, 6]
+pairs:
+  - - left
+    - right
+  - - up
+    - down
+
+# Long string to pressure line wrapping
+warning: This is a fairly long value that may need to be wrapped by the formatter when the print width is exceeded.

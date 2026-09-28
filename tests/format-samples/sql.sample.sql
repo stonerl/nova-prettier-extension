@@ -79,3 +79,56 @@ SELECT
     ) THEN 'active'
     ELSE 'inactive'
   END AS status;
+
+-- Common table expressions and window functions
+WITH
+  monthly_posts AS (
+    SELECT
+      user_id,
+      created_at
+    FROM
+      posts
+    WHERE
+      created_at >= DATE('2024-01-01')
+  )
+SELECT
+  u.username,
+  p.post_count,
+  ROW_NUMBER() OVER (
+    PARTITION BY
+      p.user_id
+    ORDER BY
+      p.created_at DESC
+  ) AS recency_rank
+FROM
+  monthly_posts p
+  JOIN users u ON u.id = p.user_id
+WHERE
+  p.post_count > (
+    SELECT
+      AVG(post_count)
+    FROM
+      monthly_posts
+  );
+
+-- Aggregation with HAVING
+SELECT
+  u.id,
+  COUNT(*) AS total
+FROM
+  users u
+GROUP BY
+  u.id
+HAVING
+  COUNT(*) > 5;
+
+-- Transactions and updates
+BEGIN TRANSACTION;
+
+UPDATE users
+SET
+  email = LOWER(email)
+WHERE
+  id = 7;
+
+COMMIT;

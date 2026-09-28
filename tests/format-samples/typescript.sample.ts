@@ -78,3 +78,45 @@ namespace Utils {
     console.log(`[LOG] ${msg}`)
   }
 }
+
+// Function overloads
+function parse(input: string): number
+function parse(input: string[]): number[]
+function parse(input: unknown): unknown {
+  return Array.isArray(input) ? input.map(Number) : Number(input)
+}
+
+// Abstract classes and inheritance
+abstract class Shape {
+  abstract area(): number
+  describe(): string {
+    return `shape with area ${this.area()}`
+  }
+}
+
+class Circle extends Shape.Circle {
+  constructor(public radius: number) {
+    super()
+  }
+  area(): number {
+    return Math.PI * this.radius ** 2
+  }
+}
+
+// satisfies and utility types
+const palette = {
+  brand: '#4a90e2',
+  accent: '#50e3c2',
+} satisfies Record<string, string>
+
+type ReadonlyUser = Readonly<Pick<User, 'id' | 'name'>>
+
+// Decorators (experimental syntax)
+@sealed
+class Vault {
+  static instance?: Vault
+}
+
+function sealed<T extends new (...args: any[]) => unknown>(ctor: T) {
+  return ctor
+}

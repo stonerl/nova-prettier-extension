@@ -60,3 +60,47 @@ subscription onNewMessage {
     }
   }
 }
+
+# Schema Definition Language
+scalar DateTime
+
+enum Role {
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+input CreateUserInput {
+  username: String!
+  email: String @deprecated(reason: "Use `username`")
+  role: Role = VIEWER
+}
+
+interface Node {
+  id: ID!
+}
+
+union SearchResult = User | Post
+
+type User implements Node @key(fields: "id") {
+  id: ID!
+  username: String!
+  role: Role
+  createdAt: DateTime
+}
+
+type Query {
+  user(id: ID!): User
+  search(term: String, first: Int = 10): [SearchResult!]!
+}
+
+directive @auth(role: Role) on FIELD_DEFINITION | OBJECT
+
+# Usage with directives
+query conditionalFetch($verbose: Boolean! = false) {
+  user(id: "4") {
+    id
+    email @include(if: $verbose)
+    role @skip(if: false)
+  }
+}

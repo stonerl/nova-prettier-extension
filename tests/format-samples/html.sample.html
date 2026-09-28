@@ -27,6 +27,56 @@
         <button type="submit">Submit</button>
       </form>
 
+      <table>
+        <caption>
+          Example table
+        </caption>
+        <colgroup>
+          <col span="2" />
+          <col />
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Age</th>
+            <th>City</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Alice</td>
+            <td>30</td>
+            <td>Vienna</td>
+          </tr>
+          <tr>
+            <td>Bob</td>
+            <td>25</td>
+            <td>Graz</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <figure>
+        <img src="chart.png" alt="Chart" />
+        <figcaption>Figure caption</figcaption>
+      </figure>
+
+      <details open>
+        <summary>More details</summary>
+        <p>Hidden until expanded.</p>
+      </details>
+
+      <video controls width="320">
+        <source src="movie.mp4" type="video/mp4" />
+        <track kind="captions" src="captions.vtt" />
+      </video>
+
+      <svg width="20" height="20" viewBox="0 0 20 20">
+        <circle cx="10" cy="10" r="8" fill="currentColor" />
+      </svg>
+
+      <p>Entities: &amp; &lt; &gt; &copy; &#9731;</p>
+
       <script>
         const foo = { bar: 'baz' }
         console.log(foo)

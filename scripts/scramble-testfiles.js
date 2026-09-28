@@ -8,56 +8,156 @@
  * Applies language-specific formatting mistakes to the sample files in
  * tests/format-samples/ to simulate real-world input for the manual
  * verify loop: scramble → open in Nova → format → eyeball the result.
- * Scanning is keyed on extension, not filename.
+ *
+ * - Dispatch is suffix-aware: the longest matching suffix wins, so
+ *   `blade.sample.blade.php` maps to the Blade injector while a plain
+ *   `.php` file maps to the PHP one.
+ * - Every injector is deterministic: a seeded PRNG (mulberry32) replaces
+ *   Math.random, seeded per file from its filename. Running the script
+ *   twice on the same tree produces byte-identical scrambles.
+ * - Injectors only mangle; none of the rules "improve" formatting.
+ *
+ * Usage:
+ *   node scripts/scramble-testfiles.js            scramble in place
+ *   node scripts/scramble-testfiles.js --dry      show what would run
+ *   node scripts/scramble-testfiles.js --seed=7   override the base seed
  */
 
 const fs = require('fs')
 const path = require('path')
 
-const TESTS_DIR = path.join(__dirname, '..', 'tests', 'format-samples')
+const args = process.argv.slice(2)
+const dryRun = args.includes('--dry')
+const seedArg = args.find((arg) => arg.startsWith('--seed='))
+const baseSeed = seedArg ? Number(seedArg.split('=')[1]) || 0 : 0x5eed
+const dirArg = args.find((arg) => arg.startsWith('--dir='))
+const SAMPLES_DIR = dirArg
+  ? path.resolve(dirArg.split('=').slice(1).join('='))
+  : path.join(__dirname, '..', 'tests', 'format-samples')
 
-const mistakeInjectors = {
-  '.css': simulateCssMistakes,
+function mulberry32(seed) {
+  let a = seed >>> 0
+  return function rng() {
+    a |= 0
+    a = (a + 0x6d2b79f5) | 0
+    let t = Math.imul(a ^ (a >>> 15), 1 | a)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+
+function fnv1a(str) {
+  let hash = 0x811c9dc5
+  for (let i = 0; i < str.length; i++) {
+    hash ^= str.charCodeAt(i)
+    hash = Math.imul(hash, 0x01000193)
+  }
+  return hash >>> 0
+}
+
+/** Seeded, per-file RNG: same filename → same sequence of decisions. */
+function rngFor(file) {
+  return mulberry32(baseSeed ^ fnv1a(file))
+}
+
+/**
+ * One of: drop one leading indent level, keep, or add one.
+ * Uses the provided RNG so repeated runs are stable.
+ *
+ * @param {function():number} rng
+ * @param {string} line
+ * @param {number} indentUnit  string used for one indent level
+ * @returns {string}
+ */
+function jitterIndent(rng, line, indentUnit) {
+  const leading = line.match(/^[ \t]*/)[0]
+  const body = line.slice(leading.length)
+  if (!body) return line
+
+  const levels = leading.length
+    ? Math.round(leading.length / indentUnit.length)
+    : 0
+  const roll = rng()
+  if (levels > 0 && roll < 0.45) {
+    return body
+  }
+  if (roll < 0.7) {
+    return indentUnit.repeat(levels) + body
+  }
+  return indentUnit.repeat(levels + 1) + body
+}
+
+// --- Suffix dispatch table (longest match wins) ---
+
+const injectors = {
+  '.blade.php': simulateBladeMistakes,
+  '.html.ejs': simulateEjsMistakes,
+  '.astro': simulateAstroMistakes,
+  '.blade': simulateBladeMistakes,
+  '.twig': simulateTwigMistakes,
+  '.toml': simulateTomlMistakes,
+  '.dockerfile': simulateDockerfileMistakes,
+  '.containerfile': simulateDockerfileMistakes,
+  '.nginx': simulateNginxMistakes,
+  '.properties': simulatePropertiesMistakes,
+  '.graphql': simulateGraphqlMistakes,
   '.ejs': simulateEjsMistakes,
+  '.html': simulateHtmlMistakes,
+  '.md': simulateMarkdownMistakes,
+  '.php': simulatePhpMistakes,
+  '.java': simulateJavaMistakes,
   '.js': simulateJsMistakes,
   '.jsx': simulateJsMistakes,
   '.ts': simulateTsMistakes,
-  '.php': simulatePhpMistakes,
-  '.md': simulateMarkdownMistakes,
-  '.html': simulateHtmlMistakes,
-  '.graphql': simulateGraphqlMistakes,
-  '.json': simulateJsonMistakes,
+  '.css': simulateCssMistakes,
   '.scss': simulateScssMistakes,
   '.less': simulateLessMistakes,
   '.vue': simulateVueMistakes,
   '.xml': simulateXmlMistakes,
   '.yaml': simulateYamlMistakes,
+  '.yml': simulateYamlMistakes,
   '.sql': simulateSqlMistakes,
-  '.nginx': simulateNginxMistakes,
-  '.java': simulateJavaMistakes,
-  '.properties': simulatePropertiesMistake,
+  '.sh': simulateShMistakes,
+  '.json': simulateJsonMistakes,
 }
 
-fs.readdirSync(TESTS_DIR).forEach((file) => {
-  const fullPath = path.join(TESTS_DIR, file)
-  const ext = path.extname(file)
-  const formatter = mistakeInjectors[ext]
+const suffixes = Object.keys(injectors).sort((a, b) => b.length - a.length)
 
+function findSuffix(file) {
+  const lower = file.toLowerCase()
+  return suffixes.find((suffix) => lower.endsWith(suffix))
+}
+
+// --- Main loop ---
+
+fs.readdirSync(SAMPLES_DIR).forEach((file) => {
+  const fullPath = path.join(SAMPLES_DIR, file)
   if (!fs.statSync(fullPath).isFile()) return
-  if (!formatter) {
+
+  const suffix = findSuffix(file)
+  const injector = suffix ? injectors[suffix] : null
+
+  if (!injector) {
     console.warn(`Skipping unsupported file: ${file}`)
     return
   }
 
+  if (dryRun) {
+    console.log(`Would scramble: ${file} (${suffix})`)
+    return
+  }
+
   const original = fs.readFileSync(fullPath, 'utf-8')
-  const scrambled = formatter(original)
+  const scrambled = injector(original, rngFor(file))
   fs.writeFileSync(fullPath, scrambled, 'utf-8')
-  console.log(`Scrambled: ${file}`)
+  console.log(`Scrambled: ${file} (${suffix})`)
 })
 
 // === FORMATTER FUNCTIONS ===
+// Every function receives (content, rng) and returns the mangled text.
+// `rng` replaces Math.random for determinism.
 
-function simulateCssMistakes(content) {
+function simulateCssMistakes(content, _rng) {
   const lines = content.split('\n')
   let inBlockComment = false
 
@@ -82,13 +182,12 @@ function simulateCssMistakes(content) {
         .replace(/\s*}\s*/g, '} ')
         .replace(/\s*:\s*/g, ':')
         .replace(/\s*;\s*/g, ';')
-        .replace(/,\s*/g, ', ')
         .replace(/\s+/g, ' ')
     })
     .join('\n')
 }
 
-function simulateEjsMistakes(content) {
+function simulateEjsMistakes(content, _rng) {
   const lines = content.split('\n')
   const result = []
   let indentLevel = 0
@@ -115,7 +214,7 @@ function simulateEjsMistakes(content) {
       const spaced = trimmed
         .replace(/\s{2,}/g, ' ')
         .replace(/^\s+/, '')
-        .replace(/%\>\s*$/, '%>')
+        .replace(/%>\s*$/, '%>')
         .replace(/<%\s*/g, '<% ')
         .replace(/\s*%>/g, ' %>')
 
@@ -136,7 +235,7 @@ function simulateEjsMistakes(content) {
   return result.join('\n')
 }
 
-function simulateJsMistakes(content) {
+function simulateJsMistakes(content, _rng) {
   const lines = content.split('\n')
   const result = []
 
@@ -169,11 +268,11 @@ function simulateJsMistakes(content) {
   return result.join('\n')
 }
 
-function simulateTsMistakes(content) {
-  return simulateJsMistakes(content)
+function simulateTsMistakes(content, rng) {
+  return simulateJsMistakes(content, rng)
 }
 
-function simulatePhpMistakes(content) {
+function simulatePhpMistakes(content, _rng) {
   const lines = content.split('\n')
   const result = []
 
@@ -225,7 +324,7 @@ function simulatePhpMistakes(content) {
   return result.join('\n')
 }
 
-function simulateMarkdownMistakes(content) {
+function simulateMarkdownMistakes(content, rng) {
   let inFencedBlock = false
   let inFrontmatter = false
 
@@ -234,7 +333,7 @@ function simulateMarkdownMistakes(content) {
     .map((line) => {
       const trimmed = line.trim()
 
-      // Toggle YAML front‑matter
+      // Toggle YAML front-matter
       if (trimmed === '---') {
         inFrontmatter = !inFrontmatter
         return line
@@ -252,7 +351,8 @@ function simulateMarkdownMistakes(content) {
         trimmed === '' ||
         /^\s*[#>]/.test(trimmed) || // headings & blockquotes
         /^\{[%{]/.test(trimmed) || // lines starting with {% or {{
-        /`[^`]+`/.test(trimmed) // inline code
+        /`[^`]+`/.test(trimmed) || // inline code
+        /'[^']+'|"[^"]+"/.test(trimmed) // quoted strings (link titles etc.)
 
       if (shouldSkip) return line
 
@@ -270,23 +370,24 @@ function simulateMarkdownMistakes(content) {
 
       // Otherwise, scramble entire line
       return scramble(line)
+
+      function scramble(text) {
+        return text
+          .split(/(\s+)/)
+          .map((chunk, i) => {
+            if (i % 2 === 1) {
+              const pad = Math.floor(rng() * 3) // deterministic 0–2 spaces
+              return chunk + ' '.repeat(pad)
+            }
+            return chunk
+          })
+          .join('')
+      }
     })
     .join('\n')
-
-  function scramble(text) {
-    return text
-      .split(/(\s+)/)
-      .map((chunk, i) => {
-        if (i % 2 === 1) {
-          return chunk + ' '.repeat(Math.floor(Math.random() * 3)) // add 0–2 spaces
-        }
-        return chunk
-      })
-      .join('')
-  }
 }
 
-function simulateHtmlMistakes(content) {
+function simulateHtmlMistakes(content, _rng) {
   const lines = content.split('\n')
   const result = []
   let inScript = false
@@ -320,19 +421,15 @@ function simulateHtmlMistakes(content) {
       continue
     }
 
-    // Avoid collapsing inline tags (e.g. <input> <br> <hr> <img>)
     result.push(
-      line
-        .replace(/ {2,}/g, ' ')
-        .replace(/^\s+/g, '') // remove leading indent
-        .replace(/\s+\/>/g, ' />'), // normalize self-closing spacing
+      line.replace(/ {2,}/g, ' ').replace(/^\s+/g, ''), // remove leading indent
     )
   }
 
   return result.join('\n')
 }
 
-function simulateGraphqlMistakes(content) {
+function simulateGraphqlMistakes(content, _rng) {
   return content
     .split('\n')
     .map((line) => {
@@ -343,7 +440,7 @@ function simulateGraphqlMistakes(content) {
     .join('\n')
 }
 
-function simulateJsonMistakes(content) {
+function simulateJsonMistakes(content, _rng) {
   return content
     .replace(/:\s*/g, ': ') // fix colon spacing
     .replace(/,\s*/g, ', ') // comma spacing
@@ -351,7 +448,7 @@ function simulateJsonMistakes(content) {
     .replace(/\n{3,}/g, '\n\n') // too many line breaks
 }
 
-function simulateScssMistakes(content) {
+function simulateScssMistakes(content, _rng) {
   const lines = content.split('\n')
   const result = []
 
@@ -373,10 +470,7 @@ function simulateScssMistakes(content) {
     const scrambled = line
       .replace(/^\s+/g, '') // remove leading indent
       .replace(/\s{2,}/g, ' ') // collapse multiple spaces
-      .replace(/\s*([:{}();,{}])\s*/g, '$1') // tighten syntax characters
-      .replace(/#\{\s*(.*?)\s*\}/g, '#{$1}') // tighten interpolations
-      .replace(/and\(/g, 'and (') // fix missing space after "and"
-      .replace(/:\s*(\d+)/g, ': $1') // fix colon spacing for numbers
+      .replace(/\s*([:{};,])\s*/g, '$1') // tighten syntax characters
       .replace(/,\s*/g, ', ') // normalize comma spacing
 
     result.push(scrambled)
@@ -385,7 +479,7 @@ function simulateScssMistakes(content) {
   return result.join('\n')
 }
 
-function simulateLessMistakes(content) {
+function simulateLessMistakes(content, _rng) {
   const lines = content.split('\n')
   const result = []
 
@@ -409,8 +503,7 @@ function simulateLessMistakes(content) {
       .replace(/\s*([{}();])\s*/g, '$1') // tighten around syntax
       .replace(/:\s*/g, ': ') // normalize to one space after colon
       .replace(/,\s*/g, ', ') // comma spacing
-      .replace(/#\{\s*(.*?)\s*\}/g, '#{$1}') // tighten interpolation
-      .replace(/&:\s+([a-zA-Z])/g, '&:$1') // fix & pseudo selectors
+      .replace(/&:\s+/g, '&:') // protect & pseudo-selectors (space changes meaning)
 
     result.push(scrambled)
   }
@@ -418,7 +511,7 @@ function simulateLessMistakes(content) {
   return result.join('\n')
 }
 
-function simulateVueMistakes(content) {
+function simulateVueMistakes(content, rng) {
   const templateMatch = content.match(
     /<template\b[^>]*>([\s\S]*?)<\/template\s*>/i,
   )
@@ -465,7 +558,7 @@ function simulateVueMistakes(content) {
 
   // --- STYLE SCRAMBLE ---
   if (styleMatch) {
-    scrambledStyle = simulateScssMistakes(styleMatch[0])
+    scrambledStyle = simulateScssMistakes(styleMatch[0], rng)
   }
 
   return [
@@ -479,7 +572,7 @@ function simulateVueMistakes(content) {
   ].join('\n\n')
 }
 
-function simulateXmlMistakes(content) {
+function simulateXmlMistakes(content, _rng) {
   const lines = content.split('\n')
   const result = []
 
@@ -513,6 +606,7 @@ function simulateXmlMistakes(content) {
       inCdata ||
       inTextBlock ||
       trimmed.startsWith('<?xml') ||
+      trimmed.startsWith('<!') ||
       trimmed.startsWith('<!--') ||
       trimmed.startsWith('-->') ||
       trimmed === ''
@@ -521,13 +615,15 @@ function simulateXmlMistakes(content) {
       continue
     }
 
-    // Scramble only tag lines
-    const scrambled = line
-      .replace(/ {2,}/g, ' ')
-      .replace(/\s*=\s*/g, '=')
-      .replace(/\s+\/>/g, ' />')
-      .replace(/^\s+/, '')
-      .replace(/\s+$/, '')
+    // Scramble only tag lines — leading indentation is preserved on
+    // purpose: @prettier/plugin-xml treats whitespace-only text nodes as
+    // significant, so a re-indent cannot be recovered by formatting.
+    const scrambled = line.replace(
+      /^(\s*)([\s\S]*?)\s*$/,
+      (_, indent, body) => {
+        return indent + body.replace(/ {2,}/g, ' ').replace(/\s*=\s*/g, '=')
+      },
+    )
 
     result.push(scrambled)
   }
@@ -535,7 +631,7 @@ function simulateXmlMistakes(content) {
   return result.join('\n')
 }
 
-function simulateYamlMistakes(content) {
+function simulateYamlMistakes(content, _rng) {
   return content
     .split('\n')
     .map((line) => {
@@ -560,13 +656,12 @@ function simulateYamlMistakes(content) {
       }
 
       // Minimal change: normalize colon spacing on unquoted keys.
-      // This replaces any spaces (or lack thereof) before and after a colon with exactly one space after.
       return line.replace(/\s*:\s*/g, ': ')
     })
     .join('\n')
 }
 
-function simulateSqlMistakes(content) {
+function simulateSqlMistakes(content, _rng) {
   return content
     .replace(/ {2,}/g, ' ')
     .replace(/\t+/g, ' ')
@@ -574,7 +669,7 @@ function simulateSqlMistakes(content) {
     .replace(/^\s+/gm, '') // unindent
 }
 
-function simulateNginxMistakes(content) {
+function simulateNginxMistakes(content, _rng) {
   return content
     .split('\n')
     .map((line) => {
@@ -606,7 +701,7 @@ function simulateNginxMistakes(content) {
     .join('\n')
 }
 
-function simulateJavaMistakes(content) {
+function simulateJavaMistakes(content, rng) {
   return content
     .split('\n')
     .map((line) => {
@@ -628,14 +723,13 @@ function simulateJavaMistakes(content) {
       // Add safe extra spaces between identifiers (but not operators)
       modified = modified.replace(
         /\b([a-zA-Z_][a-zA-Z0-9_]*)\b(?=\s+\b[a-zA-Z_][a-zA-Z0-9_]*\b)/g,
-        (match) => match + ' '.repeat(Math.random() < 0.5 ? 0 : 1),
+        (match) => match + (rng() < 0.5 ? '' : ' '),
       )
 
       // Slightly mess with spacing after control keywords
       modified = modified.replace(
         /\b(public|private|protected|if|else|while|for|return|static|final|class)\b\s+/g,
-        (match, keyword) =>
-          keyword + ' '.repeat(1 + Math.floor(Math.random() * 2)),
+        (match, keyword) => keyword + ' '.repeat(1 + Math.floor(rng() * 2)),
       )
 
       // Avoid touching operators or structural punctuation
@@ -644,14 +738,20 @@ function simulateJavaMistakes(content) {
     .join('\n')
 }
 
-function simulatePropertiesMistake(content) {
+function simulatePropertiesMistakes(content, rng) {
   return content
     .split('\n')
     .map((line) => {
       const trimmed = line.trim()
 
-      // Leave comments and blank lines alone
-      if (trimmed === '' || trimmed.startsWith('#')) return line
+      // Leave comments and blank lines alone (both # and ! comments)
+      if (
+        trimmed === '' ||
+        trimmed.startsWith('#') ||
+        trimmed.startsWith('!')
+      ) {
+        return line
+      }
 
       // Continuation or multi-line: keep indent and continuation slashes
       if (line.match(/\\\s*$/)) return line
@@ -660,26 +760,193 @@ function simulatePropertiesMistake(content) {
       const match = line.match(/^(\s*)([^:=]+?)(\s*)([:=])(\s*)(.*)$/)
       if (!match) return line
 
-      const [, indent, key, sep, value] = match
+      const [, indent, key, , separator, , value] = match
 
       let newLine = indent
 
       // Some lines lose spacing around separators
-      const random = Math.random()
-      if (random < 0.3) {
-        newLine += key + sep + value
-      } else if (random < 0.6) {
-        newLine += key + sep + ' ' + value
+      const roll = rng()
+      if (roll < 0.3) {
+        newLine += key + separator + value
+      } else if (roll < 0.6) {
+        newLine += key + separator + ' ' + value
       } else {
-        newLine += key + ' ' + sep + '  ' + value
+        newLine += key + ' ' + separator + '  ' + value
       }
 
       // Occasionally indent the line
-      if (Math.random() < 0.1) {
+      if (rng() < 0.1) {
         newLine = '  ' + newLine
       }
 
       return newLine
+    })
+    .join('\n')
+}
+
+// --- New injectors ---
+
+function simulateShMistakes(content, _rng) {
+  let heredocEnd = null
+
+  return content
+    .split('\n')
+    .map((line) => {
+      const trimmed = line.trim()
+
+      // Inside a heredoc body: leave everything alone
+      if (heredocEnd !== null) {
+        if (trimmed === heredocEnd) heredocEnd = null
+        return line
+      }
+
+      // Heredoc start: find the delimiter and skip its body
+      const heredoc = trimmed.match(/<<-?['"]?(\w+)['"]?/)
+      if (heredoc) {
+        heredocEnd = heredoc[1]
+        return line
+      }
+
+      if (trimmed === '' || trimmed.startsWith('#')) return line
+
+      let scrambled = jitterIndent(_rng, line, '  ')
+      scrambled = scrambled.replace(/\s{2,}/g, ' ')
+      // `;;` terminates `case` arms — leave it, only mess with single `;`
+      scrambled = scrambled.replace(
+        /(?<!;)\s*;(?!;)\s*/g,
+        _rng() < 0.5 ? '; ' : ';',
+      )
+      scrambled = scrambled.replace(/\s*\|\s*/g, _rng() < 0.5 ? '|' : ' | ')
+      scrambled = scrambled.replace(/\s*&&\s*/g, _rng() < 0.5 ? ' && ' : '&&')
+      return scrambled
+    })
+    .join('\n')
+}
+
+function simulateDockerfileMistakes(content, rng) {
+  return content
+    .split('\n')
+    .map((line) => {
+      const trimmed = line.trim()
+
+      // Preserve comments, blank lines, continuation lines
+      if (trimmed === '' || trimmed.startsWith('#') || trimmed.endsWith('\\')) {
+        return line
+      }
+
+      let scrambled = jitterIndent(rng, line, '  ')
+      // Collapse runs; occasionally lowercase the instruction keyword
+      scrambled = scrambled.replace(/\s{2,}/g, ' ')
+      const keyword = scrambled.match(/^([A-Z][A-Z0-9]+)\b/)
+      if (keyword && rng() < 0.3) {
+        scrambled =
+          keyword[1].toLowerCase() + scrambled.slice(keyword[1].length)
+      }
+      return scrambled
+    })
+    .join('\n')
+}
+
+function simulateTomlMistakes(content, rng) {
+  return content
+    .split('\n')
+    .map((line) => {
+      const trimmed = line.trim()
+
+      // Preserve comments, blank lines, and multiline string markers
+      if (
+        trimmed === '' ||
+        trimmed.startsWith('#') ||
+        trimmed === '"""' ||
+        trimmed === "'''"
+      ) {
+        return line
+      }
+
+      let scrambled = jitterIndent(rng, line, '  ')
+      scrambled = scrambled.replace(/\s*=\s*/g, rng() < 0.5 ? ' = ' : '=')
+      scrambled = scrambled.replace(/\s*,\s*/g, ', ')
+      scrambled = scrambled.replace(/\s{2,}/g, ' ')
+      return scrambled
+    })
+    .join('\n')
+}
+
+function simulateAstroMistakes(content, _rng) {
+  const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/)
+  let frontmatter = ''
+  let template = content
+
+  if (frontmatterMatch) {
+    frontmatter = frontmatterMatch[1]
+    template = content.slice(frontmatterMatch[0].length)
+  }
+
+  // Frontmatter: strip indents, collapse spaces (TS-ish mangle)
+  const mangledFrontmatter = frontmatter
+    .split('\n')
+    .map((line) => line.replace(/\s{2,}/g, ' ').replace(/^\s+/g, ''))
+    .join('\n')
+
+  // Template: strip leading indents, tighten attribute spacing
+  const mangledTemplate = template
+    .split('\n')
+    .map((line) => {
+      const trimmed = line.trim()
+      if (trimmed === '') return ''
+      return line
+        .replace(/^\s+/g, '')
+        .replace(/\s{2,}/g, ' ')
+        .replace(/=\s+"/g, '="')
+    })
+    .join('\n')
+
+  return (
+    (frontmatterMatch ? `---\n${mangledFrontmatter}\n---` : '') +
+    mangledTemplate
+  )
+}
+
+function simulateBladeMistakes(content, rng) {
+  return content
+    .split('\n')
+    .map((line) => {
+      const trimmed = line.trim()
+
+      if (trimmed === '') return line
+
+      // Preserve @php blocks verbatim
+      if (trimmed.startsWith('@php')) return line
+
+      let scrambled = jitterIndent(rng, line, '  ')
+      scrambled = scrambled.replace(/\s{2,}/g, ' ')
+      // Mangle spacing inside {{ }} and @directive expressions
+      scrambled = scrambled.replace(/\{\{\s*/g, rng() < 0.5 ? '{{' : '{{ ')
+      scrambled = scrambled.replace(/\s*\}\}/g, '}}')
+      scrambled = scrambled.replace(/@(\w+)\s*\(/g, (m, name) =>
+        rng() < 0.5 ? `@${name}(` : `@${name} (`,
+      )
+      return scrambled
+    })
+    .join('\n')
+}
+
+function simulateTwigMistakes(content, rng) {
+  return content
+    .split('\n')
+    .map((line) => {
+      const trimmed = line.trim()
+
+      if (trimmed === '') return line
+
+      let scrambled = jitterIndent(rng, line, '  ')
+      scrambled = scrambled.replace(/\s{2,}/g, ' ')
+      // Tighten or loosen tag spacing: {% tag %} / {%tag%}
+      scrambled = scrambled.replace(/\{%\s*/g, rng() < 0.5 ? '{%' : '{% ')
+      scrambled = scrambled.replace(/\s*%\}/g, '%}')
+      scrambled = scrambled.replace(/\{\{\s*/g, rng() < 0.5 ? '{{' : '{{ ')
+      scrambled = scrambled.replace(/\s*\}\}/g, '}}')
+      return scrambled
     })
     .join('\n')
 }

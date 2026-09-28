@@ -72,3 +72,36 @@ input[type='password'] {
     opacity: 1;
   }
 }
+
+/* Custom properties and nesting */
+:root {
+  --brand: #4a90e2;
+  --gap: 8px;
+}
+
+@supports (display: grid) {
+  .grid {
+    display: grid;
+    grid-template-areas:
+      'head head'
+      'side main';
+    gap: var(--gap);
+  }
+
+  .grid > .main {
+    grid-area: main;
+  }
+
+  .grid > .empty-rule {
+  }
+}
+
+.card {
+  & > .title {
+    color: var(--brand);
+  }
+
+  &:hover .body {
+    background: color-mix(in srgb, var(--brand) 20%, white);
+  }
+}

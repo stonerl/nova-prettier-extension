@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!-- Root element with namespaces and attributes -->
-<root xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0">
+<root
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:dc="http://purl.org/dc/elements/1.1/"
+  version="1.0"
+>
   <!-- Nested elements with attributes -->
   <user id="123" active="true">
     <name>John Doe</name>
@@ -14,6 +18,14 @@
   <!-- Self-closing and empty tags -->
   <meta />
   <config value="" />
+
+  <!-- Namespaced elements and entities -->
+  <dc:creator>Jane &amp; Doe</dc:creator>
+  <code>&lt;not-a-tag&gt;</code>
+  <glyph unicode="&#9731;" />
+
+  <!-- Single-quoted attributes -->
+  <theme mode='dark' fallback='light' />
 
   <!-- Text content and CDATA -->
   <description>

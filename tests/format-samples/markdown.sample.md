@@ -45,6 +45,44 @@ Another paragraph follows, with **bold text**, _italic text_, and **_bold italic
 > This is a blockquote that spans multiple lines.
 > It should be indented properly and maintain its structure.
 
+> Nested level one
+>
+> > Nested blockquote level two
+
+## Tables
+
+| Left | Center | Right |
+| :--- | :----: | ----: |
+| a    |   b    |     c |
+| aa   |   bb   |    cc |
+
+## Task Lists
+
+- [x] Scramble the samples
+- [x] Format in Nova
+- [ ] Eyeball the output
+
+## Links and Reference Links
+
+Autolink: <https://example.com>
+
+Inline [link](https://example.com), reference [ref][nova-docs], and
+bare www.example.com.
+
+[nova-docs]: https://docs.example.com/nova 'Nova Docs'
+
+## Line Breaks and Rules
+
+Hard break: trailing two spaces
+then a new line.
+
+Thematic break:
+
+---
+
+Setext heading
+==============
+
 ## Inline Code
 
 Use `npm install` to install dependencies.

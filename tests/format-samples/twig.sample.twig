@@ -1,0 +1,52 @@
+{% extends 'base.twig' %}
+
+{% block title %}
+  Twig Sample
+{% endblock %}
+
+{% set heading = 'Twig Test' %}
+
+{% block content %}
+  <h1>{{ heading }}</h1>
+
+  {% if user %}
+    <p>
+      Welcome back, {{ user.name }}!
+    </p>
+  {% else %}
+    <p>
+      Please <a href="/login">log in</a>.
+    </p>
+  {% endif %}
+
+  <ul>
+    {% for item in items %}
+      <li data-index="{{ loop.index }}">{{ item.label|escape }}</li>
+    {% else %}
+      <li>No items found.</li>
+    {% endfor %}
+  </ul>
+
+  {{ 'now'|date('Y-m-d') }}
+  {{ total_price|number_format(2, '.', ',') }}
+
+  {% set greeting = 'Hello' ~ ' ' ~ (user.name|default('stranger')) %}
+
+  {% macro label(text, class) %}
+    <label class="label">{{ text|title }}</label>
+  {% endmacro %}
+
+  {% import _self as macros %}
+  {{ macros.greeting('World') }}
+
+  {# Inline comment #}
+  {% embed 'partials.card' %}
+    {% block body %}
+      <p>
+        Embedded content with {{ extra_value|default('—') }}
+      </p>
+    {% endblock %}
+  {% endembed %}
+
+  <span {{ test_attr|raw }}></span>
+{% endblock %}

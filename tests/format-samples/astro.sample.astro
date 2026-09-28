@@ -1,0 +1,46 @@
+---
+import { Astro } from 'astro'
+const { title, items, nested } = Astro.props
+interface Props {
+  title: string
+  items: string[]
+  nested?: { deep: boolean }
+}
+const doubled = items.map((item) => item.length * 2)
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <h1>{title}</h1>
+
+    <ul class="list">
+      {items.map((item, index) => (
+        <li data-index={index}>{item}</li>
+      ))}
+    </ul>
+
+    {nested?.deep ? <p data-deep>Nested truthy</p> : <p>Nested falsy</p>}
+
+    <Fragment slot="title">
+      <span>Fragment content</span>
+    </Fragment>
+
+    <div>{doubled.join(', ')}</div>
+
+    <!-- HTML comment preserved -->
+
+    <style>
+      .list {
+        color: #4a90e2;
+        padding: 0;
+      }
+      .list li {
+        margin: 4px 0;
+      }
+    </style>
+  </body>
+</html>

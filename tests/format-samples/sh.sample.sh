@@ -28,3 +28,29 @@ esac
 
 results=$(find . -name '*.sh' | sort | wc -l)
 echo "found $results scripts"
+
+# Arrays and arithmetic
+declare -a items=(alpha beta gamma)
+total=0
+for index in "${!items[@]}"; do
+  ((total += index))
+  echo "index $index of ${#items[@]}"
+done
+
+if ((total % 2 == 0)); then
+  echo "even sum: $total"
+fi
+
+# Heredoc and trap
+cat << 'EOF'
+literal heredoc
+$not_expanded ${here}
+EOF
+
+cleanup() {
+  rm -f /tmp/sample.lock
+}
+trap cleanup EXIT INT TERM
+
+export SAMPLE_ENV="sample-value"
+readonly SAMPLE_CONST="fixed"

@@ -71,3 +71,44 @@ if (a > 0) {
 } else {
   console.log('non-positive')
 }
+
+// Destructuring, spread, and rest
+const { id, name, ...rest } = user
+const merged = { ...user, ...rest, id: 99 }
+const [first, second = 0, ...others] = list
+
+// Generator functions and yield
+function* counter(start) {
+  while (start < 10) {
+    yield start++
+  }
+}
+
+// Private class fields and methods
+class Counter {
+  #count = 0
+  #step
+  constructor(step = 1) {
+    this.#step = step
+  }
+  increment() {
+    return (this.#count += this.#step)
+  }
+  get value() {
+    return this.#count
+  }
+}
+
+// Optional catch binding and regex literals
+const semver = /(\d+)\.(\d+)\.(\d+)/
+try {
+  JSON.parse('{bad')
+} catch {
+  console.error('unparseable')
+}
+
+// for…of with labels and numeric separators
+const million = 1_000_000
+outer: for (const n of [1_000, 2_000]) {
+  if (n > 1_500) break outer
+}
