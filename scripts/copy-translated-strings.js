@@ -20,7 +20,6 @@ const PROJECT_ROOT = path.resolve(__dirname, '..')
 const TRANSLATIONS_DIR = path.join(PROJECT_ROOT, 'translations')
 const EXTENSION_DIR = path.join(PROJECT_ROOT, 'prettier.novaextension')
 
-// List of language folders you use for translations.
 const languages = [
   'de.lproj',
   'en.lproj',
@@ -29,13 +28,10 @@ const languages = [
   'zh-Hans.lproj',
 ]
 
-// ─────────────────────────────────────────
-// Copy strings.json with filtering
-
+// strings.json — copy with filtering
 languages.forEach((lang) => {
   const sourceFile = path.join(TRANSLATIONS_DIR, lang, 'strings.json')
 
-  // If there's no translation file for the language, skip it.
   if (!fs.existsSync(sourceFile)) {
     console.warn(
       `Source file for ${lang} not found at ${sourceFile}. Skipping strings.json.`,
@@ -43,7 +39,6 @@ languages.forEach((lang) => {
     return
   }
 
-  // Read and parse the JSON file.
   let translations = {}
   try {
     translations = JSON.parse(fs.readFileSync(sourceFile, 'utf8'))
@@ -52,7 +47,7 @@ languages.forEach((lang) => {
     return
   }
 
-  // Filter out strings that are empty or consist solely of whitespace.
+  // drop empty or whitespace-only entries
   const filtered = {}
   Object.keys(translations).forEach((key) => {
     const value = translations[key]
@@ -69,12 +64,9 @@ languages.forEach((lang) => {
     return
   }
 
-  // Define the destination directory inside the extension folder,
-  // mirroring the language folder structure.
   const destLangDir = path.join(EXTENSION_DIR, lang)
   fs.mkdirSync(destLangDir, { recursive: true })
 
-  // Write the filtered translations into the destination file.
   const destFile = path.join(destLangDir, 'strings.json')
   fs.writeFileSync(destFile, JSON.stringify(filtered, null, 2))
   console.log(
@@ -82,14 +74,10 @@ languages.forEach((lang) => {
   )
 })
 
-// ─────────────────────────────────────────
-// Copy notification.json as is
-
+// notification.json — copy as is (used for web-based late translations)
 languages.forEach((lang) => {
-  // Set source file to notification.json instead of strings.json.
   const sourceFile = path.join(TRANSLATIONS_DIR, lang, 'notification.json')
 
-  // If there's no notification file for the language, skip it.
   if (!fs.existsSync(sourceFile)) {
     console.warn(
       `Source file for ${lang} not found at ${sourceFile}. Skipping notification.json.`,
@@ -97,7 +85,6 @@ languages.forEach((lang) => {
     return
   }
 
-  // Read the file contents directly.
   let contents = ''
   try {
     contents = fs.readFileSync(sourceFile, 'utf8')
@@ -106,12 +93,9 @@ languages.forEach((lang) => {
     return
   }
 
-  // Define the destination directory inside the extension folder,
-  // mirroring the language folder structure.
   const destLangDir = path.join(EXTENSION_DIR, lang)
   fs.mkdirSync(destLangDir, { recursive: true })
 
-  // Write the notification.json file as is to the destination.
   const destFile = path.join(destLangDir, 'notification.json')
   fs.writeFileSync(destFile, contents)
   console.log(`Copied notification strings for ${lang} to ${destFile}`)

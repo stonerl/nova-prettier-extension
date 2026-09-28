@@ -43,12 +43,9 @@ function prependChangelogEntry(file) {
   console.log(`✔ Prepended changelog entry to ${file}`)
 }
 
-// 1. Bump both package.json files using npm
 bumpWithNpm('package.json')
 bumpWithNpm('prettier.novaextension/package.json')
 
-// 2. Update extension.json directly
 bumpJsonFile('prettier.novaextension/extension.json')
 
-// 3. Add new version to CHANGELOG.md
 prependChangelogEntry('prettier.novaextension/CHANGELOG.md')

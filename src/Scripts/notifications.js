@@ -42,7 +42,6 @@ async function showNotification({
   actions,
   callback,
 }) {
-  // auto-cancels any existing notification with the same id
   center.cancel(id)
 
   const req = new NotificationRequest(id)

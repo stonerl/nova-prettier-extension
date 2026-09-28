@@ -29,7 +29,6 @@ const extensionJsonPath = path.join(
   'prettier.novaextension/extension.json',
 )
 
-// Languages to output translations for
 const languages = [
   'de.lproj',
   'en.lproj',
@@ -38,14 +37,12 @@ const languages = [
   'zh-Hans.lproj',
 ]
 
-// Global results object, keyed by table name.
-// Any extraction without a specified table goes to the default "strings" table.
+// Global results object, keyed by table name ("strings", "notification", …)
 const results = {
   strings: {},
 }
 
-// ─────────────────────────────────────────
-// Extraction from unifiedConfig.json
+// ── Extraction from unifiedConfig.json ────────────────────────────────
 if (fs.existsSync(unifiedConfigPath)) {
   const unifiedConfig = JSON.parse(fs.readFileSync(unifiedConfigPath, 'utf8'))
 
@@ -95,7 +92,6 @@ if (fs.existsSync(unifiedConfigPath)) {
 
       extractTranslatableValues(node.config, node.configWorkspace)
 
-      // Extract second element from any tuple in "values" array in config
       if (node.config?.values && Array.isArray(node.config.values)) {
         for (const tuple of node.config.values) {
           if (Array.isArray(tuple) && tuple.length > 1 && tuple[1])
@@ -103,7 +99,6 @@ if (fs.existsSync(unifiedConfigPath)) {
         }
       }
 
-      // Extract second element from any tuple in "values" array in configWorkspace
       if (
         node.configWorkspace?.values &&
         Array.isArray(node.configWorkspace.values)
@@ -121,12 +116,10 @@ if (fs.existsSync(unifiedConfigPath)) {
   extractFromUnified(unifiedConfig)
 }
 
-// ─────────────────────────────────────────
-// Extraction from extension.json
+// ── Extraction from extension.json ────────────────────────────────────
 if (fs.existsSync(extensionJsonPath)) {
   const ext = JSON.parse(fs.readFileSync(extensionJsonPath, 'utf8'))
 
-  // Extract root-level keys
   if (ext.description) results.strings[ext.description] = ext.description
 
   const commandSections = ext.commands || {}
@@ -138,8 +131,7 @@ if (fs.existsSync(extensionJsonPath)) {
   }
 }
 
-// ─────────────────────────────────────────
-// Extract nova.localize() strings from src/Scripts using AST
+// ── Extract nova.localize() strings from src/Scripts using AST ────────
 const parser = require('@babel/parser')
 const traverse = require('@babel/traverse').default
 
@@ -153,7 +145,6 @@ function extractNotificationKeysAST(filePath) {
 
   traverse(ast, {
     CallExpression({ node }) {
-      // Check if the call is nova.localize(...)
       if (
         node.callee &&
         node.callee.type === 'MemberExpression' &&
@@ -161,19 +152,17 @@ function extractNotificationKeysAST(filePath) {
         node.callee.property.name === 'localize'
       ) {
         const args = node.arguments
-        // Ensure we have at least 2 arguments (key and fallback)
+        // Only string literals are supported as fallbacks — dynamic
+        // runtime expressions are intentionally not handled here.
         if (
           args.length >= 2 &&
           args[0].type === 'StringLiteral' &&
-          // Only string literals are supported as fallback values. This is intentional to avoid
-          // handling dynamic runtime expressions in the translation extraction process.
           args[1].type === 'StringLiteral'
         ) {
           const key = args[0].value
           const fallback = args[1].value
-          // Default table is "strings"
+          // default table is "strings"
           let tableName = 'strings'
-          // If a third argument is provided and is a string literal, use that as the table name
           if (
             args.length >= 3 &&
             args[2].type === 'StringLiteral' &&
@@ -181,7 +170,6 @@ function extractNotificationKeysAST(filePath) {
           ) {
             tableName = args[2].value
           }
-          // Ensure the table exists in our results object
           if (!results[tableName]) {
             results[tableName] = {}
           }
@@ -217,9 +205,7 @@ if (fs.existsSync(SCRIPTS_DIR)) {
   extractNotificationKeysFromDir(SCRIPTS_DIR)
 }
 
-// ─────────────────────────────────────────
-// Write out translations to separate files per table (e.g. strings.json, notification.json)
-// For each language, create a separate JSON file for each table in results.
+// ── Write out one JSON file per table, per language ───────────────────
 languages.forEach((lang) => {
   const langDir = path.join(TRANSLATIONS_DIR, lang)
   fs.mkdirSync(langDir, { recursive: true })
@@ -242,8 +228,8 @@ languages.forEach((lang) => {
       Object.keys(results[tableName]).map((key) => [
         key,
         lang === 'en.lproj'
-          ? results[tableName][key] // Always use updated fallback
-          : (existing[key] ?? ''), // Use existing or empty string for others
+          ? results[tableName][key] // always use updated fallback
+          : (existing[key] ?? ''), // use existing or empty string
       ]),
     )
 

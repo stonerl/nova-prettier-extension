@@ -69,9 +69,6 @@ function stubModule(file, exportsObj) {
   require.cache[resolved] = m
 }
 
-/**
- * Deferred gate — blocks an awaited promise until released.
- */
 function makeGate() {
   let release
   const promise = new Promise((resolve) => {
@@ -94,15 +91,12 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 /**
  * Build a fresh PrettierExtension instance backed by counting stubs.
- * The restart debouncers are shortened to 30ms so the trailing
- * cycle's debounce delay doesn't dominate the test runtime; the logic
- * under test is the join/re-run bookkeeping, not the debounce
- * duration.
- */
-/**
- * Counters shared by all stub instances. main.js holds a reference to
- * the first FakeFormatter class it required, so the counters must live
- * outside makeInstance to survive across tests.
+ * The restart debouncers are shortened to 30ms so the trailing cycle's
+ * debounce delay doesn't dominate the test runtime; the logic under
+ * test is the join/re-run bookkeeping, not the debounce duration.
+ * Counters live outside makeInstance: main.js holds a reference to the
+ * first FakeFormatter class it required, so per-instance fields would
+ * not survive across tests.
  */
 const calls = {
   waitForPendingFormats: 0,
@@ -309,7 +303,6 @@ async function redundantTriggerSkipsRestart() {
   console.log('\n== Redundant triggers skip the stop/start ==')
   const { ext, calls } = makeInstance()
 
-  // Establish a running service with a resolved path.
   await ext._runRestartCycle()
   check('initial cycle ran', calls.stop === 1 && calls.start === 1, calls)
   check(

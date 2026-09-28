@@ -5,37 +5,27 @@
  * @author Toni Förster
  * @copyright © 2026 Toni Förster
  *
- * Nova loads extensions once per workspace window, and every instance
- * installs the bundled packages into the same shared extension bundle.
- * A fresh install or an update therefore has two or more extension
- * processes booting at the same time, each running its own `npm install`
- * against the same node_modules tree — the installs race each other
- * (ENOTEMPTY/EEXIST cleanup fights) and can leave the bundle broken.
+ * Nova loads the extension once per workspace window and every instance
+ * installs the bundled packages into the same shared bundle — two or
+ * more extension processes booting at once race their `npm install`s
+ * against the same node_modules tree and can leave the bundle broken.
  *
- * This module provides a lock that all extension processes share:
+ * The lock is a directory, created atomically by running `mkdir` in a
+ * subprocess: POSIX mkdir fails when the path already exists, so
+ * exactly one process wins. The holder heartbeats by `touch`ing the
+ * directory; a process that dies stops heartbeating, so the lock goes
+ * stale after `staleMs` and another instance can take over. Read-side
+ * staleness checks (`nova.fs.stat`) stay in-process.
  *
- *   • The lock is a directory, created atomically by running `mkdir` in
- *     a subprocess. POSIX mkdir fails when the path already exists, so
- *     exactly one process wins — the losers see the directory and wait.
- *   • The holder heartbeats by `touch`ing the directory, refreshing its
- *     mtime. A process that dies (Nova killed it) stops heartbeating, so
- *     the lock goes stale after `staleMs` and another instance can take
- *     it over instead of blocking waiters for the full TTL. Read-side
- *     staleness checks (`nova.fs.stat`) stay in-process — reading is
- *     always allowed.
+ * All writes run through subprocesses because the extension process
+ * only holds a read-only filesystem entitlement — Nova rejects
+ * in-process `nova.fs` writes (the earlier `fs.open(path, 'x')` scheme
+ * silently failed); subprocesses run with the plain process
+ * entitlement and may write.
  *
- * All writes run through subprocesses (`/usr/bin/env mkdir/touch/rmdir/
- * rm`) because the extension itself only holds a read-only filesystem
- * entitlement: Nova rejects in-process `nova.fs` writes even inside its
- * own tempdir, which is why the earlier `fs.open(path, 'x')` approach
- * silently failed. Subprocesses run with the plain process entitlement
- * and may write — the same mechanism removeTree() in module-resolver.js
- * already uses for deletions.
- *
- * The lock lives in `nova.fs.tempdir()` (Nova 10+), which is documented
- * as shared between instances of the same extension running in
- * different workspaces. On older versions it falls back to the
- * extension's global storage path.
+ * The lock lives in `nova.fs.tempdir()` (Nova 10+), documented as
+ * shared between instances of the same extension running in different
+ * workspaces; older versions fall back to the global storage path.
  */
 
 const { handleProcessResult, log } = require('./helpers.js')
@@ -70,7 +60,7 @@ function installLockLocation() {
 /**
  * Runs a coreutils tool (`mkdir`, `touch`, `rmdir`, `rm`) in a
  * subprocess and resolves on exit 0, rejecting with the exit status
- * otherwise — mirroring how removeTree() spawns `/usr/bin/env rm`.
+ * otherwise.
  *
  * @param {string[]} args
  * @param {number} [timeoutMs]
@@ -110,10 +100,9 @@ function createInstallLock({ staleMs = 30000 } = {}) {
   const { path, usesFallback } = installLockLocation()
 
   const acquire = async () => {
-    // Pre-Nova-10 fallback: the global storage path may not exist yet
-    // ("the directory itself may not exist"). mkdir -p is idempotent and
-    // only touches the parent, so the lock path's EEXIST semantics are
-    // unaffected.
+    // Pre-Nova-10 fallback: the global storage path may not exist yet —
+    // mkdir -p is idempotent and only touches the parent, leaving the
+    // lock path's EEXIST semantics unaffected.
     if (usesFallback) {
       try {
         await runTool(['mkdir', '-p', nova.extension.globalStoragePath])
@@ -127,12 +116,11 @@ function createInstallLock({ staleMs = 30000 } = {}) {
 
     if (stats) {
       if (Date.now() - stats.mtime.getTime() < staleMs) {
-        return false // A live holder owns the lock.
+        return false // a live holder owns the lock
       }
 
-      // Stale lock — the previous holder died mid-install. Remove it
-      // and try to take over. A losing race here is harmless: the
-      // winner removes nothing or creates the lock first.
+      // Stale lock — previous holder died mid-install. Remove and try
+      // to take over; a losing race here is harmless.
       log.info('Stale bundled-install lock detected — taking it over.')
       try {
         await runTool(['rm', '-rf', path])
@@ -146,10 +134,8 @@ function createInstallLock({ staleMs = 30000 } = {}) {
       await runTool(['mkdir', path])
       return true
     } catch (err) {
-      // Distinguish "someone else was faster" (expected during races)
-      // from a broken environment (parent missing, permissions…). The
-      // former is quiet; the latter gets a warning so entitlement or
-      // path problems surface in the Extension Console.
+      // "someone else was faster" (expected) stays quiet; a broken
+      // environment (parent missing, permissions…) gets a warning.
       if (nova.fs.stat(path)) {
         log.info(
           'Lost the race for the bundled-install lock — another process is installing.',
@@ -165,9 +151,8 @@ function createInstallLock({ staleMs = 30000 } = {}) {
     try {
       await runTool(['rmdir', path])
     } catch {
-      // Fails when the lock is already gone (stale takeover released
-      // it for us) — nothing to do. A lock dir that refuses to go away
-      // is cleaned up by the next holder's stale detection.
+      // lock already gone (stale takeover released it) — a stubborn
+      // lock dir is cleaned up by the next holder's stale detection
     }
   }
 
@@ -183,11 +168,10 @@ function createInstallLock({ staleMs = 30000 } = {}) {
 
   const heartbeat = async () => {
     try {
-      // touch refreshes the directory mtime the staleness check reads.
+      // touch refreshes the mtime the staleness check reads
       await runTool(['touch', path])
     } catch (err) {
-      // Non-fatal: if the lock vanished, waiters fall through to the
-      // stale-lock path and take over.
+      // Non-fatal: if the lock vanished, waiters take the stale path.
       log.warn('Could not refresh the bundled-install lock', err)
     }
   }
@@ -202,10 +186,9 @@ function createInstallLock({ staleMs = 30000 } = {}) {
  * heartbeating. Bails out after `ttlMs` at the latest.
  *
  * Deliberately does NOT exit when Prettier's package.json appears on
- * disk: npm writes it early during an install, so its existence does
- * not mean the tree is complete. Readiness is decided by the caller's
- * verification after this wait returns — the only signal that can tell
- * a finished tree from a mid-write one.
+ * disk: npm writes it early during an install, so its existence doesn't
+ * mean the tree is complete — readiness is decided by the caller's
+ * verification after this wait.
  *
  * @param {string} prettierPath – path of the bundled prettier module
  *                              (unused today, kept for call-site clarity)
@@ -217,8 +200,7 @@ async function waitForBundledInstall(prettierPath, lock, ttlMs, pollMs = 250) {
   const deadline = Date.now() + ttlMs
 
   while (Date.now() < deadline) {
-    // Lock released (directory gone), or the holder stopped
-    // heartbeating.
+    // Lock released (directory gone), or holder stopped heartbeating
     if (!lock.isHeld()) return
 
     await new Promise((resolve) => setTimeout(resolve, pollMs))

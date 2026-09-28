@@ -1,4 +1,3 @@
-// eslint.config.js
 const { defineConfig } = require('eslint/config')
 const prettierFlat = require('eslint-config-prettier/flat')
 

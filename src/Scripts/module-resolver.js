@@ -43,7 +43,6 @@ function findPathRecursively(directory, subPath, callback) {
 }
 
 function findModuleWithFileSystem(directory, module) {
-  // Find the first parent folder with package.json that contains prettier
   const packageResult = findPathRecursively(
     directory,
     'package.json',
@@ -69,7 +68,6 @@ function findModuleWithFileSystem(directory, module) {
   )
   if (!packageResult) return null
 
-  // In that folder, or a parent, find node_modules/[module]
   const moduleResult = findPathRecursively(
     packageResult.directory,
     nova.path.join('node_modules', module),
@@ -94,16 +92,13 @@ function isLoadableModule(modulePath) {
 }
 
 // Broken project installs persist until the user fixes them, and every
-// resolution re-runs the guard — without deduping, each watcher-triggered
-// cycle re-prints the warn. First hit per path logs a full warn, repeats
-// drop to debug. Lives at module level so it survives across findPrettier
-// calls; resets naturally on extension reload.
+// resolution re-runs the guard — dedupe per path so repeats log at debug
+// level instead of re-printing the warn.
 const warnedBrokenModulePaths = new Set()
 
 /**
  * Warns that a project Prettier install was skipped in favor of the
- * bundled one, once per path — repeat hits within the same extension
- * session are demoted to debug level.
+ * bundled one, once per path.
  *
  * @param {string} modulePath – the skipped module directory
  * @param {string} reason     – why the install is skipped, for the log
@@ -192,15 +187,12 @@ function isPackageInstalledPerLockfile(directory, lock, pkg) {
  *                                      (missing, outdated, INVALID, MAXDEPTH)
  */
 async function verifyBundledPackages(directory, packageNames) {
-  // readJsonFile resolves null on any error (missing or unreadable
-  // lockfile) — every package then goes through npm ls.
   const lock = readJsonFile(nova.path.join(directory, 'package-lock.json'))
 
   const broken = []
   const unverified = []
   for (const pkg of packageNames) {
     if (isPackageInstalledPerLockfile(directory, lock, pkg)) continue
-    // Not installed at all — broken without asking npm.
     if (
       !nova.fs.stat(
         nova.path.join(directory, 'node_modules', pkg, 'package.json'),
@@ -267,11 +259,10 @@ async function installPackages(directory) {
 }
 
 /**
- * Distinctive strings introduced by each bundled patch. Reading them is
- * enough to tell whether a patch is applied — the extension only holds a
- * read-only filesystem entitlement, so "applied" state can't be tracked
- * with a marker file. Each check runs against its own file, so repeated
- * strings across patches are unambiguous.
+ * Distinctive strings introduced by each bundled patch. The extension
+ * only holds a read-only filesystem entitlement, so "applied" state
+ * can't be tracked with a marker file — reading is enough. Each check
+ * runs against its own file, so repeated strings are unambiguous.
  */
 const PATCH_SIGNATURES = [
   {
@@ -322,12 +313,11 @@ function areBundledPatchesApplied(extensionPath) {
 /**
  * Applies the bundled patches with patch-package.
  *
- * npm ≥ 11 blocks postinstall scripts by default, so patches can no
- * longer rely on the `postinstall: patch-package` hook — newer npm
- * versions leave every bundled plugin unpatched after a plain install.
- * patch-package runs as a subprocess (plain process entitlement, no
- * filesystem entitlement needed); whether anything must run is decided
- * by read-only signature checks on the patched files.
+ * npm ≥ 11 blocks postinstall scripts by default, so the old
+ * `postinstall: patch-package` hook leaves every bundled plugin
+ * unpatched after a plain install. patch-package runs as a subprocess
+ * (plain process entitlement); whether it must run is decided by
+ * read-only signature checks.
  *
  * @param {string} extensionPath – directory containing node_modules and patches/
  */
@@ -389,8 +379,7 @@ async function removeTree(path) {
 
   // The extension only holds a read-only filesystem entitlement, so
   // deletion must happen in a subprocess (plain process entitlement).
-  // `rm -rf` recurses on its own, which also avoids following npm's .bin
-  // symlinks one level too far.
+  // `rm -rf` recurses on its own, avoiding npm's .bin symlinks.
   let resolve, reject
   const promise = new Promise((_resolve, _reject) => {
     resolve = _resolve
@@ -428,7 +417,7 @@ async function findPrettier() {
   const nodeVersion = await getNodeVersion()
   const npmVersion = await getNpmVersion()
 
-  // If either npm or Node isn’t detected, error out immediately
+  // If either npm or Node isn't detected, error out immediately
   if (npmVersion === 'unknown' || nodeVersion === 'unknown') {
     await showNotification({
       id: 'prettier-resolution-error',
@@ -443,7 +432,6 @@ async function findPrettier() {
         'notification',
       ),
     })
-    // stop execution — we can’t proceed without both binaries
     throw new Error('Missing runtime tools: Node.js and npm are required.')
   }
 
@@ -455,7 +443,7 @@ async function findPrettier() {
 
   // Try finding in the workspace
   if (nova.workspace.path && !preferBundled) {
-    // Try finding purely through file system first
+    // File system first
     try {
       const fsResult = findModuleWithFileSystem(nova.workspace.path, 'prettier')
       if (fsResult && !isLoadableModule(fsResult)) {
@@ -475,7 +463,7 @@ async function findPrettier() {
       )
     }
 
-    // Try npm as an alternative
+    // npm as an alternative
     try {
       const npmResult = await findModuleWithNPM(nova.workspace.path, 'prettier')
       if (npmResult && !isLoadableModule(npmResult.path)) {
@@ -486,8 +474,7 @@ async function findPrettier() {
       } else if (npmResult && !npmResult.correctVersion) {
         // Same philosophy as the missing-package.json guard: an install
         // npm ls reports as invalid or outdated must not take the service
-        // down (start would fail ×3 with no fallback). verifyBundledPackages
-        // already honors correctVersion this way — the callers now agree.
+        // down (start would fail ×3 with no fallback).
         warnBrokenProjectPrettier(
           npmResult.path,
           'npm ls reports it as invalid or outdated',
@@ -519,10 +506,10 @@ async function findPrettier() {
     let declaredPackages = {}
 
     try {
-      const file = nova.fs.open(packageJsonPath, 'r') // Open the file for reading
+      const file = nova.fs.open(packageJsonPath, 'r')
       let json
       try {
-        json = JSON.parse(file.read()) // Parse the JSON string
+        json = JSON.parse(file.read())
       } finally {
         file.close()
       }
@@ -536,20 +523,13 @@ async function findPrettier() {
     }
 
     // Cross-process install serialization. Nova loads the extension once
-    // per workspace window, and every instance installs into the same
-    // bundle — a fresh install or an update has two or more processes
-    // verifying a mid-install tree and racing their own npm installs
-    // (ENOTEMPTY/EEXIST cleanup fights). The lock is a directory created
-    // atomically by a subprocess (mkdir), living inside nova.fs.tempdir(),
-    // which Nova documents as shared between instances of the same
-    // extension — the per-workspace context used previously could never
-    // see another window's lock. The lock writes go through subprocesses
-    // because the extension process itself is entitlement-blocked from
-    // nova.fs writes (in-process fs.open with 'x' silently failed); only
-    // the read-side staleness checks stay in-process. The holder
-    // heartbeats the directory's mtime while installing; if it dies (Nova
-    // killed the process), the lock goes stale after 30s instead of
-    // blocking waiters for the full TTL.
+    // per workspace window and every instance installs into the same
+    // bundle — installs race each other (ENOTEMPTY/EEXIST fights). The
+    // lock is a subprocess-created directory inside nova.fs.tempdir(),
+    // documented as shared between instances of the same extension.
+    // Lock writes go through subprocesses because the extension process
+    // is entitlement-blocked from nova.fs writes; the holder heartbeats
+    // the directory mtime so a killed process's lock goes stale after 30s.
     const INSTALL_LOCK_TTL_MS = 5 * 60 * 1000
     const INSTALL_POLL_INTERVAL_MS = 250
     const INSTALL_HEARTBEAT_INTERVAL_MS = 10000
@@ -706,8 +686,6 @@ async function findPrettier() {
   } catch (err) {
     if (err.status === 127) throw err
     log.warn('Error trying to find or install bundled Prettier', err)
-    // Rethrow so callers can surface a real error instead of an
-    // undefined module path that crashes the Prettier service later.
     throw err
   }
 }

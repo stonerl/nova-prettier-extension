@@ -68,14 +68,13 @@ function skipInitialCall(fn) {
 /**
  * Observe a config key in both workspace and extension, skipping each
  * observer's initial "current value" notification so only real changes
- * reach the callback.
- * Returns the two Disposables so callers can dispose them later.
+ * reach the callback. Returns the two Disposables so callers can dispose
+ * them later.
  */
 function observeConfigWithWorkspaceOverride(name, fn) {
   // Each observer fires once with the current value on registration, so
-  // each gets its own skipInitialCall wrapper — a shared flag would
-  // depend on both observers firing initially and would let the second
-  // initial call leak.
+  // each gets its own skipInitialCall wrapper — a shared flag would let
+  // the second initial call leak through.
   const workspaceDisposable = nova.workspace.config.observe(
     name,
     skipInitialCall(fn),
@@ -174,11 +173,7 @@ const log = Object.fromEntries(
     fn,
     (...args) => {
       if (fn === 'debug') {
-        // Gate debug logs: if not in dev mode or debug logging flag is off, do nothing.
-        if (!isDebugLoggingEnabled()) {
-          return
-        }
-        // Remap debug to use console.log
+        if (!isDebugLoggingEnabled()) return
         return console.log(...args)
       }
       return console[fn](...args)
@@ -186,7 +181,6 @@ const log = Object.fromEntries(
   ]),
 )
 
-// Sanitize Prettier Config Function using Nova's File API with correct mode strings
 async function sanitizePrettierConfig() {
   // Nothing to sanitize without an open workspace — building the path
   // from a null workspace path would throw inside nova.fs.open.
@@ -233,7 +227,6 @@ async function sanitizePrettierConfig() {
 
     if (modified) {
       log.info('Prettier configuration sanitized successfully.')
-      // Send a notification if values have been changed.
       await showNotification({
         id: 'prettier-config-updated',
         title: nova.localize(
@@ -252,7 +245,6 @@ async function sanitizePrettierConfig() {
       log.debug('Prettier configuration is already sanitized.')
     }
   } catch (err) {
-    // Missing or malformed Configuration.json must never break extension startup.
     log.warn('Error while sanitizing Prettier configuration', err)
   }
 }
@@ -264,10 +256,9 @@ function debouncePromise(fn, timeoutMs) {
     clearTimeout(timer)
     timer = setTimeout(() => {
       timer = null
-      // Fire-and-forget: debounced() has no return value and callers
-      // never await it, so rejections are logged instead of leaking
-      // as unhandled rejections. resolve().then() also converts sync
-      // throws from fn into logged rejections.
+      // Fire-and-forget: callers never await debounced(), so rejections
+      // are logged instead of leaking as unhandled rejections. The
+      // .then() also converts sync throws from fn into logged rejections.
       Promise.resolve()
         .then(() => fn(...args))
         .catch((err) => log.error('Debounced task failed:', err))
@@ -285,23 +276,20 @@ function debouncePromise(fn, timeoutMs) {
 /**
  * Checks whether a path reported by a FileSystemWatcher lies inside the
  * extension bundle. Events from there are the extension's own doing
- * (the bundled npm install writes package files and node_modules into
- * the bundle), so they must not trigger service restarts.
+ * (the bundled npm install writes into the bundle) and must not trigger
+ * service restarts.
  *
- * Watcher callbacks report the modified path either as an absolute path
- * or relative to the watched workspace. A relative path is resolved
- * against the workspace; the extension directory is deliberately NOT
- * used as a fallback base, because a generic event like `package.json`
- * would then be attributed to the bundle even in a window whose
- * workspace simply has its own package.json — dropping genuine user
- * triggers.
+ * Watcher callbacks report either absolute paths or paths relative to
+ * the watched workspace. Relative paths resolve against the workspace —
+ * deliberately NOT against the extension directory, since a generic
+ * `package.json` event would then be attributed to the bundle in every
+ * window, dropping genuine user triggers.
  *
  * Containment is a plain string-prefix comparison instead of
  * nova.path.relative(): the runtime's relative() can normalize via
  * symlinks and then report "outside" for paths that are clearly inside
- * (observed live), while the operands here are always clean, absolute,
- * same-volume paths. None of the watch patterns can produce paths with
- * `..` segments, so traversal handling is not needed.
+ * (observed live). The operands here are always clean, absolute,
+ * same-volume paths, and no watch pattern can produce `..` segments.
  *
  * With no usable path at all the filter declines to match, so callers
  * keep their previous behavior instead of losing events.
@@ -336,10 +324,10 @@ function isInsideExtensionBundle(filePath) {
 // ---------------------------------------------------------------------------
 
 /**
- * Determines the user’s home directory. Nova doesn’t expose an explicit
- * home API, so the environment Nova passes to child processes is used
- * first; as a fallback the path is derived from a released extension’s
- * install location (<home>/Library/Application Support/Nova/Extensions).
+ * Determines the user's home directory. Nova doesn't expose a home API,
+ * so nova.environment.HOME is used first, with a fallback derived from a
+ * released extension's install location
+ * (<home>/Library/Application Support/Nova/Extensions).
  *
  * @returns {string|null}
  */
@@ -543,9 +531,8 @@ async function probeNodeRuntime() {
   }
 }
 
-// Cached promise for the runtime lookup. Only successful probes are
-// cached — a failed lookup resets the cache so a later install of the
-// managed Node.js package (e.g. while formatting) is picked up.
+// Cached promise for the runtime lookup — only successful probes are
+// cached, so a later managed-Node install is picked up.
 let _nodeRuntimePromise = null
 
 /**
@@ -642,9 +629,8 @@ async function spawnNpm(args, options = {}) {
   })
 }
 
-// Cache of promises for each CLI tool’s “--version” lookup.
-// This ensures that multiple calls to getCliVersion('npm') or getCliVersion('node')
-// return the same in‐flight or resolved promise, avoiding spawning the process more than once.
+// Cache of promises per CLI tool's "--version" lookup — multiple calls
+// return the same in-flight/resolved promise, avoiding duplicate spawns.
 const _cliVersionPromises = {}
 
 /**
@@ -677,7 +663,7 @@ function getCliVersion(toolName) {
   return _cliVersionPromises[toolName]
 }
 
-/** Convenience wrappers for clarity & backward compatibility */
+/** Convenience wrappers */
 function getNpmVersion() {
   return getCliVersion('npm')
 }

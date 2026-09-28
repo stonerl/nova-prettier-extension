@@ -113,9 +113,7 @@ class PrettierService extends FormattingService {
     if (!config.parser) return { missingParser: true }
 
     const runFormat = (cfg, useCursor) => {
-      // If withCursor flag is true and a cursor offset was provided, use formatWithCursor
       if (useCursor && typeof cfg.cursorOffset === 'number') {
-        // formatWithCursor returns an object with both formatted code and new cursorOffset
         return this.prettier.formatWithCursor(original, cfg)
       }
       return this.prettier
@@ -124,11 +122,10 @@ class PrettierService extends FormattingService {
     }
 
     // Plugins resolved from the project (not bundled with the extension).
-    // Load-time failures are already filtered out during config resolution
-    // (see getConfig → _preloadExternalPlugins). If any remaining plugin
-    // fails while formatting — usually a runtime incompatibility with the
-    // bundled Prettier — retry once without them and report which plugins
-    // were disabled.
+    // Load-time failures are already filtered out during config
+    // resolution. If a remaining plugin fails while formatting (usually
+    // a runtime incompatibility with the bundled Prettier), retry once
+    // without them and report which were disabled.
     const externalEntries = pluginReport?.externalEntries ?? []
 
     try {
@@ -139,8 +136,8 @@ class PrettierService extends FormattingService {
 
       // A crash while mapping the cursor (some plugins' locStart/locEnd
       // are not cursor-safe) must not lose the whole format: retry once
-      // without cursor tracking. The client already falls back to the
-      // editor position when no cursor offset comes back.
+      // without cursor tracking — the client falls back to the editor
+      // position when no cursor offset comes back.
       if (withCursor && typeof config.cursorOffset === 'number') {
         try {
           const result = await runFormat(config, false)
@@ -154,9 +151,9 @@ class PrettierService extends FormattingService {
 
       // Identify the failing plugin by dropping one candidate at a time
       // (bounded), then fall back to disabling all remaining externals.
-      // All recovery attempts run without cursor tracking — the cursor
-      // crash path above was already tried, and cursorless results keep
-      // the diagnosis clean.
+      // Recovery runs without cursor tracking — the cursor path above
+      // was already tried, and cursorless results keep the diagnosis
+      // clean.
       const MAX_CULPRIT_ATTEMPTS = 3
       const cleared = []
 
@@ -186,14 +183,13 @@ class PrettierService extends FormattingService {
             configError,
           )
         } catch {
-          // the candidate wasn't (the only) culprit — keep it dropped and
-          // move on to the next one
+          // candidate wasn't (the only) culprit — keep it dropped, try next
           cleared.push(candidate)
         }
       }
 
-      // Culprit not isolated (or more than MAX_CULPRIT_ATTEMPTS externals):
-      // disable all remaining externals and try once more.
+      // Culprit not isolated (or more externals than attempts): disable
+      // all remaining externals and try once more.
       try {
         const configWithoutExternals = {
           ...config,
@@ -310,8 +306,7 @@ class PrettierService extends FormattingService {
     if (options.filepath) {
       // Cache key includes every input that can change the result, so a
       // normal lookup (ignorePath set) can never poison a forced one
-      // (ignorePath null) and vice versa. (withNodeModules is always
-      // false here and thus not part of the key.)
+      // (ignorePath null) and vice versa.
       const cacheKey = `${options.filepath}\u0000${ignorePath ?? ''}`
       if (this._fileInfoCache.has(cacheKey)) {
         info = this._fileInfoCache.get(cacheKey)
@@ -321,12 +316,10 @@ class PrettierService extends FormattingService {
           withNodeModules: false,
           // Only the ignore verdict is needed here — config is resolved
           // separately below. resolveConfig:false skips Prettier's
-          // internal config walk-up (getFileInfo runs resolveConfig by
-          // default), making uncached lookups near-free. Inference itself
-          // still runs (cheap extension lookup) and feeds the
-          // inferredParser override below. Verified against the bundled
-          // Prettier's FileInfoOptions: `parser` is not a supported
-          // option — passing it would be silently ignored.
+          // internal config walk-up, making uncached lookups near-free.
+          // Inference still runs and feeds the parser override below.
+          // Note: `parser` is not a supported FileInfoOptions key — it
+          // would be silently ignored.
           resolveConfig: false,
         })
         this._fileInfoCache.set(cacheKey, info)
@@ -337,9 +330,9 @@ class PrettierService extends FormattingService {
     let inferredConfig = {}
     let configError
     if (options._customConfigFile) {
-      // The client points at an explicit config file. Prettier's own
-      // resolution loads it (JSON, YAML, TOML, JS…), replacing the old
-      // client-side JSON.parse, which silently dropped every other format.
+      // Prettier's own resolution loads the explicit config file (JSON,
+      // YAML, TOML, JS…) — replacing the old client-side JSON.parse,
+      // which silently dropped every other format.
       try {
         inferredConfig =
           (await this.prettier.resolveConfig(pathForConfig, {
@@ -347,8 +340,8 @@ class PrettierService extends FormattingService {
             editorconfig: true,
           })) ?? {}
       } catch (err) {
-        // Surface the failure to the client (which shows a notification);
-        // formatting continues with the remaining options.
+        // Surface to the client (which shows a notification); formatting
+        // continues with the remaining options.
         configError = {
           path: options._customConfigFile,
           message: err?.message ?? String(err),
@@ -356,9 +349,9 @@ class PrettierService extends FormattingService {
       }
     } else if (!options._ignoreConfigFile) {
       // The cache stores the raw `resolveConfig` result (null when no
-      // config file and no .editorconfig exists above the path) so it can
-      // be shared with `hasConfig`. Normalize to an object here; the null
-      // distinguishes "no config" from a config that parses to `{}`.
+      // config file and no .editorconfig exists) so it can be shared
+      // with `hasConfig`. Normalize to an object here; null distinguishes
+      // "no config" from a config that parses to `{}`.
       if (this._configCache.has(pathForConfig)) {
         inferredConfig = this._configCache.get(pathForConfig) ?? {}
       } else {
@@ -370,10 +363,10 @@ class PrettierService extends FormattingService {
       }
     }
 
-    // inferredConfig comes first, user options override
+    // inferredConfig first, user options override
     const config = { ...inferredConfig, ...options }
 
-    // [optional] cleanup internal flags so Prettier doesn’t see them
+    // internal flags — Prettier must not see them
     delete config._customConfigFile
     delete config._ignoreConfigFile
 
@@ -382,16 +375,11 @@ class PrettierService extends FormattingService {
     }
 
     // Merge config-declared plugins with the bundled set injected by the
-    // client. Runs in every module resolution mode:
-    // - bundled mode (options.plugins non-empty): declared plugins are
-    //   merged with the bundled set — bundled wins, externals are resolved
-    //   from the project, load failures are isolated, runtime failures get
-    //   a retry without them.
-    // - explicit-path / project Prettier: nothing is injected, so this is
-    //   a best-effort upgrade only — resolvable plugins are replaced with
-    //   absolute paths (document-dir anchored, so monorepo subpackages
-    //   work), everything else passes through untouched and keeps Prettier's
-    //   native CLI error behavior.
+    // client, in every module resolution mode. In bundled mode, externals
+    // are resolved from the project with load-failure isolation and a
+    // runtime retry; in explicit-path / project Prettier modes nothing is
+    // injected, so this is a best-effort upgrade only and unresolvable
+    // plugins keep Prettier's native CLI error behavior.
     let pluginReport
     if (
       Array.isArray(inferredConfig.plugins) &&
@@ -407,8 +395,8 @@ class PrettierService extends FormattingService {
         config.plugins = pluginReport.plugins
       }
 
-      // Tell the client which config file declared the (unresolvable)
-      // plugins so its notice can point users at the right file.
+      // Which config file declared the (unresolvable) plugins, so the
+      // client's notice can point users at the right file.
       if (pluginReport.unresolved.length > 0) {
         try {
           pluginReport.configFile =
@@ -435,20 +423,16 @@ class PrettierService extends FormattingService {
    * bundled plugin paths injected by the extension client.
    *
    * Each declared entry (a string specifier, or a `[specifier, options]`
-   * tuple) is classified:
-   * - bundled package → dropped; the bundled equivalent is already in the
-   *   injected list (the bundled version wins)
-   * - `file:` URL or absolute path → passed through untouched
-   * - package name / subpath → resolved to an absolute path, anchored at
-   *   the formatted file's directory (Node's resolution walks up
-   *   node_modules chains, so monorepo subpackages and pnpm layouts work)
-   * - unresolvable → in bundled mode reported back to the client, which
-   *   shows a notice; in native mode passed through so Prettier's own
-   *   resolution (and its native error behavior) still applies
+   * tuple) is classified: bundled package → dropped (bundled version
+   * already injected); file: URL or absolute path → passed through;
+   * package name/subpath → resolved to an absolute path anchored at the
+   * formatted file's directory (walks up node_modules chains, so
+   * monorepo subpackages and pnpm layouts work); unresolvable → reported
+   * to the client in bundled mode, passed through in native modes so
+   * Prettier's own resolution and error behavior still apply.
    *
    * Load-failure isolation and the runtime retry only apply in bundled
-   * mode — native modes keep CLI parity: `externalEntries` stays empty,
-   * so `_preloadExternalPlugins` and the format-time retry never engage.
+   * mode — native modes keep CLI parity (`externalEntries` stays empty).
    *
    * prettier-plugin-tailwindcss is always moved to the end of the merged
    * list — it must be loaded last.
@@ -467,9 +451,8 @@ class PrettierService extends FormattingService {
       bundledPaths.some((bundledPath) => bundledPath.includes(specifier))
 
     // The merged list starts with the bundled paths the client injected —
-    // they remain active even when external plugins are added alongside
-    // them. Declared entries that match a bundled plugin are skipped (the
-    // bundled version already covers them); everything else is appended.
+    // they stay active alongside any external plugins. Declared entries
+    // matching a bundled plugin are skipped; everything else is appended.
     const merged = [...bundledPaths]
     const externalEntries = []
     const externalNames = []
@@ -568,7 +551,7 @@ class PrettierService extends FormattingService {
    * Resolve a config-declared plugin specifier to an absolute path,
    * anchored at the formatted file's directory. Results are cached —
    * the service restarts on package.json / config file changes, which
-   * clears the cache whenever a re-resolution could yield a new result.
+   * clears the cache whenever a re-resolution could differ.
    *
    * @param {string} specifier – package name, subpath, or relative path
    * @param {string} baseDir   – directory of the formatted file
@@ -587,8 +570,7 @@ class PrettierService extends FormattingService {
       })
     } catch {
       // require.resolve fails for ESM-only packages
-      // (ERR_PACKAGE_PATH_NOT_EXPORTED) — fall back to reading their
-      // package.json manually.
+      // (ERR_PACKAGE_PATH_NOT_EXPORTED) — fall back to their package.json.
       resolvedPath = this._resolvePluginFromNodeModules(specifier, baseDir)
     }
 
@@ -599,8 +581,8 @@ class PrettierService extends FormattingService {
   /**
    * Fallback for packages without a CJS entry point: walk up from
    * `baseDir` looking for `node_modules/<package>`, then pick the entry
-   * file from its package.json. Prettier imports the returned path, so
-   * ESM entries (.mjs, exports.import) work.
+   * file from its package.json (Prettier imports the path, so ESM
+   * entries work).
    *
    * @param {string} specifier – package name, possibly with a subpath
    * @param {string} baseDir   – directory to start the walk-up from
@@ -666,11 +648,10 @@ class PrettierService extends FormattingService {
 
 /**
  * Warm up Prettier's core parsers by formatting a tiny sample with each
- * one. The first format with a parser pays the module/JIT load cost —
- * doing this right after startup moves it off the first save. Runs
- * sequentially so the warmup never contends with early format requests,
- * and each sample is independent: one failing parser must not abort the
- * rest. Best-effort — every error is swallowed.
+ * one — the first format with a parser pays the module/JIT load cost,
+ * and doing this at startup moves it off the first save. Sequential so
+ * the warmup never contends with early format requests; each sample is
+ * independent and every error is swallowed (best-effort).
  *
  * @param {object} prettier – the loaded Prettier module
  * @returns {Promise<void>}
@@ -691,8 +672,8 @@ async function warmCoreParsers(prettier) {
     try {
       await prettier.format(sample, { parser })
     } catch {
-      // A parser that doesn't ship in this Prettier build (or fails for
-      // any other reason) simply stays cold; saves handle it then.
+      // parser missing from this Prettier build (or otherwise broken) —
+      // it simply stays cold
     }
   }
 }
@@ -700,7 +681,6 @@ async function warmCoreParsers(prettier) {
 let jsonRpcService
 
 async function bootstrap() {
-  // 1) instantiate and register handlers
   jsonRpcService = new JsonRpcService(process.stdin, process.stdout)
   const [, , modulePath] = process.argv
 
@@ -731,17 +711,16 @@ async function bootstrap() {
       )
     }
 
-    // 2) await the startup notification so we know it went out
+    // Await the startup notification so we know it went out
     await jsonRpcService.notify('didStart')
 
-    // 2.5) Warm core parsers off the request path — deferred so the
-    // handshake stays unaffected and early format requests are served
-    // first.
+    // Warm core parsers off the request path — deferred so the
+    // handshake stays unaffected and early format requests go first.
     setTimeout(() => {
       warmCoreParsers(module).catch(() => {})
     }, 0)
   } catch (err) {
-    // if we failed during bootstrap, notify and exit
+    // failed during bootstrap — notify and exit
     if (jsonRpcService) {
       await jsonRpcService.notify('startDidFail', {
         name: err.name,
@@ -752,14 +731,14 @@ async function bootstrap() {
     process.exit(1)
   }
 
-  // 3) graceful shutdown
+  // graceful shutdown
   process.once('SIGTERM', async () => {
     try {
       await jsonRpcService.dispose()
       process.stdin.destroy()
       process.stdout.destroy()
     } catch {
-      // pipes already gone — nothing to clean up
+      // pipes already gone
     }
   })
 }

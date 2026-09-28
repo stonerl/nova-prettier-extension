@@ -123,7 +123,6 @@ function makeNovaShim({ withTempdir = true } = {}) {
     },
   }
 
-  // Test helpers hanging off the shim for convenience.
   shim._agePath = (p, secondsAgo) => {
     if (dirs.has(p)) dirs.set(p, now() - secondsAgo * 1000)
     if (files.has(p)) files.get(p).mtimeMs = now() - secondsAgo * 1000

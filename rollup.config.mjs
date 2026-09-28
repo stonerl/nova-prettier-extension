@@ -14,12 +14,10 @@ import resolve from '@rollup/plugin-node-resolve'
 import terser from '@rollup/plugin-terser'
 import fs from 'fs'
 
-// Load unified configuration
 const unifiedConfig = JSON.parse(
   fs.readFileSync('./src/unifiedConfig.json', 'utf8'),
 )
 
-// Function to extract specific configurations
 const extractConfig = (unifiedConfig, type) => {
   const extract = (item) => {
     const extracted = { ...item }
@@ -42,11 +40,9 @@ const extractConfig = (unifiedConfig, type) => {
   return unifiedConfig.map(extract)
 }
 
-// Generate configurations
 const globalConfig = extractConfig(unifiedConfig, 'config')
 const workspaceConfig = extractConfig(unifiedConfig, 'configWorkspace')
 
-// Write the configurations to files
 fs.writeFileSync(
   './prettier.novaextension/config.json',
   JSON.stringify(globalConfig, null, 2),
@@ -56,7 +52,6 @@ fs.writeFileSync(
   JSON.stringify(workspaceConfig, null, 2),
 )
 
-// Minify JSON files
 const minifyConfigFile = (filePath) => {
   if (!fs.existsSync(filePath)) {
     console.warn(`⚠️  Skipping missing file: ${filePath}`)
@@ -73,7 +68,6 @@ const minifyConfigFile = (filePath) => {
   }
 }
 
-// List of JSON files to minify
 const jsonFilesToMinify = [
   'config.json',
   'configWorkspace.json',
@@ -89,7 +83,6 @@ const jsonFilesToMinify = [
   'zh-Hans.lproj/strings.json',
 ].map((file) => `./prettier.novaextension/${file}`)
 
-// Minify all listed files
 jsonFilesToMinify.forEach(minifyConfigFile)
 
 export default [

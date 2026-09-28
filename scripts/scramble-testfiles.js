@@ -60,15 +60,6 @@ function rngFor(file) {
   return mulberry32(baseSeed ^ fnv1a(file))
 }
 
-/**
- * One of: drop one leading indent level, keep, or add one.
- * Uses the provided RNG so repeated runs are stable.
- *
- * @param {function():number} rng
- * @param {string} line
- * @param {number} indentUnit  string used for one indent level
- * @returns {string}
- */
 function jitterIndent(rng, line, indentUnit) {
   const leading = line.match(/^[ \t]*/)[0]
   const body = line.slice(leading.length)
@@ -87,7 +78,7 @@ function jitterIndent(rng, line, indentUnit) {
   return indentUnit.repeat(levels + 1) + body
 }
 
-// --- Suffix dispatch table (longest match wins) ---
+// suffix dispatch table (longest match wins)
 
 const injectors = {
   '.blade.php': simulateBladeMistakes,
@@ -128,8 +119,6 @@ function findSuffix(file) {
   return suffixes.find((suffix) => lower.endsWith(suffix))
 }
 
-// --- Main loop ---
-
 fs.readdirSync(SAMPLES_DIR).forEach((file) => {
   const fullPath = path.join(SAMPLES_DIR, file)
   if (!fs.statSync(fullPath).isFile()) return
@@ -154,8 +143,8 @@ fs.readdirSync(SAMPLES_DIR).forEach((file) => {
 })
 
 // === FORMATTER FUNCTIONS ===
-// Every function receives (content, rng) and returns the mangled text.
-// `rng` replaces Math.random for determinism.
+// Every function receives (content, rng) and returns the mangled text;
+// rng replaces Math.random for determinism.
 
 function simulateCssMistakes(content, _rng) {
   const lines = content.split('\n')
@@ -165,19 +154,16 @@ function simulateCssMistakes(content, _rng) {
     .map((line) => {
       const trimmed = line.trim()
 
-      // Start or end of a block comment
       if (trimmed.startsWith('/*')) inBlockComment = true
       if (inBlockComment) {
         if (trimmed.endsWith('*/')) inBlockComment = false
-        return line // Preserve as-is
+        return line
       }
 
-      // Preserve line comments or blank lines
       if (trimmed.startsWith('//') || trimmed === '') return line
 
-      // Apply formatting mistakes
       return line
-        .replace(/^\s+/g, '') // remove leading indent
+        .replace(/^\s+/g, '')
         .replace(/\s*{\s*/g, '{ ')
         .replace(/\s*}\s*/g, '} ')
         .replace(/\s*:\s*/g, ':')
@@ -195,7 +181,6 @@ function simulateEjsMistakes(content, _rng) {
   for (let i = 0; i < lines.length; i++) {
     const trimmed = lines[i].trim()
 
-    // Maintain blank lines between logic and HTML for readability
     if (trimmed === '') {
       result.push('')
       continue
@@ -204,12 +189,10 @@ function simulateEjsMistakes(content, _rng) {
     const isLogicLine = /^<%[^=]/.test(trimmed)
     const isOutputLine = /^<%=/.test(trimmed)
 
-    // Adjust indentation for closing blocks
     if (trimmed.startsWith('<% }') || trimmed === '<% } %>') {
       indentLevel = Math.max(0, indentLevel - 1)
     }
 
-    // Format EJS logic or output lines
     if (isLogicLine || isOutputLine) {
       const spaced = trimmed
         .replace(/\s{2,}/g, ' ')
@@ -220,7 +203,7 @@ function simulateEjsMistakes(content, _rng) {
 
       result.push('  '.repeat(indentLevel) + spaced)
 
-      // Increase indent for opening logic blocks
+      // opening logic block
       if (trimmed.match(/<%.*{\s*%>$/)) {
         indentLevel++
       }
@@ -228,7 +211,6 @@ function simulateEjsMistakes(content, _rng) {
       continue
     }
 
-    // Standard HTML lines — keep structure but strip extra indent
     result.push('  '.repeat(indentLevel) + trimmed)
   }
 
@@ -249,16 +231,14 @@ function simulateJsMistakes(content, _rng) {
       trimmed.startsWith('*') ||
       trimmed.startsWith('*/')
 
-    // Preserve comments and their original blank-line spacing
     result.push(currentLine)
 
     const nextLineWasBlank = lines[i + 1] === ''
     if (isComment && nextLineWasBlank) {
-      result.push('') // preserve intended blank line
+      result.push('')
       i++ // skip next (blank) line
     }
 
-    // Format actual code lines (non-blank, non-comment)
     if (trimmed && !isComment) {
       const scrambled = currentLine.replace(/\s{2,}/g, ' ').replace(/^\s+/g, '')
       result[result.length - 1] = scrambled
@@ -282,17 +262,15 @@ function simulatePhpMistakes(content, _rng) {
     const line = lines[i]
     const trimmed = line.trim()
 
-    // Detect switch to HTML
     if (trimmed === '?>') inHtml = true
     if (trimmed.startsWith('<?php')) inHtml = false
 
-    // Leave HTML untouched
     if (inHtml || trimmed.startsWith('<!')) {
       result.push(line)
       continue
     }
 
-    // Skip scrambling for lines with echo/return + quotes
+    // don't scramble echo/return lines containing quotes
     const isSensitiveLine =
       /\b(echo|return)\b/.test(trimmed) && /["'].*["']/.test(trimmed)
 
@@ -311,11 +289,10 @@ function simulatePhpMistakes(content, _rng) {
       continue
     }
 
-    // Safe formatting-only scramble
     const scrambled = line
       .replace(/ {2,}/g, ' ')
       .replace(/\s*([=;:{}(),\[\]])\s*/g, '$1')
-      .replace(/^\s{4}/, '  ') // reduce indent
+      .replace(/^\s{4}/, '  ')
       .replace(/\s+$/g, '')
 
     result.push(scrambled)
@@ -333,14 +310,12 @@ function simulateMarkdownMistakes(content, rng) {
     .map((line) => {
       const trimmed = line.trim()
 
-      // Toggle YAML front-matter
       if (trimmed === '---') {
         inFrontmatter = !inFrontmatter
         return line
       }
       if (inFrontmatter) return line
 
-      // Toggle fenced code blocks
       if (trimmed.startsWith('```')) {
         inFencedBlock = !inFencedBlock
         return line
@@ -356,19 +331,18 @@ function simulateMarkdownMistakes(content, rng) {
 
       if (shouldSkip) return line
 
-      // Line contains a template literal — don't touch
+      // template literal — don't touch
       if (/\{\{[^}]+\}\}|\{\%[^%]+\%\}/.test(line)) {
         return line
       }
 
-      // List item — scramble only the content
+      // list item — scramble only the content
       const listMatch = line.match(/^(\s*([-+*]|\d+\.)\s+)(.*)$/)
       if (listMatch) {
         const [, prefix, , text] = listMatch
         return prefix + scramble(text)
       }
 
-      // Otherwise, scramble entire line
       return scramble(line)
 
       function scramble(text) {
@@ -395,17 +369,15 @@ function simulateHtmlMistakes(content, _rng) {
   for (const line of lines) {
     const trimmed = line.trim()
 
-    // Start/end script detection
     if (trimmed.startsWith('<script')) inScript = true
     if (trimmed.startsWith('</script>')) inScript = false
 
-    // Keep comments and blank lines exactly
     if (trimmed.startsWith('<!--') || trimmed === '') {
       result.push(line)
       continue
     }
 
-    // Leave script content messy but line-by-line
+    // script content: messy but line-by-line
     if (
       inScript &&
       !trimmed.startsWith('<script') &&
@@ -421,9 +393,7 @@ function simulateHtmlMistakes(content, _rng) {
       continue
     }
 
-    result.push(
-      line.replace(/ {2,}/g, ' ').replace(/^\s+/g, ''), // remove leading indent
-    )
+    result.push(line.replace(/ {2,}/g, ' ').replace(/^\s+/g, ''))
   }
 
   return result.join('\n')
@@ -442,10 +412,10 @@ function simulateGraphqlMistakes(content, _rng) {
 
 function simulateJsonMistakes(content, _rng) {
   return content
-    .replace(/:\s*/g, ': ') // fix colon spacing
-    .replace(/,\s*/g, ', ') // comma spacing
-    .replace(/ {2,}/g, ' ') // excess spaces
-    .replace(/\n{3,}/g, '\n\n') // too many line breaks
+    .replace(/:\s*/g, ': ')
+    .replace(/,\s*/g, ', ')
+    .replace(/ {2,}/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
 }
 
 function simulateScssMistakes(content, _rng) {
@@ -455,7 +425,6 @@ function simulateScssMistakes(content, _rng) {
   for (const line of lines) {
     const trimmed = line.trim()
 
-    // Leave comments alone
     if (
       trimmed === '' ||
       trimmed.startsWith('//') ||
@@ -468,10 +437,10 @@ function simulateScssMistakes(content, _rng) {
     }
 
     const scrambled = line
-      .replace(/^\s+/g, '') // remove leading indent
-      .replace(/\s{2,}/g, ' ') // collapse multiple spaces
-      .replace(/\s*([:{};,])\s*/g, '$1') // tighten syntax characters
-      .replace(/,\s*/g, ', ') // normalize comma spacing
+      .replace(/^\s+/g, '')
+      .replace(/\s{2,}/g, ' ')
+      .replace(/\s*([:{};,])\s*/g, '$1')
+      .replace(/,\s*/g, ', ')
 
     result.push(scrambled)
   }
@@ -498,12 +467,12 @@ function simulateLessMistakes(content, _rng) {
     }
 
     const scrambled = line
-      .replace(/^\s+/g, '') // remove leading indent
-      .replace(/\s{2,}/g, ' ') // collapse multiple spaces
-      .replace(/\s*([{}();])\s*/g, '$1') // tighten around syntax
-      .replace(/:\s*/g, ': ') // normalize to one space after colon
-      .replace(/,\s*/g, ', ') // comma spacing
-      .replace(/&:\s+/g, '&:') // protect & pseudo-selectors (space changes meaning)
+      .replace(/^\s+/g, '')
+      .replace(/\s{2,}/g, ' ')
+      .replace(/\s*([{}();])\s*/g, '$1')
+      .replace(/:\s*/g, ': ')
+      .replace(/,\s*/g, ', ')
+      .replace(/&:\s+/g, '&:') // space changes meaning for & pseudo-selectors
 
     result.push(scrambled)
   }
@@ -522,7 +491,6 @@ function simulateVueMistakes(content, rng) {
   let scrambledScript = ''
   let scrambledStyle = ''
 
-  // --- TEMPLATE SCRAMBLE ---
   if (templateMatch) {
     scrambledTemplate = templateMatch[1]
       .split('\n')
@@ -537,7 +505,6 @@ function simulateVueMistakes(content, rng) {
       .join('\n')
   }
 
-  // --- SCRIPT SCRAMBLE ---
   if (scriptMatch) {
     scrambledScript = scriptMatch[0]
       .split('\n')
@@ -556,7 +523,6 @@ function simulateVueMistakes(content, rng) {
       .join('\n')
   }
 
-  // --- STYLE SCRAMBLE ---
   if (styleMatch) {
     scrambledStyle = simulateScssMistakes(styleMatch[0], rng)
   }
@@ -590,18 +556,16 @@ function simulateXmlMistakes(content, _rng) {
 
     if (trimmed.includes(']]>')) {
       inCdata = false
-      result.push(line) // preserve leading indentation
+      result.push(line)
       continue
     }
 
-    // Detect text-only lines
     if (!inCdata && !trimmed.startsWith('<') && !trimmed.endsWith('>')) {
       inTextBlock = true
     } else {
       inTextBlock = false
     }
 
-    // Preserve raw content
     if (
       inCdata ||
       inTextBlock ||
@@ -637,7 +601,6 @@ function simulateYamlMistakes(content, _rng) {
     .map((line) => {
       const trimmed = line.trim()
 
-      // Preserve blank lines, comments, block indicators, and YAML document markers
       if (
         trimmed === '' ||
         trimmed.startsWith('#') ||
@@ -650,12 +613,11 @@ function simulateYamlMistakes(content, _rng) {
         return line
       }
 
-      // Preserve lines starting with a quoted key entirely.
       if (/^['"].+['"]\s*:/.test(trimmed)) {
         return line
       }
 
-      // Minimal change: normalize colon spacing on unquoted keys.
+      // unquoted keys only: normalize colon spacing
       return line.replace(/\s*:\s*/g, ': ')
     })
     .join('\n')
@@ -666,7 +628,7 @@ function simulateSqlMistakes(content, _rng) {
     .replace(/ {2,}/g, ' ')
     .replace(/\t+/g, ' ')
     .replace(/\n{3,}/g, '\n\n')
-    .replace(/^\s+/gm, '') // unindent
+    .replace(/^\s+/gm, '')
 }
 
 function simulateNginxMistakes(content, _rng) {
@@ -675,24 +637,15 @@ function simulateNginxMistakes(content, _rng) {
     .map((line) => {
       const trimmed = line.trim()
 
-      // Preserve blank lines and comments as-is.
       if (trimmed === '' || trimmed.startsWith('#')) {
         return line
       }
 
-      // Minimal changes for non-comment lines:
       let scrambled = line
 
-      // Remove leading indentation.
       scrambled = scrambled.replace(/^\s+/, '')
-
-      // Collapse multiple spaces into one.
       scrambled = scrambled.replace(/\s{2,}/g, ' ')
-
-      // Remove extra spaces before semicolons.
       scrambled = scrambled.replace(/\s*;/g, ';')
-
-      // Normalize spacing around braces.
       scrambled = scrambled.replace(/\s*{\s*/g, ' { ')
       scrambled = scrambled.replace(/\s*}\s*/g, ' } ')
 
@@ -707,7 +660,7 @@ function simulateJavaMistakes(content, rng) {
     .map((line) => {
       const trimmed = line.trim()
 
-      // Don't touch comments or annotations
+      // comments and annotations: untouched
       if (
         trimmed === '' ||
         trimmed.startsWith('//') ||
@@ -720,19 +673,18 @@ function simulateJavaMistakes(content, rng) {
 
       let modified = line
 
-      // Add safe extra spaces between identifiers (but not operators)
+      // extra spaces between identifiers (not operators)
       modified = modified.replace(
         /\b([a-zA-Z_][a-zA-Z0-9_]*)\b(?=\s+\b[a-zA-Z_][a-zA-Z0-9_]*\b)/g,
         (match) => match + (rng() < 0.5 ? '' : ' '),
       )
 
-      // Slightly mess with spacing after control keywords
+      // spacing after control keywords
       modified = modified.replace(
         /\b(public|private|protected|if|else|while|for|return|static|final|class)\b\s+/g,
         (match, keyword) => keyword + ' '.repeat(1 + Math.floor(rng() * 2)),
       )
 
-      // Avoid touching operators or structural punctuation
       return modified
     })
     .join('\n')
@@ -744,7 +696,7 @@ function simulatePropertiesMistakes(content, rng) {
     .map((line) => {
       const trimmed = line.trim()
 
-      // Leave comments and blank lines alone (both # and ! comments)
+      // # and ! comments: untouched
       if (
         trimmed === '' ||
         trimmed.startsWith('#') ||
@@ -753,10 +705,9 @@ function simulatePropertiesMistakes(content, rng) {
         return line
       }
 
-      // Continuation or multi-line: keep indent and continuation slashes
+      // continuation line: untouched
       if (line.match(/\\\s*$/)) return line
 
-      // Match key-value pairs with either = or :
       const match = line.match(/^(\s*)([^:=]+?)(\s*)([:=])(\s*)(.*)$/)
       if (!match) return line
 
@@ -764,7 +715,7 @@ function simulatePropertiesMistakes(content, rng) {
 
       let newLine = indent
 
-      // Some lines lose spacing around separators
+      // lose spacing around separators
       const roll = rng()
       if (roll < 0.3) {
         newLine += key + separator + value
@@ -774,7 +725,6 @@ function simulatePropertiesMistakes(content, rng) {
         newLine += key + ' ' + separator + '  ' + value
       }
 
-      // Occasionally indent the line
       if (rng() < 0.1) {
         newLine = '  ' + newLine
       }
@@ -794,13 +744,13 @@ function simulateShMistakes(content, _rng) {
     .map((line) => {
       const trimmed = line.trim()
 
-      // Inside a heredoc body: leave everything alone
+      // heredoc body: leave everything alone
       if (heredocEnd !== null) {
         if (trimmed === heredocEnd) heredocEnd = null
         return line
       }
 
-      // Heredoc start: find the delimiter and skip its body
+      // heredoc start: skip its body
       const heredoc = trimmed.match(/<<-?['"]?(\w+)['"]?/)
       if (heredoc) {
         heredocEnd = heredoc[1]
@@ -829,13 +779,13 @@ function simulateDockerfileMistakes(content, rng) {
     .map((line) => {
       const trimmed = line.trim()
 
-      // Preserve comments, blank lines, continuation lines
+      // comments, blank lines, continuation lines: untouched
       if (trimmed === '' || trimmed.startsWith('#') || trimmed.endsWith('\\')) {
         return line
       }
 
       let scrambled = jitterIndent(rng, line, '  ')
-      // Collapse runs; occasionally lowercase the instruction keyword
+      // collapse runs; occasionally lowercase the instruction keyword
       scrambled = scrambled.replace(/\s{2,}/g, ' ')
       const keyword = scrambled.match(/^([A-Z][A-Z0-9]+)\b/)
       if (keyword && rng() < 0.3) {
@@ -853,7 +803,7 @@ function simulateTomlMistakes(content, rng) {
     .map((line) => {
       const trimmed = line.trim()
 
-      // Preserve comments, blank lines, and multiline string markers
+      // comments, blank lines, multiline string markers: untouched
       if (
         trimmed === '' ||
         trimmed.startsWith('#') ||
@@ -915,12 +865,12 @@ function simulateBladeMistakes(content, rng) {
 
       if (trimmed === '') return line
 
-      // Preserve @php blocks verbatim
+      // @php blocks: verbatim
       if (trimmed.startsWith('@php')) return line
 
       let scrambled = jitterIndent(rng, line, '  ')
       scrambled = scrambled.replace(/\s{2,}/g, ' ')
-      // Mangle spacing inside {{ }} and @directive expressions
+      // mangle spacing inside {{ }} and @directive expressions
       scrambled = scrambled.replace(/\{\{\s*/g, rng() < 0.5 ? '{{' : '{{ ')
       scrambled = scrambled.replace(/\s*\}\}/g, '}}')
       scrambled = scrambled.replace(/@(\w+)\s*\(/g, (m, name) =>
@@ -941,7 +891,7 @@ function simulateTwigMistakes(content, rng) {
 
       let scrambled = jitterIndent(rng, line, '  ')
       scrambled = scrambled.replace(/\s{2,}/g, ' ')
-      // Tighten or loosen tag spacing: {% tag %} / {%tag%}
+      // tag spacing: {% tag %} / {%tag%}
       scrambled = scrambled.replace(/\{%\s*/g, rng() < 0.5 ? '{%' : '{% ')
       scrambled = scrambled.replace(/\s*%\}/g, '%}')
       scrambled = scrambled.replace(/\{\{\s*/g, rng() < 0.5 ? '{{' : '{{ ')

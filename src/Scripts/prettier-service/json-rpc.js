@@ -67,27 +67,23 @@ class JsonRpcParser extends Transform {
    * @private
    */
   _transform(chunk, encoding, callback) {
-    // 1) stash the new chunk
     this.buffers.push(chunk)
     this.bytesBuffered += chunk.length
 
-    // 2) if we’re over threshold, collapse into one Buffer; otherwise
-    //    rebuild the full Buffer so we never lose data across buffers
+    // Over threshold: collapse the chunk array into one Buffer to avoid
+    // unbounded growth; otherwise always re-concat so this.buffer
+    // contains all bytes so far.
     if (this.bytesBuffered > JsonRpcParser.COLLAPSE_THRESHOLD) {
       this.buffer = Buffer.concat(this.buffers, this.bytesBuffered)
       this.buffers = [this.buffer]
       this.bytesBuffered = this.buffer.length
     } else {
-      // cheap for small sizes: always re-concat so this.buffer includes all bytes
       this.buffer = Buffer.concat(this.buffers, this.bytesBuffered)
     }
 
     // Keep extracting messages while we have a full header+body
     while (true) {
-      // 1. Find header delimiter as raw Buffer (avoid toString+regex)
-      //    Pre-define these once, e.g. static class props:
-      //    JsonRpcParser.CRLF = Buffer.from('\r\n\r\n', 'ascii')
-      //    JsonRpcParser.LF   = Buffer.from('\n\n', 'ascii')
+      // Find the header delimiter as raw Buffer bytes — no toString/regex
       const idxCRLF = this.buffer.indexOf(JsonRpcParser.CRLF)
       const idxLF = this.buffer.indexOf(JsonRpcParser.LF)
       let sep, delimLen
@@ -101,7 +97,6 @@ class JsonRpcParser extends Transform {
         break // no full header yet
       }
 
-      // 2. Extract header text directly from the Buffer
       const headerBuf = this.buffer.slice(0, sep)
       const headers = new Map(
         headerBuf
@@ -113,7 +108,6 @@ class JsonRpcParser extends Transform {
           }),
       )
 
-      // 3. Pull out content-length
       const len = parseInt(headers.get('content-length'), 10)
       if (isNaN(len) || len > MAX_CONTENT_LENGTH) {
         const err = new Error(`Frame too large: ${len} bytes`)
@@ -121,10 +115,8 @@ class JsonRpcParser extends Transform {
         return callback(err)
       }
 
-      // 4. Wait until full body is buffered
       if (this.buffer.length < sep + delimLen + len) break
 
-      // 5. Slice out the body using the dynamic delimiter length
       const bodyBuf = this.buffer.slice(sep + delimLen, sep + delimLen + len)
       let body
       try {
@@ -135,12 +127,11 @@ class JsonRpcParser extends Transform {
         continue
       }
 
-      // 6. Push the parsed frame and remove it from the buffer
       this.push({ headers, body })
       this.buffer = this.buffer.slice(sep + delimLen + len)
     }
 
-    // Sync up the buffers array to only the unparsed remainder
+    // Sync the chunk array to the unparsed remainder
     this.buffers = [this.buffer]
     this.bytesBuffered = this.buffer.length
 
@@ -193,28 +184,23 @@ class JsonRpcService {
      */
     this._writeQueue = Promise.resolve()
 
-    // Pipe incoming bytes into our parser, and unpipe on fatal errors
+    // Pipe incoming bytes into our parser
     const piped = readStream.pipe(this.parser)
     piped
       .on('error', (err) => {
-        // unexpected parse crash → internal error response
         this._writePayload({ jsonrpc: '2.0', error: INTERNAL_ERROR, id: null })
         this.logger.error('Parser error', err)
-        // stop feeding any more data
         readStream.unpipe(this.parser)
-        // optionally destroy the parser to free resources
         this.parser.destroy()
       })
       .on('data', (frame) => {
         this._handleFrame(frame).catch((err) => {
-          // Fatal internal error
           this._writePayload({
             jsonrpc: '2.0',
             error: INTERNAL_ERROR,
             id: null,
           })
           this.logger.error('Fatal error in _handleFrame', err)
-          // unpipe so no further frames are sent
           readStream.unpipe(this.parser)
           this.parser.destroy()
         })
@@ -231,7 +217,6 @@ class JsonRpcService {
    */
   onRequest(method, handler) {
     this.handlers.set(method, handler)
-    // return an unsubscribe function
     return () => {
       this.handlers.delete(method)
     }
@@ -250,7 +235,6 @@ class JsonRpcService {
 
     const req = body
 
-    // Batch requests
     if (Array.isArray(req)) {
       // [] is invalid per JSON-RPC 2.0 §4.3
       if (req.length === 0) {
@@ -262,7 +246,6 @@ class JsonRpcService {
         return
       }
 
-      // Properly handle non-empty batches:
       const responses = await Promise.all(req.map((r) => this._process(r)))
       for (const resp of responses) {
         if (resp) {
@@ -272,7 +255,6 @@ class JsonRpcService {
       return
     }
 
-    // Single request or notification
     const resp = await this._process(req)
     if (resp) {
       await this._writePayload(resp)
@@ -282,7 +264,6 @@ class JsonRpcService {
   async _process(request) {
     const { jsonrpc, method, params, id } = request
 
-    // Spec compliance checks
     const validId =
       id === undefined
         ? true
@@ -316,7 +297,7 @@ class JsonRpcService {
         id,
       }
     } catch (err) {
-      // if handler threw a JSON-RPC error object, pass it through
+      // a JSON-RPC error object passes through as-is
       const errObj =
         err && typeof err.code === 'number' && typeof err.message === 'string'
           ? err
@@ -378,8 +359,8 @@ class JsonRpcService {
     const closed = once(stream, 'close', { signal }).then(() => {
       throw new Error('Write stream closed before drain')
     })
-    // Loser of the race gets aborted → rejects with AbortError.
-    // Swallow so it never becomes an unhandled rejection.
+    // Loser of the race gets aborted (AbortError) — swallow so it never
+    // becomes an unhandled rejection.
     drain.catch(() => {})
     closed.catch(() => {})
     try {

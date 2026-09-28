@@ -34,14 +34,9 @@ const { Formatter } = require('./formatter.js')
 const pluginPaths = require('./prettier-plugins.js')
 
 /**
- * Finds the package root of a bundled plugin from its registry entry
- * path: walks up from the entry file's directory until the parent is
- * `node_modules` itself or an `@scope` directory under it — either way
- * the current directory is the package root. Registry entries point at
- * entry files of varying depth (`node_modules/<pkg>/index.js`,
- * `…/<pkg>/dist/index.js`, `…/dist/cjs/index.js`, scoped
- * `@org/<pkg>/src/index.mjs`), so a fixed two-level walk missed most of
- * them and their version showed without a number.
+ * Finds a bundled plugin's package root from its registry entry path:
+ * entries point at entry files of varying depth, so walk up until the
+ * parent is `node_modules` itself or an `@scope` directory under it.
  *
  * @param {string} pluginPath – absolute entry file path from the registry
  * @returns {string|null}      – the plugin's package directory, or null
@@ -83,7 +78,6 @@ class PrettierExtension {
     this.ignoredEditors = new Set()
     this.issueCollection = new IssueCollection()
 
-    // initialize disposables containers
     this.fsWatchers = []
     this.commandDisposables = []
     this.configDisposables = []
@@ -91,7 +85,6 @@ class PrettierExtension {
 
     this.customConfigWatcher = null
 
-    // debouncers
     // Shared 5s debouncer for all "restart module" triggers — package
     // file changes, project Prettier updates, and the restart command
     // all funnel into modulePathDidChange. One instance prevents
@@ -112,26 +105,26 @@ class PrettierExtension {
     this.formatter = new Formatter()
     this.hasStarted = false
 
-    // Module-path resolution cache. findPrettier() shells out to npm and
-    // can take many seconds; config-file changes restart the service but
-    // never change which Prettier binary to load, so the resolved path is
-    // reused until a trigger that can affect resolution fires.
+    // Module-path resolution cache: findPrettier() shells out to npm and
+    // can take many seconds. Config-file changes restart the service but
+    // never change which Prettier to load, so the resolved path is
+    // reused until a resolution-affecting trigger fires.
     this._resolvedModulePath = null
     this._needsResolution = true
 
     // In-flight stop/start cycle (singleflight — see _runRestartCycle)
     this._restartCycle = null
-    // Set when a trigger joins an in-flight cycle, so the cycle can
-    // schedule one more run after finishing instead of dropping it.
+    // trigger joined an in-flight cycle — schedule one more run
+    // after it finishes instead of dropping it
     this._restartCycleQueued = false
 
-    // Path the running service was last started with. Redundant triggers
-    // (e.g. config observers re-firing with unchanged values during
-    // startup) resolve to the same effective path — the stop/start is
-    // skipped instead of bouncing a healthy service.
+    // Path the running service was started with. Redundant triggers
+    // (observers re-firing with unchanged values during startup) resolve
+    // to the same effective path — the stop/start is skipped instead of
+    // bouncing a healthy service.
     this._runningModulePath = null
-    // Set by reloadPrettierConfig: config-file edits must restart the
-    // service even when the module path is unchanged.
+    // config-file edits must restart the service even when the module
+    // path is unchanged
     this._forceRestart = false
   }
 
@@ -151,10 +144,6 @@ class PrettierExtension {
     return getConfigWithWorkspaceOverride('prettier.config.file')
   }
 
-  /**
-   * Watch the user’s external config-file (prettier.config.file),
-   * tear down any old watcher, set up a new one, then trigger a restart.
-   */
   handleCustomConfigPathChange() {
     if (this.customConfigWatcher) {
       this.customConfigWatcher.dispose()
@@ -224,7 +213,6 @@ class PrettierExtension {
         'prettier.module.preferBundled',
         this.modulePreferBundledDidChange,
       ),
-      // restart when the user changes the external config-file path
       ...observeConfigWithWorkspaceOverride(
         'prettier.config.file',
         this.handleCustomConfigPathChange,
@@ -241,7 +229,6 @@ class PrettierExtension {
       this.configDisposables,
     )
 
-    // immediately wire up the custom‐config watcher on load
     this.handleCustomConfigPathChange()
   }
 
@@ -265,11 +252,10 @@ class PrettierExtension {
 
   start() {
     // Config writes and observer registration are deferred until after
-    // activation has returned. Nova's config store can deadlock — a
-    // config write waits for its synchronous change-notification
-    // observers, which re-enter config reads behind a writer-priority
-    // rwlock — when two extensions touch config concurrently during
-    // activation (e.g. alongside Docker Suite). Keeping activate()
+    // activation. Nova's config store can deadlock when two extensions
+    // touch config concurrently during activation — a config write waits
+    // for its synchronous change-notification observers, which re-enter
+    // config reads behind a writer-priority rwlock. Keeping activate()
     // free of config-store traffic shrinks that window.
     this.configSetupTimer = setTimeout(() => {
       this.configSetupTimer = null
@@ -277,7 +263,7 @@ class PrettierExtension {
       this.syncSelectionUnsupportedContext()
     }, 0)
 
-    // 1) File‐system watchers
+    // File-system watchers
     if (nova.workspace.path) {
       const configFilesToWatch = [
         '**/.prettierrc',
@@ -327,12 +313,12 @@ class PrettierExtension {
       this.fsWatchers.push(nodeModulesWatcher)
     }
 
-    // 2) Workspace text‐editor listener
+    // Text-editor listener
     this.didAddTextEditorDisposable = nova.workspace.onDidAddTextEditor(
       this.didAddTextEditor,
     )
 
-    // 3) Commands
+    // Commands
     this.commandDisposables = [
       nova.commands.register('prettier.format', this.didInvokeFormatCommand),
 
@@ -386,15 +372,13 @@ class PrettierExtension {
       }),
     ]
 
-    // Normalize boolean or Promise into a Promise<boolean>
-    const readyPromise = Promise.resolve(this.formatter.isReady)
-
-    // Initial service start. Config observers skip their initial
-    // "current value" notification, so nothing else triggers this on a
-    // fresh activation — kick it off explicitly. Fire-and-forget:
-    // modulePathDidChange catches internally and surfaces failures as
-    // notifications.
+    // Initial service start: config observers skip their initial
+    // "current value" notification, so nothing triggers this on a fresh
+    // activation. Fire-and-forget — modulePathDidChange catches
+    // internally and surfaces failures as notifications.
     this.modulePathDidChange()
+
+    const readyPromise = Promise.resolve(this.formatter.isReady)
 
     readyPromise.then((didStart) => {
       if (!didStart) return
@@ -488,11 +472,10 @@ class PrettierExtension {
 
   async reloadPrettierConfig() {
     log.debug('Prettier config file changed — restarting Prettier…')
-    // Config-file edits must restart the service even when the module
-    // path is unchanged — mark the cycle as mandatory.
+    // config-file edits must restart even when the module path is unchanged
     this._forceRestart = true
-    // Delegate to modulePathDidChange so failures surface through
-    // its existing notification handling instead of rejecting unhandled.
+    // delegate so failures surface via modulePathDidChange's notification
+    // handling instead of rejecting unhandled
     await this.modulePathDidChange()
   }
 
@@ -506,18 +489,16 @@ class PrettierExtension {
   async npmPackageFileDidChange(path) {
     if (this.preferBundled || this.modulePath) return
 
-    // The bundled install itself writes package files into the extension
-    // bundle — those events are the extension's own doing and the
-    // running resolution already picks up their result, so a restart
-    // would only cause a redundant stop/start cycle.
+    // The bundled install itself writes package files into the
+    // extension bundle — self-induced events whose result the running
+    // resolution already picked up; restarting would only cause a
+    // redundant stop/start cycle.
     if (isInsideExtensionBundle(path)) {
       log.debug('Ignoring self-induced watcher event:', path)
       return
     }
 
     log.debug('npmPackageFileDidChange invoked:', path)
-    // package.json / lockfiles changed — the resolved module path may be
-    // different now
     this._needsResolution = true
     this.debouncedModulePathDidChange()
   }
@@ -544,8 +525,6 @@ class PrettierExtension {
     }
 
     log.debug('moduleProjectPrettierDidChange invoked:', path)
-    // node_modules/prettier changed — the resolved module path may be
-    // different now
     this._needsResolution = true
     this.debouncedModulePathDidChange()
   }
@@ -591,10 +570,9 @@ class PrettierExtension {
     }
 
     this._restartCycle = (async () => {
-      // Phase 1: resolution — the service stays up, so formatting keeps
-      // working while npm ls runs. Only resolution-affecting triggers
-      // set _needsResolution; an explicitly configured module path makes
-      // resolution pointless.
+      // Resolution: the service stays up, so formatting keeps working
+      // while npm ls runs. Only resolution-affecting triggers set
+      // _needsResolution; an explicit module path makes it pointless.
       if (this._needsResolution && !this.modulePath) {
         try {
           const path = await findPrettier()
@@ -604,9 +582,8 @@ class PrettierExtension {
         }
       }
 
-      // Phase 2: stop/start only when something actually changed — a
-      // trigger that resolves to the same path must not bounce a healthy
-      // service (this is what made save-formats go dark for seconds).
+      // Stop/start only when something actually changed — a trigger that
+      // resolves to the same path must not bounce a healthy service.
       if (this._isRestartRedundant()) {
         log.debug('Module path and config unchanged — skipping restart')
         return
@@ -823,10 +800,8 @@ class PrettierExtension {
   }
 
   async didInvokeFormatSelectionCommand(editor) {
-    // 1) Ask the formatter what the real syntax key is
     const syntaxKey = this.formatter.getSyntaxKey(editor)
 
-    // 2) Which keys we support selection for:
     const supported = new Set([
       'javascript',
       'jsx',
@@ -835,7 +810,6 @@ class PrettierExtension {
       'graphql',
     ])
 
-    // 3) Bail out if this syntax isn’t in our set
     if (!supported.has(syntaxKey)) {
       const suppressionKey = 'prettier.selection-unsupported.dismissed'
       const dismissed = nova.config.get(suppressionKey)
@@ -943,44 +917,37 @@ class PrettierExtension {
   }
 
   dispose() {
-    // 0) cancel deferred config setup so it never registers anything
-    //    on a disposed instance
+    // cancel deferred config setup so it never registers anything
+    // on a disposed instance
     if (this.configSetupTimer) {
       clearTimeout(this.configSetupTimer)
       this.configSetupTimer = null
     }
 
-    // 1) stop the Prettier subprocess
     this.formatter.stop()
 
-    // 2) dispose all fs.watch listeners
     for (const watcher of this.fsWatchers) {
       watcher.dispose()
     }
     this.fsWatchers = []
 
-    // 3) dispose all of commands
     for (const cmd of this.commandDisposables) {
       cmd.dispose()
     }
     this.commandDisposables = []
 
-    // 4) dispose the workspace.textEditor listener
     this.didAddTextEditorDisposable.dispose()
     this.didAddTextEditorDisposable = null
 
-    // 5) dispose all save‑listeners
     for (const listener of this.saveListeners.values()) {
       listener.dispose()
     }
     this.saveListeners.clear()
 
-    // 6) clear debounce timers
     this.debouncedModulePathDidChange.cancel()
     this.debouncedReloadPrettierOnConfigChange.cancel()
     this.debouncedModulePathOrPreferBundledDidChangeFast.cancel()
 
-    // 7) tear down config observers
     for (const d of this.configDisposables) d.dispose()
     this.configDisposables = []
   }

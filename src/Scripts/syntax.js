@@ -16,7 +16,7 @@
 
 const { extractPath, getConfigWithWorkspaceOverride } = require('./helpers.js')
 
-// 1) Map file‑name suffixes (longest first) to internal language keys
+// Map file-name suffixes (longest first) to internal language keys
 const extToSyntax = {
   // Astro
   '.astro': 'astro',
@@ -26,8 +26,8 @@ const extToSyntax = {
 
   // Liquid variants
   '.liquid': 'liquid-html', // plain .liquid → HTML flavor
-  '.liquid.md': 'liquid-md', // Liquid in Markdown
-  '.liquid.html': 'liquid-html', // Liquid in HTML
+  '.liquid.md': 'liquid-md',
+  '.liquid.html': 'liquid-html',
 
   // Embedded HTML templates
   '.html.ejs': 'html+ejs',
@@ -44,8 +44,8 @@ const extToSyntax = {
   // GraphQL
   '.graphql': 'graphql',
   '.gql': 'graphql',
-  '.gqls': 'graphql', // GraphQL schema (unofficial, rare)
-  '.graphqls': 'graphql', // GraphQL schema files (rare)
+  '.gqls': 'graphql', // schema (unofficial, rare)
+  '.graphqls': 'graphql', // schema (rare)
 
   // JS / TS ecosystem
   '.tsx': 'tsx',
@@ -133,28 +133,28 @@ const extToSyntax = {
   '.json': 'json',
   '.yaml': 'yaml',
   '.yml': 'yaml',
-  '.yaml.tmpl': 'yaml', // Helm templates, commonly used in Kubernetes
+  '.yaml.tmpl': 'yaml', // Helm templates
 
-  // SQL – Standard and extended dialects
-  '.sql': 'sql', // Standard SQL files
+  // SQL – standard and extended dialects
+  '.sql': 'sql',
   '.ddl': 'sql', // Data Definition Language
   '.tsql': 'sql', // Transact-SQL (SQL Server)
-  '.psql': 'sql', // PostgreSQL SQL scripts (alias)
+  '.psql': 'sql', // PostgreSQL scripts (alias)
   '.pgsql': 'sql', // PostgreSQL (PLpgSQL)
-  '.mysql': 'sql', // MySQL scripts
+  '.mysql': 'sql',
   '.hqsql': 'sql', // Hive Query Language (non-standard alias)
-  '.hql': 'sql', // HiveQL standard extension
+  '.hql': 'sql', // HiveQL
   '.q': 'sql', // HiveQL query files
 
   // PLSQL – Oracle PL/SQL
-  '.pls': 'sql', // PL/SQL source file
+  '.pls': 'sql',
   '.bdy': 'sql', // Package body
   '.fnc': 'sql', // Function
   '.pck': 'sql', // Package
   '.pkb': 'sql', // Package body
   '.pks': 'sql', // Package specification
   '.plb': 'sql', // Library
-  '.plsql': 'sql', // Generic PL/SQL file
+  '.plsql': 'sql',
   '.prc': 'sql', // Procedure
   '.spc': 'sql', // Specification
   '.tpb': 'sql', // Trigger body
@@ -170,20 +170,20 @@ const extToSyntax = {
   '.viw': 'sql', // View
 
   // Extended dialects – for full support
-  '.sqlite': 'sql', // SQLite
-  '.sqlite3': 'sql', // SQLite v3
+  '.sqlite': 'sql',
+  '.sqlite3': 'sql',
   '.bq': 'sql', // BigQuery shorthand
-  '.bigquery': 'sql', // BigQuery
+  '.bigquery': 'sql',
   '.sf.sql': 'sql', // Snowflake
   '.rs.sql': 'sql', // Redshift
   '.trino.sql': 'sql', // Trino
   '.singlestore.sql': 'sql', // SingleStoreDB (formerly MemSQL)
   '.spark.sql': 'sql', // Spark SQL
   '.n1ql': 'sql', // Couchbase N1QL
-  '.mariadb.sql': 'sql', // MariaDB
+  '.mariadb.sql': 'sql',
   '.db2i': 'sql', // IBM DB2i (experimental)
-  '.flink.sql': 'sql', //FlinkSQL
-  '.flinksql': 'sql', //FlinkSQL
+  '.flink.sql': 'sql', // FlinkSQL
+  '.flinksql': 'sql', // FlinkSQL
 
   // TOML
   '.toml': 'toml',
@@ -206,18 +206,18 @@ const extToSyntax = {
   '.markdown': 'markdown',
   '.md': 'markdown',
 
-  // Vue Single‑File Components
+  // Vue Single-File Components
   '.vue': 'vue',
 }
 
-// 2) Pre‑sorted list of extensions by length (descending), so longest match wins first.
-//    Prevents false positives like ".php" matching ".blade.php" files.
+// Pre-sorted by length (descending), so longest match wins first —
+// prevents false positives like ".php" matching ".blade.php" files.
 const sortedExtensions = Object.keys(extToSyntax).sort(
   (a, b) => b.length - a.length,
 )
 
-// 2.5) If Nova reports a SQL-dialect-specific syntax, normalize it to "sql"
-//      These are only reported when the SQL Language Extension is installed.
+// SQL-dialect-specific syntaxes Nova reports (only with the SQL Language
+// Extension installed) — normalize them to "sql"
 const sqlAliases = new Set([
   'bigquery',
   'flinksql',
@@ -237,11 +237,11 @@ const sqlAliases = new Set([
   'tsql',
 ])
 
-// 2.5) Basename matchers for prettier-plugin-sh languages that can't be
-//      expressed as path suffixes: bare filenames (hosts, CODEOWNERS,
-//      gradlew, …), dotless rc twins (bashrc, profile, …), dotenv prefixes
-//      (.env.local, .env.production, …), and the .husky hook directory.
-//      Mirrors the plugin's own `isSupported` matchers.
+// Basename matchers for prettier-plugin-sh languages that can't be
+// expressed as path suffixes: bare filenames (hosts, CODEOWNERS,
+// gradlew, …), dotless rc twins (bashrc, profile, …), dotenv prefixes
+// (.env.local, .env.production, …), and the .husky hook directory.
+// Mirrors the plugin's own `isSupported` matchers.
 const basenameExact = new Set([
   // Ignore-list twins and odd spellings
   'gitignore-global',
@@ -327,14 +327,15 @@ function detectBasenameSyntax(path) {
 
   if (basename.startsWith(dotenvPrefix) || basename === '.env') return 'sh'
   if (basenameExact.has(basename)) return 'sh'
-  // Husky hooks: any file inside a .husky directory
+
+  // any file inside a .husky directory
   const dirname = lastSlash === -1 ? '' : path.slice(0, lastSlash)
   if (dirname.endsWith(huskyDirSuffix)) return 'sh'
 
   return null
 }
 
-// 3) Nova’s built‑in syntax keys we explicitly support
+// Nova's built-in syntax keys we explicitly support
 const knownSyntaxKeys = new Set([
   'astro',
   'blade',
@@ -377,17 +378,16 @@ const knownSyntaxKeys = new Set([
  * @returns {string}            one of your internal syntax keys
  */
 function detectSyntax({ syntax, uri }) {
-  // Read the user’s “advanced detection” setting (default: true)
   const advancedDetection = getConfigWithWorkspaceOverride(
     'prettier.syntax.advancedDetection',
   )
 
-  // If the user disabled it, trust Nova entirely
+  // disabled — trust Nova entirely
   if (!advancedDetection) {
     return syntax
   }
 
-  // 0) Astro, Liquid, TOML and Twig exceptions: if Nova got it right, trust it immediately
+  // Astro, Liquid, TOML and Twig: if Nova got it right, trust it
   if (
     syntax === 'astro' ||
     syntax === 'liquid-md' ||
@@ -397,18 +397,18 @@ function detectSyntax({ syntax, uri }) {
   ) {
     return syntax
   }
-  // 0) SQLexceptions: if Nova got it right, trust it immediately
+  // SQL dialects: normalize to "sql"
   if (sqlAliases.has(syntax)) {
     return 'sql'
   }
 
-  // 0.5) Nova reports "shell" for shell scripts; normalize to our "sh" key
-  //      so PLUGIN_DESCRIPTORS can resolve the bundled shell plugin.
+  // Nova reports "shell"; normalize to our "sh" key so
+  // PLUGIN_DESCRIPTORS can resolve the bundled shell plugin
   if (syntax === 'shell') {
     return 'sh'
   }
 
-  // 1) Extension‑based detection (longest suffix first)
+  // Extension-based detection (longest suffix first)
   const path = extractPath(uri).toLowerCase()
   for (const ext of sortedExtensions) {
     if (path.endsWith(ext)) {
@@ -416,19 +416,18 @@ function detectSyntax({ syntax, uri }) {
     }
   }
 
-  // 1.5) Basename‑based detection for bare filenames, rc twins, dotenv
-  //      prefixes (.env.local, …) and .husky hooks
+  // Basename-based detection for bare filenames, rc twins, dotenv
+  // prefixes and .husky hooks
   const basenameSyntax = detectBasenameSyntax(path)
   if (basenameSyntax) {
     return basenameSyntax
   }
 
-  // 2) If Nova’s syntax matches one we support, use that
+  // Nova's syntax matches one we support — use it
   if (knownSyntaxKeys.has(syntax)) {
     return syntax
   }
 
-  // 3) Otherwise give Nova’s value back
   return syntax
 }
 
