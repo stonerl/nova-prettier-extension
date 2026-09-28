@@ -1,3 +1,27 @@
+## 3.9.13 - 2026-09-28
+
+### Fixed
+
+- **Prettier Info now shows a version for every bundled plugin**
+  - The dialog derived a plugin's package root as exactly two directory
+    levels below its entry file, so plugins with other layouts showed
+    without a version: properties and ejs (entry file directly in the
+    package root), nginx (`dist/cjs/`, three levels deep) and the five
+    scoped `@org/…` plugins. The package root is now found by walking up
+    until the parent is `node_modules` itself or an `@scope` directory,
+    and all fourteen plugins render with a version.
+
+### Changed
+
+- **Bundled packages are pinned to exact versions**
+  - Per the Prettier team's recommendation: formatting output changes
+    between minor releases, so caret ranges (`^`) let any fresh install
+    of the extension resolve a newer Prettier minor that formats
+    differently — output drift without a release. `prettier` and all
+    bundled plugins are now pinned to the lockfile's exact versions;
+    version bumps happen deliberately per release instead of implicitly
+    at install time.
+
 ## 3.9.12 - 2026-09-28
 
 ### Added
