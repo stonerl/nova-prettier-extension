@@ -319,10 +319,15 @@ class PrettierService extends FormattingService {
         info = await this.prettier.getFileInfo(options.filepath, {
           ignorePath,
           withNodeModules: false,
-          // The client always sends an explicit parser; passing it through
-          // skips Prettier's expensive inference path (resolveConfig +
-          // plugin loading), making uncached lookups near-free.
-          ...(options.parser ? { parser: options.parser } : {}),
+          // Only the ignore verdict is needed here — config is resolved
+          // separately below. resolveConfig:false skips Prettier's
+          // internal config walk-up (getFileInfo runs resolveConfig by
+          // default), making uncached lookups near-free. Inference itself
+          // still runs (cheap extension lookup) and feeds the
+          // inferredParser override below. Verified against the bundled
+          // Prettier's FileInfoOptions: `parser` is not a supported
+          // option — passing it would be silently ignored.
+          resolveConfig: false,
         })
         this._fileInfoCache.set(cacheKey, info)
       }
@@ -693,7 +698,8 @@ async function warmCoreParsers(prettier) {
 }
 
 let jsonRpcService
-;(async () => {
+
+async function bootstrap() {
   // 1) instantiate and register handlers
   jsonRpcService = new JsonRpcService(process.stdin, process.stdout)
   const [, , modulePath] = process.argv
@@ -753,8 +759,16 @@ let jsonRpcService
       process.stdin.destroy()
       process.stdout.destroy()
     } catch {
-      /* swallow */
+      // pipes already gone — nothing to clean up
     }
-    process.exit(0)
   })
-})()
+}
+
+// Only bootstrap when run as the actual service process — the module is
+// also required by tests, which instantiate PrettierService with a stub
+// prettier instead.
+if (require.main === module) {
+  bootstrap().catch(() => {})
+}
+
+module.exports = { PrettierService, bootstrap }
