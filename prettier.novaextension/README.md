@@ -127,6 +127,21 @@ plugin (XML or Properties) in the extension settings, and format the
 matching fixture file (`test.xml` / `test.properties`). The Extension
 Console then logs that the plugin was loaded from your project.
 
+### Formatting Samples
+
+`tests/format-samples/` holds one deliberately formatted file per supported
+language. They aren't consumed by any test suite — they exist for the manual
+formatter check:
+
+1. Scramble the samples: `npm run prepare:testfiles`
+2. Open the folder in Nova and format each file (Editor → Prettier⁺ → Format)
+3. Eyeball the result — the scrambled mistakes should disappear
+
+The samples are committed formatted (they're deliberately excluded from
+`prettier --check`), so re-run the scramble step whenever you want to test
+again. To add a sample for a new language, drop a `*.sample.*` file into
+that folder — the scramble script picks formats up by extension.
+
 ## Contributing Translations
 
 [![Languages](https://hosted.weblate.org/widget/prettier-for-nova/language-badge.svg)](https://hosted.weblate.org/projects/prettier-for-nova/)

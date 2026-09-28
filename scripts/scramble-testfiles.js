@@ -1,18 +1,20 @@
 /**
- * scramble-testfiles.js — Deliberately mangles formatting in test files
+ * scramble-testfiles.js — Deliberately mangles formatting in format samples
  *
  * @license MIT
  * @author Toni Förster
  * @copyright © 2025 Toni Förster
  *
- * Applies language-specific formatting mistakes to test files to simulate real-world
- * input and validate the robustness of the formatter across languages.
+ * Applies language-specific formatting mistakes to the sample files in
+ * tests/format-samples/ to simulate real-world input for the manual
+ * verify loop: scramble → open in Nova → format → eyeball the result.
+ * Scanning is keyed on extension, not filename.
  */
 
 const fs = require('fs')
 const path = require('path')
 
-const TESTS_DIR = path.join(__dirname, '..', 'tests')
+const TESTS_DIR = path.join(__dirname, '..', 'tests', 'format-samples')
 
 const mistakeInjectors = {
   '.css': simulateCssMistakes,
