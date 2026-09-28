@@ -1,9 +1,45 @@
+## 3.9.12 - 2026-09-28
+
+### Added
+
+- **New menu command: Prettier Info**
+  - Shows which Prettier is in use (bundled / project / explicit module
+    path, including whether it comes from a global or workspace
+    setting), the module path and its version, the service state, and
+    Node/npm versions — mirroring the info dialog of the
+    [SQL Language
+    Extension](https://extensions.panic.com/extensions/stonerl/stonerl.sql/).
+  - Also lists every bundled plugin with its version and the
+    external/unresolved/disabled plugins seen in the most recent
+    format.
+
+### Performance
+
+- **Faster saves and a faster first format**
+  - `hasConfig` now caches its result: repeated checks skip the
+    per-save config walk-up on disk.
+  - Prettier's core language parsers (TypeScript, Babel, JSON, CSS,
+    HTML, Markdown, YAML, GraphQL) are warmed in the background right
+    after the service starts, moving the first format's module load off
+    the first save per session.
+
+### Development
+
+- Formatting samples moved into `tests/format-samples/` (renamed from
+  `.test.` to `.sample.` so they stop sharing the test-suite
+  namespace) and expanded: new TOML, Astro, Blade and Twig samples,
+  richer modern-syntax coverage in twelve existing ones, and every
+  sample canonicalized to verified Prettier output.
+- The scramble tester uses a seeded PRNG for stable scrambles and six
+  new injectors; all samples keep the round-trip
+  scramble → format → byte-identical invariant.
+
 ## 3.9.11 - 2026-09-28
 
 This release makes bundled-package installation and service startup
 robust across project windows and loaded machines. With contributions
 from [@StirStudios](https://github.com/StirStudios) — thanks for PRs
-#160, #161 and #162!
+`#160`, `#161` and `#162`!
 
 ### Fixed
 
