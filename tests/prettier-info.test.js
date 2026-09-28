@@ -184,16 +184,23 @@ function makeNovaShim() {
     delete require.cache[path.join(SRC_DIR, file)]
   }
 
-  // Seed a package.json (version 1.0.0) for every bundled plugin the
-  // registry reports, so the info lines can carry versions.
+  // Seed a package.json (version 1.0.0) at the true package root of
+  // every bundled plugin the registry reports. Roots are found the same
+  // way main.js finds them: walk up until the parent is node_modules or
+  // an @scope directory.
   const pluginPaths = require(path.join(SRC_DIR, 'prettier-plugins.js'))
   for (const [, pluginPath] of Object.entries(pluginPaths)) {
-    const packagePath = path.join(
-      path.dirname(path.dirname(pluginPath)),
-      'package.json',
+    let dir = path.dirname(pluginPath)
+    for (let hops = 0; hops < 8; hops++) {
+      const base = path.dirname(dir).split('/').pop()
+      if (base === 'node_modules' || base.startsWith('@')) break
+      dir = path.dirname(dir)
+    }
+    files.set(
+      path.join(dir, 'package.json'),
+      JSON.stringify({ version: '1.0.0' }),
     )
-    files.set(packagePath, JSON.stringify({ version: '1.0.0' }))
-    dirs.add(path.dirname(packagePath))
+    dirs.add(dir)
   }
   return { shim, files, config, shownMessages }
 }
@@ -257,6 +264,26 @@ async function bundledInfo() {
       shownMessages[0].includes('Source: Bundled') &&
       shownMessages[0].includes('\n'),
     shownMessages[0]?.slice(0, 120),
+  )
+
+  // Every registry plugin — regardless of its entry file's depth or
+  // scope — must show with a version (the depth-bug regression check:
+  // ejs/properties sit one level up, nginx three, scoped ones under
+  // @org/).
+  const withPlugins = await ext._buildPrettierInfoLines()
+  const pluginLine = withPlugins
+    .find((l) => l.startsWith('Bundled plugins:'))
+    ?.slice('Bundled plugins: '.length)
+  const pluginNames = Object.keys(
+    require(path.join(SRC_DIR, 'prettier-plugins.js')),
+  )
+  const missing = pluginNames.filter(
+    (name) => !pluginLine?.includes(`${name} (1.0.0)`),
+  )
+  check(
+    'every bundled plugin shows with a version (all depth variants)',
+    missing.length === 0,
+    missing,
   )
 }
 

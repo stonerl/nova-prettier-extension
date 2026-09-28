@@ -33,6 +33,30 @@ const {
 const { Formatter } = require('./formatter.js')
 const pluginPaths = require('./prettier-plugins.js')
 
+/**
+ * Finds the package root of a bundled plugin from its registry entry
+ * path: walks up from the entry file's directory until the parent is
+ * `node_modules` itself or an `@scope` directory under it — either way
+ * the current directory is the package root. Registry entries point at
+ * entry files of varying depth (`node_modules/<pkg>/index.js`,
+ * `…/<pkg>/dist/index.js`, `…/dist/cjs/index.js`, scoped
+ * `@org/<pkg>/src/index.mjs`), so a fixed two-level walk missed most of
+ * them and their version showed without a number.
+ *
+ * @param {string} pluginPath – absolute entry file path from the registry
+ * @returns {string|null}      – the plugin's package directory, or null
+ */
+function pluginPackageDir(pluginPath) {
+  let dir = nova.path.dirname(pluginPath)
+  for (let hops = 0; hops < 8; hops++) {
+    const parent = nova.path.dirname(dir)
+    const base = parent.split('/').pop()
+    if (base === 'node_modules' || base.startsWith('@')) return dir
+    dir = parent
+  }
+  return null
+}
+
 class PrettierExtension {
   constructor() {
     this.didAddTextEditor = this.didAddTextEditor.bind(this)
@@ -757,11 +781,10 @@ class PrettierExtension {
 
     const pluginVersions = Object.entries(pluginPaths).map(
       ([name, pluginPath]) => {
-        const packagePath = nova.path.join(
-          nova.path.dirname(nova.path.dirname(pluginPath)),
-          'package.json',
-        )
-        const pkg = readJsonFile(packagePath)
+        const packagePath = pluginPackageDir(pluginPath)
+          ? nova.path.join(pluginPackageDir(pluginPath), 'package.json')
+          : null
+        const pkg = packagePath && readJsonFile(packagePath)
         return pkg?.version ? `${name} (${pkg.version})` : name
       },
     )
