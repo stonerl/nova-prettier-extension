@@ -524,45 +524,45 @@ const WORKSPACE_CHOICES = {
     [true, 'Enabled'],
     [false, 'Disabled'],
   ],
-  'prettier.plugins.prettier-plugin-toml.alignEntries': [
+  'prettier.plugins.prettier-plugin-toml.tomlVersion': [
+    ['v1.0.0', 'v1.0.0'],
+    ['v1.1.0', 'v1.1.0'],
+    ['v1.1.0-preview', 'v1.1.0-preview'],
+  ],
+  'prettier.plugins.prettier-plugin-toml.keyValueEqualsSignAlignment': [
     [true, 'Enabled'],
     [false, 'Disabled'],
   ],
-  'prettier.plugins.prettier-plugin-toml.alignComments': [
+  'prettier.plugins.prettier-plugin-toml.trailingCommentAlignment': [
     [true, 'Enabled'],
     [false, 'Disabled'],
   ],
-  'prettier.plugins.prettier-plugin-toml.arrayAutoExpand': [
+  'prettier.plugins.prettier-plugin-toml.indentSubTables': [
     [true, 'Enabled'],
     [false, 'Disabled'],
   ],
-  'prettier.plugins.prettier-plugin-toml.arrayAutoCollapse': [
+  'prettier.plugins.prettier-plugin-toml.indentTableKeyValuePairs': [
     [true, 'Enabled'],
     [false, 'Disabled'],
   ],
-  'prettier.plugins.prettier-plugin-toml.compactArrays': [
-    [true, 'Enabled'],
-    [false, 'Disabled'],
+  'prettier.plugins.prettier-plugin-toml.commentStyle': [
+    ['normalize', 'normalize'],
+    ['preserve', 'preserve'],
   ],
-  'prettier.plugins.prettier-plugin-toml.compactInlineTables': [
-    [true, 'Enabled'],
-    [false, 'Disabled'],
+  'prettier.plugins.prettier-plugin-toml.dateTimeDelimiter': [
+    ['T', 'T'],
+    ['space', 'space'],
+    ['preserve', 'preserve'],
   ],
-  'prettier.plugins.prettier-plugin-toml.compactEntries': [
-    [true, 'Enabled'],
-    [false, 'Disabled'],
+  'prettier.plugins.prettier-plugin-toml.stringQuoteStyle': [
+    ['double', 'double'],
+    ['single', 'single'],
+    ['preserve', 'preserve'],
   ],
-  'prettier.plugins.prettier-plugin-toml.indentTables': [
-    [true, 'Enabled'],
-    [false, 'Disabled'],
-  ],
-  'prettier.plugins.prettier-plugin-toml.indentEntries': [
-    [true, 'Enabled'],
-    [false, 'Disabled'],
-  ],
-  'prettier.plugins.prettier-plugin-toml.reorderKeys': [
-    [true, 'Enabled'],
-    [false, 'Disabled'],
+  'prettier.plugins.prettier-plugin-toml.keyQuoteStyle': [
+    ['double', 'double'],
+    ['single', 'single'],
+    ['preserve', 'preserve'],
   ],
   'prettier.plugins.prettier-plugin-twig.enabled': [
     [true, 'Enabled'],
