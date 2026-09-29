@@ -32,6 +32,8 @@ const {
 } = require('./notifications.js')
 const { Formatter, findMissingBundledPlugins } = require('./formatter.js')
 const pluginPaths = require('./prettier-plugins.js')
+const { projectChoices, resolveCommand } = require('./settings.js')
+const { WORKSPACE_CHOICES } = require('./workspace-choices.js')
 
 /**
  * Finds a bundled plugin's package root from its registry entry path:
@@ -370,6 +372,20 @@ class PrettierExtension {
       nova.commands.register('prettier.info', async () => {
         await this.showPrettierInfo()
       }),
+
+      // Project Settings enum resolve commands: Nova re-requests the
+      // choices every time the pane is shown, so the "Global Setting"
+      // option can name the preference's current value. Passed as a
+      // receiver-wrapped closure — nova.localize is an Objective-C
+      // bridge method and throws "self type check failed" when invoked
+      // detached.
+      ...Object.keys(WORKSPACE_CHOICES).map((key) =>
+        nova.commands.register(resolveCommand(key), () =>
+          projectChoices(key, nova.config.get(key), (k, fallback) =>
+            nova.localize(k, fallback),
+          ),
+        ),
+      ),
     ]
 
     // Initial service start: config observers skip their initial

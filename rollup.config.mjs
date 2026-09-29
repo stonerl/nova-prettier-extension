@@ -40,8 +40,52 @@ const extractConfig = (unifiedConfig, type) => {
   return unifiedConfig.map(extract)
 }
 
+// Workspace enum items whose first choice is [null, "Global Setting"] get a
+// `resolve` command so Nova re-computes the pop-up choices when the pane is
+// shown; the handler renames the first choice to "Global Setting (<value>)"
+// with the preference's current value (see src/Scripts/settings.js). The
+// static `values` stay in place as a fallback for older Nova versions.
+const workspaceChoices = {}
+
+const collectWorkspaceChoices = (items) => {
+  for (const item of items) {
+    if (item.children) {
+      collectWorkspaceChoices(item.children)
+    } else if (
+      Array.isArray(item.values) &&
+      item.values[0]?.[0] === null &&
+      item.key
+    ) {
+      item.resolve = `${item.key}.choices`
+      workspaceChoices[item.key] = item.values.slice(1)
+    }
+  }
+}
+
 const globalConfig = extractConfig(unifiedConfig, 'config')
 const workspaceConfig = extractConfig(unifiedConfig, 'configWorkspace')
+
+collectWorkspaceChoices(workspaceConfig)
+
+fs.writeFileSync(
+  './src/Scripts/workspace-choices.js',
+  `/**
+ * workspace-choices.js — Generated from src/unifiedConfig.json by rollup.config.mjs
+ *
+ * @license MIT
+ * @author Alexander Weiss, Toni Förster
+ * @copyright © 2023 Alexander Weiss, © 2025 Toni Förster
+ *
+ * Own choices for each workspace enum setting whose first choice is the
+ * null-valued "Global Setting" fallback. Do not edit by hand.
+ */
+
+/** @type {Record<string, Array<[string|boolean, string]>>} */
+const WORKSPACE_CHOICES = ${JSON.stringify(workspaceChoices, null, '\t')}
+
+module.exports = { WORKSPACE_CHOICES }
+`,
+)
 
 fs.writeFileSync(
   './prettier.novaextension/config.json',

@@ -17,6 +17,10 @@ Java, Laravel Blade, Liquid, PHP, Shell, SQL, Tailwind CSS, TOML, Twig, and XML
 - **Format on Save:** Automatically format your code on save
   (this setting can be customized per project), or manually format using
   `Editor > Prettier⁺ > Format Document` (**⌥⇧F**).
+- **Project Settings Inheritance:** Workspace settings default to
+  "Global Setting", and pop-up menus name the value they inherit —
+  "Global Setting (Enabled)" — so the effective configuration is always
+  visible without leaving Project Settings.
 - **Format Document (Forced):** Ignores `.prettierignore` and Ignored Syntaxes,
   formatting anyway via `Editor > Prettier⁺ > Format Document (Forced)`.
 - **Format Selection:** Precisely formats only the highlighted portion of your code
