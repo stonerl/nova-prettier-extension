@@ -1,3 +1,47 @@
+## 3.9.17 - 2026-09-29
+
+### Changed
+
+- **(Breaking)** `prettier-plugin-toml` updated to `3.0.2`: Taplo is
+  replaced by Tombi (WASM), shrinking the bundled footprint by ~27 MB
+  and adding TOML 1.1 support.
+  - All 11 Taplo plugin settings are replaced by Tombi's 17 options;
+    stored values for the old keys are silently ignored. Closest
+    replacements: alignEntries → keyValueEqualsSignAlignment,
+    indentTables → indentSubTables, indentEntries →
+    indentTableKeyValuePairs, compactEntries →
+    keyValueEqualsSignSpaceWidth 0, compactInlineTables →
+    inlineTableBraceSpaceWidth 0, allowedBlankLines →
+    tableBlankLines/groupBlankLinesLimit. reorderKeys has no successor
+    upstream. Core Prettier options still map through.
+  - The plugin now also picks up Tombi's own configuration
+    (`.tombi.toml`, `tombi.toml`, `.config/tombi.toml`,
+    `[tool.tombi]` in `pyproject.toml`).
+- Updated `prettier-plugin-java` to version `2.11.0`.
+
+### Fixed
+
+- **Bundled plugins now install in the background when a project
+  Prettier wins resolution**
+  - On a fresh install the resolver early-returned before the bundled
+    install ran, so bundled plugins stayed missing for the whole
+    session and every service start warned about them. Installing
+    bundled modules is now kicked off fire-and-forget whenever a
+    project Prettier is chosen; the install lock serializes across
+    windows. Missing-plugin reports are mode-gated: warn when bundled
+    modules run, debug in native modes.
+
+### Development
+
+- Bundled installs align with npm 12's script policy
+  - The `postinstall: patch-package` hook never ran under npm ≥ 12
+    (dependency install scripts are blocked by default); patching is
+    covered at runtime by `applyBundledPatches()`.
+  - Explicit `allowScripts` denials for `core-js-pure` and `fsevents`
+    permanently silence the skipped-scripts warning for users' runtime
+    installs.
+- Ran `npm audit fix` for transitive dependency updates.
+
 ## 3.9.16 - 2026-09-29
 
 ### Added
