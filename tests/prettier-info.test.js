@@ -205,10 +205,18 @@ function makeNovaShim() {
   return { shim, files, config, shownMessages }
 }
 
+// Fixture for the formatter.js stub: plugins whose registry entry file
+// main.js should treat as missing in the current scenario.
+let missingBundledPlugins = []
+
 function makeInstance({ runningModulePath = null } = {}) {
   const { shim, files, config, shownMessages } = makeNovaShim()
+  missingBundledPlugins = []
 
-  stubModule('formatter.js', { Formatter: FakeFormatter })
+  stubModule('formatter.js', {
+    Formatter: FakeFormatter,
+    findMissingBundledPlugins: () => missingBundledPlugins,
+  })
   stubModule('module-resolver.js', {
     findPrettier: async () => BUNDLED_PRETTIER,
   })
@@ -284,6 +292,33 @@ async function bundledInfo() {
     'every bundled plugin shows with a version (all depth variants)',
     missing.length === 0,
     missing,
+  )
+
+  // A plugin whose registry entry file is missing (registry drift after
+  // a plugin update) must show as "(missing)" instead of a version,
+  // without disturbing the other plugins' lines.
+  const pluginPaths = require(path.join(SRC_DIR, 'prettier-plugins.js'))
+  missingBundledPlugins = [{ key: 'ejs', path: pluginPaths.ejs }]
+
+  const withMissing = await ext._buildPrettierInfoLines()
+  const missingLine = withMissing
+    .find((l) => l.startsWith('Bundled plugins:'))
+    ?.slice('Bundled plugins: '.length)
+
+  check(
+    'missing plugin shows as "(missing)"',
+    missingLine?.includes('ejs (missing)') === true,
+    missingLine,
+  )
+  check(
+    'missing plugin shows no version',
+    missingLine?.includes('ejs (1.0.0)') === false,
+    missingLine,
+  )
+  check(
+    'present plugins still show versions next to the missing one',
+    missingLine?.includes('astro (1.0.0)') === true,
+    missingLine,
   )
 }
 
