@@ -184,7 +184,6 @@ class JsonRpcService {
      */
     this._writeQueue = Promise.resolve()
 
-    // Pipe incoming bytes into our parser
     const piped = readStream.pipe(this.parser)
     piped
       .on('error', (err) => {

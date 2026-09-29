@@ -870,11 +870,8 @@ class PrettierExtension {
    * @param {boolean} [opts.selectionOnly=false] — format only the selected range
    * @param {boolean} [opts.forced=false]        — ignore user opts and always format
    *                                               cannot be combined with `isSaving` or `selectionOnly`
-   *
    * @throws {Error} if `forced` is true alongside `isSaving` or `selectionOnly`
-   *
    */
-
   async _formatEditor(
     editor,
     { isSaving = false, selectionOnly = false, forced = false } = {},

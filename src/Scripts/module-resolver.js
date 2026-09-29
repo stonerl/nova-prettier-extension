@@ -417,7 +417,6 @@ async function findPrettier() {
   const nodeVersion = await getNodeVersion()
   const npmVersion = await getNpmVersion()
 
-  // If either npm or Node isn't detected, error out immediately
   if (npmVersion === 'unknown' || nodeVersion === 'unknown') {
     await showNotification({
       id: 'prettier-resolution-error',

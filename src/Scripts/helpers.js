@@ -144,7 +144,7 @@ function handleProcessResult(process, reject, resolve, timeoutMs = 30000) {
       try {
         process.terminate()
       } catch {
-        // already exited — nothing to terminate
+        // already exited
       }
       settle(
         reject,
@@ -663,7 +663,6 @@ function getCliVersion(toolName) {
   return _cliVersionPromises[toolName]
 }
 
-/** Convenience wrappers */
 function getNpmVersion() {
   return getCliVersion('npm')
 }

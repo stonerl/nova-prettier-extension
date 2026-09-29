@@ -212,7 +212,7 @@ class Formatter {
     this._lastLoadedPlugins = []
     this._lastUnresolvedPlugins = []
     this._lastDisabledPlugins = []
-    /** the 5s force-stop timer scheduled in stop() */
+    /** 5s force-stop timer from stop() */
     this._forceStopTimer = null
 
     this.setupIsReadyPromise()
@@ -381,7 +381,6 @@ class Formatter {
       }
     })
 
-    // Signal "not ready" immediately
     if (this._resolveIsReadyPromise) this._resolveIsReadyPromise(false)
     this._isReadyPromise = null
 
@@ -926,7 +925,6 @@ class Formatter {
       )
     }
 
-    // Explicit ignore
     if (ignored) {
       log.debug(`Prettier is configured to ignore ${document.path}`)
       return []

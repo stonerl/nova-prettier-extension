@@ -84,7 +84,7 @@ const sqlExtensionSyntaxMap = {
   trino: 'trino',
   sqlpl: 'db2',
   sqlite: 'sqlite',
-  'sql-generic': 'sql', // maps sql-generic to sql
+  'sql-generic': 'sql',
 }
 
 /**
