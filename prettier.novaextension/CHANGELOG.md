@@ -1,3 +1,34 @@
+## 3.9.15 - 2026-09-29
+
+### Performance
+
+- **Bundled installs take about half the disk space**
+  - The packages installed at activation still shipped content the
+    extension runtime never reads: sourcemaps, TypeScript typings,
+    docs, and `node-sql-parser`'s browser-only UMD and per-dialect
+    builds. A new cleanup step runs after the bundled `npm install`,
+    deletes them, and keeps every LICENSE/NOTICE/COPYING file. The
+    bundled footprint drops from ~261 MB to ~144 MB per install;
+    formatting behavior is unchanged. The step is idempotent, re-prunes
+    automatically after plugin updates, and runs in CI too.
+
+### Added
+
+- **Missing bundled plugins are now reported proactively**
+  - When a bundled plugin's entry file is missing from the install —
+    usually a plugin update that reshuffled its file layout — a warning
+    names the plugin at service start (once per session), and Prettier
+    Info marks it as "(missing)". Previously this surfaced only as a
+    format failure for the affected syntaxes with no visible cause.
+
+### Development
+
+- New `tests.yml` GitHub Actions workflow runs the full test suite on
+  commits and pull requests to `main` (Node 22).
+- Rollup minification now runs terser with `compress.passes: 2`.
+- Warning output no longer prefixes `⚠️` — `console.warn` already
+  carries the warning semantics.
+
 ## 3.9.14 - 2026-09-28
 
 ### Fixed
