@@ -116,10 +116,10 @@ function deprecatedAndDeferred() {
     !prettierOptions.has('jsxBracketSameLine'),
   )
 
-  // Deferred on purpose: experimentalTernaries is supported by the
-  // pinned Prettier but intentionally not exposed yet;
-  // experimentalOperatorPosition requires a Prettier newer than the
-  // pin (3.13+ vs 3.9.9). Flip these when wiring them.
+  // Deferred on purpose: experimental options are deliberately not
+  // exposed — both are supported by the pinned Prettier (3.9.9 declares
+  // experimentalOperatorPosition; the Java plugin also implements it).
+  // Flip these when wiring them.
   const deferred = ['experimentalTernaries', 'experimentalOperatorPosition']
   check(
     'deferred experimental options stay unwired until deliberately added',
