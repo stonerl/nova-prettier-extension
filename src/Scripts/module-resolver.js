@@ -461,86 +461,16 @@ async function clearStaleBinLinks(directory) {
   }
 }
 
-async function findPrettier() {
-  const nodeVersion = await getNodeVersion()
-  const npmVersion = await getNpmVersion()
-
-  if (npmVersion === 'unknown' || nodeVersion === 'unknown') {
-    await showNotification({
-      id: 'prettier-resolution-error',
-      title: nova.localize(
-        'prettier.notification.runtimeMissing.title',
-        'Missing Runtime Tools',
-        'notification',
-      ),
-      body: nova.localize(
-        'prettier.notification.runtimeMissing.body',
-        'Please install Node.js (which includes npm) and ensure it’s on your PATH so Prettier⁺ can resolve correctly. Then restart Nova to apply the change.',
-        'notification',
-      ),
-    })
-    throw new Error('Missing runtime tools: Node.js and npm are required.')
-  }
-
-  log.debug(`node Version: ${nodeVersion}\nnpm Version: ${npmVersion}`)
-
-  const preferBundled = getConfigWithWorkspaceOverride(
-    'prettier.module.preferBundled',
-  )
-
-  // Try finding in the workspace
-  if (nova.workspace.path && !preferBundled) {
-    // File system first
-    try {
-      const fsResult = findModuleWithFileSystem(nova.workspace.path, 'prettier')
-      if (fsResult && !isLoadableModule(fsResult)) {
-        warnBrokenProjectPrettier(
-          fsResult,
-          'no package.json found (broken install?)',
-        )
-      } else if (fsResult) {
-        log.info(`Loading project prettier (fs) at ${fsResult}`)
-        return fsResult
-      }
-    } catch (err) {
-      log.warn(
-        'Error trying to find workspace Prettier using file system',
-        err,
-        err.stack,
-      )
-    }
-
-    // npm as an alternative
-    try {
-      const npmResult = await findModuleWithNPM(nova.workspace.path, 'prettier')
-      if (npmResult && !isLoadableModule(npmResult.path)) {
-        warnBrokenProjectPrettier(
-          npmResult.path,
-          'no package.json found (broken install?)',
-        )
-      } else if (npmResult && !npmResult.correctVersion) {
-        // Same philosophy as the missing-package.json guard: an install
-        // npm ls reports as invalid or outdated must not take the service
-        // down (start would fail ×3 with no fallback).
-        warnBrokenProjectPrettier(
-          npmResult.path,
-          'npm ls reports it as invalid or outdated',
-        )
-      } else if (npmResult) {
-        log.info(`Loading project prettier (npm) at ${npmResult.path}`)
-        return npmResult.path
-      }
-    } catch (err) {
-      if (err.status === 127) throw err
-      log.warn(
-        'Error trying to find workspace Prettier using npm',
-        err,
-        err.stack,
-      )
-    }
-  }
-
-  // Install/update bundled modules
+/**
+ * Verifies the bundled module tree under the extension directory and
+ * (re)installs it when packages are missing or invalid, then applies
+ * the bundled patches and prunes development-only files. Installs are
+ * serialized across extension processes via the install lock, so this
+ * can run from a resolution as well as from a background task.
+ *
+ * @returns {Promise<string>} – path to the bundled Prettier module
+ */
+async function ensureBundledModules() {
   try {
     const prettierPath = nova.path.join(
       nova.extension.path,
@@ -740,4 +670,125 @@ async function findPrettier() {
   }
 }
 
-module.exports = { findPrettier, isLoadableModule }
+// In-process singleflight — several resolutions can fire while one
+// background install is still running.
+let pendingBackgroundEnsure = null
+
+/**
+ * Populates the bundled tree while a project Prettier serves the
+ * service. Fresh extension installs ship an empty bundle (the release
+ * strips node_modules), so without this the bundled plugins stay
+ * missing until a bundled resolution happens to run. Errors are
+ * logged, never thrown — the project Prettier keeps formatting.
+ *
+ * @returns {Promise<void>} – settles when the install attempt finished
+ */
+function ensureBundledModulesInBackground() {
+  if (pendingBackgroundEnsure) return pendingBackgroundEnsure
+
+  log.info('Populating the bundled modules in background…')
+  pendingBackgroundEnsure = ensureBundledModules()
+    .catch((err) => {
+      log.warn('Background install of bundled modules failed', err)
+    })
+    .finally(() => {
+      pendingBackgroundEnsure = null
+    })
+  return pendingBackgroundEnsure
+}
+
+async function findPrettier() {
+  const nodeVersion = await getNodeVersion()
+  const npmVersion = await getNpmVersion()
+
+  if (npmVersion === 'unknown' || nodeVersion === 'unknown') {
+    await showNotification({
+      id: 'prettier-resolution-error',
+      title: nova.localize(
+        'prettier.notification.runtimeMissing.title',
+        'Missing Runtime Tools',
+        'notification',
+      ),
+      body: nova.localize(
+        'prettier.notification.runtimeMissing.body',
+        'Please install Node.js (which includes npm) and ensure it’s on your PATH so Prettier⁺ can resolve correctly. Then restart Nova to apply the change.',
+        'notification',
+      ),
+    })
+    throw new Error('Missing runtime tools: Node.js and npm are required.')
+  }
+
+  log.debug(`node Version: ${nodeVersion}\nnpm Version: ${npmVersion}`)
+
+  const preferBundled = getConfigWithWorkspaceOverride(
+    'prettier.module.preferBundled',
+  )
+
+  // Try finding in the workspace
+  if (nova.workspace.path && !preferBundled) {
+    // File system first
+    try {
+      const fsResult = findModuleWithFileSystem(nova.workspace.path, 'prettier')
+      if (fsResult && !isLoadableModule(fsResult)) {
+        warnBrokenProjectPrettier(
+          fsResult,
+          'no package.json found (broken install?)',
+        )
+      } else if (fsResult) {
+        log.info(`Loading project prettier (fs) at ${fsResult}`)
+        // The service runs the project Prettier; populate the bundled
+        // tree in the background so a later bundled resolution (user
+        // enables preferBundled, opens a project without Prettier, or
+        // the project install breaks) finds it ready.
+        ensureBundledModulesInBackground()
+        return fsResult
+      }
+    } catch (err) {
+      log.warn(
+        'Error trying to find workspace Prettier using file system',
+        err,
+        err.stack,
+      )
+    }
+
+    // npm as an alternative
+    try {
+      const npmResult = await findModuleWithNPM(nova.workspace.path, 'prettier')
+      if (npmResult && !isLoadableModule(npmResult.path)) {
+        warnBrokenProjectPrettier(
+          npmResult.path,
+          'no package.json found (broken install?)',
+        )
+      } else if (npmResult && !npmResult.correctVersion) {
+        // Same philosophy as the missing-package.json guard: an install
+        // npm ls reports as invalid or outdated must not take the service
+        // down (start would fail ×3 with no fallback).
+        warnBrokenProjectPrettier(
+          npmResult.path,
+          'npm ls reports it as invalid or outdated',
+        )
+      } else if (npmResult) {
+        log.info(`Loading project prettier (npm) at ${npmResult.path}`)
+        ensureBundledModulesInBackground()
+        return npmResult.path
+      }
+    } catch (err) {
+      if (err.status === 127) throw err
+      log.warn(
+        'Error trying to find workspace Prettier using npm',
+        err,
+        err.stack,
+      )
+    }
+  }
+
+  // No usable project Prettier (or preferBundled) — ensure the bundled
+  // tree and load from it.
+  return ensureBundledModules()
+}
+
+module.exports = {
+  findPrettier,
+  isLoadableModule,
+  ensureBundledModulesInBackground,
+}

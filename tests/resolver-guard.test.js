@@ -54,6 +54,7 @@ const BUNDLED_PRETTIER = `${EXTENSION}/node_modules/prettier`
  */
 function makeNovaShim({
   workspaceModulePath = BROKEN_MODULE,
+  workspaceModuleLoadable = false,
   lockfile = '{}',
   extensionNpmLsExit = 0,
   extensionDeps = ['prettier'],
@@ -71,9 +72,10 @@ function makeNovaShim({
   dirs.add(`${WORKSPACE}/node_modules`)
   dirs.add(BROKEN_MODULE)
 
-  // When the test overrides the workspace module path, that directory
-  // gets a real package.json so it IS loadable.
-  if (workspaceModulePath !== BROKEN_MODULE) {
+  // When the test overrides the workspace module path, or explicitly
+  // marks the default one loadable, that directory gets a real
+  // package.json so it IS loadable.
+  if (workspaceModulePath !== BROKEN_MODULE || workspaceModuleLoadable) {
     files.set(
       `${workspaceModulePath}/package.json`,
       JSON.stringify({ name: 'prettier' }),
@@ -157,6 +159,9 @@ function makeNovaShim({
       // Test helper: mutate the file model after shim creation.
       _remove(p) {
         files.delete(p)
+      },
+      _removeDir(p) {
+        dirs.delete(p)
       },
     },
   }
@@ -655,6 +660,114 @@ async function multiPackagePoolDrainsAllPackages() {
   }
 }
 
+async function fsProjectPrettierPopulatesBundledInBackground() {
+  console.log(
+    '\n== fs project Prettier wins while the bundled tree is populated in background ==',
+  )
+
+  // A loadable node_modules/prettier makes the fs branch win. The
+  // bundled tree is present and lockfile-matched, so the background
+  // ensure must verify without installing anything.
+  const lockfile = JSON.stringify({
+    packages: { 'node_modules/prettier': { version: '3.0.0' } },
+  })
+  const novaShim = makeNovaShim({
+    workspaceModulePath: BROKEN_MODULE,
+    workspaceModuleLoadable: true,
+    lockfile,
+  })
+  const captured = { info: [], warn: [], error: [] }
+  const { resolver, restore } = loadResolver(novaShim, captured)
+
+  try {
+    const result = await resolver.findPrettier()
+
+    check(
+      'fs project Prettier is returned immediately',
+      result === BROKEN_MODULE,
+      result,
+    )
+
+    check(
+      'background populate was kicked off',
+      captured.info.some((line) =>
+        line.includes('Populating the bundled modules in background'),
+      ),
+      captured.info,
+    )
+
+    // Join the in-flight background install (singleflight) and wait for
+    // it to settle before asserting on its outcome.
+    await resolver.ensureBundledModulesInBackground()
+
+    check(
+      'background ensure verified the bundled tree',
+      captured.info.some((line) => line.includes('Using bundled Prettier.')),
+      captured.info,
+    )
+
+    const installSpawns = novaShim._processStub.created.filter(
+      (proc) => (proc.options.args || [])[1] === 'install',
+    )
+    check(
+      'healthy bundled tree installs nothing',
+      installSpawns.length === 0,
+      installSpawns.length,
+    )
+
+    // A second call joins the same in-flight/finished attempt instead of
+    // spawning a duplicate install.
+    const first = resolver.ensureBundledModulesInBackground()
+    const second = resolver.ensureBundledModulesInBackground()
+    check('background ensure is singleflight', first === second)
+    await second
+  } finally {
+    restore()
+  }
+}
+
+async function freshInstallPopulatesEmptyBundledTreeInBackground() {
+  console.log(
+    '\n== fresh install with project Prettier populates the empty bundle in background ==',
+  )
+
+  // Release builds ship without node_modules. A project Prettier must
+  // still win resolution immediately while npm install repopulates the
+  // bundle in the background.
+  const novaShim = makeNovaShim({
+    workspaceModulePath: BROKEN_MODULE,
+    workspaceModuleLoadable: true,
+  })
+  novaShim.fs._removeDir(`${EXTENSION}/node_modules`)
+  const captured = { info: [], warn: [], error: [] }
+  const { resolver, restore } = loadResolver(novaShim, captured)
+
+  try {
+    const result = await resolver.findPrettier()
+
+    check(
+      'project Prettier is returned without waiting for the install',
+      result === BROKEN_MODULE,
+      result,
+    )
+
+    await resolver.ensureBundledModulesInBackground()
+
+    check(
+      'background install completed the bundled tree',
+      captured.info.some((line) => line.includes('Using bundled Prettier.')),
+      captured.info,
+    )
+
+    const installSpawns = novaShim._processStub.created.filter(
+      (proc) => (proc.options.args || [])[1] === 'install',
+    )
+    check('npm install ran in background', installSpawns.length > 0)
+  } finally {
+    restore()
+  }
+}
+
 async function main() {
   predicateChecks()
   await brokenWorkspaceFallsBackToBundled()
@@ -666,6 +779,8 @@ async function main() {
   await missingInstalledPackageIsBrokenWithoutNpmLs()
   await timeoutKeepsInstalledPackage()
   await multiPackagePoolDrainsAllPackages()
+  await fsProjectPrettierPopulatesBundledInBackground()
+  await freshInstallPopulatesEmptyBundledTreeInBackground()
 
   console.log(
     `\n${failed === 0 ? 'All checks passed.' : `${failed} check(s) failed.`}`,

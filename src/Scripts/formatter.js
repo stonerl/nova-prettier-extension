@@ -44,8 +44,9 @@ const {
 
 const { detectSyntax } = require('./syntax.js')
 
-// Paths already warned about this session — service restarts must not
-// re-spam the console for the same missing plugin.
+// Paths already reported this session, keyed by report level — service
+// restarts must not re-spam the console, and a mode switch (native →
+// bundled) must still escalate the report to a warning.
 const warnedMissingPluginPaths = new Set()
 
 /**
@@ -285,15 +286,25 @@ class Formatter {
     if (this.prettierService) return
     log.info('Starting Prettier service…')
 
-    // Plugins always load from the bundle, no matter which Prettier
-    // module runs — a missing entry file fails its syntaxes at format
-    // time with no visible cause, so surface it here.
+    // Bundled plugins only load when the bundled Prettier module runs
+    // (see the options.plugins gate in the format request) — a missing
+    // entry file there fails its syntaxes at format time with no visible
+    // cause, so surface it here. In native modes the files are never
+    // imported, so stay quiet at debug level.
+    const bundledMode = this.modulePath?.includes(nova.extension.path)
     for (const { key, path } of findMissingBundledPlugins()) {
-      if (warnedMissingPluginPaths.has(path)) continue
-      warnedMissingPluginPaths.add(path)
-      log.warn(
-        `Bundled plugin "${key}" is missing its entry file — check prettier-plugins.js against the installed package: ${path}`,
-      )
+      const dedupeKey = `${bundledMode ? 'warn' : 'debug'}:${path}`
+      if (warnedMissingPluginPaths.has(dedupeKey)) continue
+      warnedMissingPluginPaths.add(dedupeKey)
+      if (bundledMode) {
+        log.warn(
+          `Bundled plugin "${key}" is missing its entry file — check prettier-plugins.js against the installed package: ${path}`,
+        )
+      } else {
+        log.debug(
+          `Bundled plugin "${key}" is not installed (bundled modules not populated): ${path}`,
+        )
+      }
     }
 
     // Await the didStart handshake so callers can detect service-side
