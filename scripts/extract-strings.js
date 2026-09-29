@@ -219,7 +219,7 @@ languages.forEach((lang) => {
         existing = JSON.parse(fs.readFileSync(outputPath, 'utf8'))
       } catch {
         console.warn(
-          `⚠️ Could not parse ${lang}/${tableName}.json — skipping merge`,
+          `Could not parse ${lang}/${tableName}.json — skipping merge`,
         )
       }
     }

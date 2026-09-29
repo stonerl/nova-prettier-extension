@@ -366,6 +366,54 @@ async function applyBundledPatches(extensionPath) {
 }
 
 /**
+ * Removes development-only files (sourcemaps, TypeScript typings, docs,
+ * node-sql-parser's browser builds) from the bundled node_modules. Runs
+ * in a subprocess — the extension's read-only entitlement prevents
+ * in-process deletion, same as applyBundledPatches. The script is
+ * idempotent and stays silent on an already-pruned tree, so repeated
+ * bundled resolutions add no noise.
+ *
+ * @param {string} extensionPath – directory containing node_modules and Scripts/
+ */
+async function pruneBundledNodeModules(extensionPath) {
+  const scriptPath = nova.path.join(
+    extensionPath,
+    'Scripts',
+    'prune-runtime-deps.js',
+  )
+
+  if (!nova.fs.stat(scriptPath)) {
+    log.debug('prune-runtime-deps.js not found — skipping bundled prune')
+    return
+  }
+
+  try {
+    const process = await spawnNode([scriptPath], { cwd: extensionPath })
+
+    let resolve, reject
+    const promise = new Promise((_resolve, _reject) => {
+      resolve = _resolve
+      reject = _reject
+    })
+
+    const output = []
+    process.onStdout((line) => output.push(line))
+
+    handleProcessResult(process, reject, resolve, 120000)
+    process.start()
+
+    await promise
+    const summary = output.join('').trim()
+    if (summary) {
+      log.info(summary)
+    }
+  } catch (err) {
+    // Non-fatal: leftover dev files only waste disk, never break formats.
+    log.warn('Pruning bundled node_modules failed', err)
+  }
+}
+
+/**
  * Recursively removes a file or directory tree via the Nova file-system
  * API. Note that stat() follows symlinks, so an entry that is itself a
  * symlink to a directory would be recursed into — safe for npm's `.bin`,
@@ -673,11 +721,14 @@ async function findPrettier() {
         // lock ourselves anymore.
         await applyBundledPatches(nova.extension.path)
       }
+
+      await pruneBundledNodeModules(nova.extension.path)
     } else {
       // Verification passed with no lock held — but a pre-existing
       // node_modules may have been installed with an npm version that
       // skipped postinstall scripts.
       await applyBundledPatches(nova.extension.path)
+      await pruneBundledNodeModules(nova.extension.path)
     }
 
     log.info('Using bundled Prettier.')

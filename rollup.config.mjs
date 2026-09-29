@@ -54,7 +54,7 @@ fs.writeFileSync(
 
 const minifyConfigFile = (filePath) => {
   if (!fs.existsSync(filePath)) {
-    console.warn(`⚠️  Skipping missing file: ${filePath}`)
+    console.warn(`Skipping missing file: ${filePath}`)
     return
   }
 
@@ -63,7 +63,7 @@ const minifyConfigFile = (filePath) => {
     fs.writeFileSync(filePath, JSON.stringify(data))
   } catch (error) {
     console.warn(
-      `⚠️  Failed to parse JSON in file: ${filePath}. Skipping. Error: ${error.message}`,
+      `Failed to parse JSON in file: ${filePath}. Skipping. Error: ${error.message}`,
     )
   }
 }
@@ -96,6 +96,9 @@ export default [
       commonjs(),
       resolve({ preferBuiltins: true }),
       terser({
+        compress: {
+          passes: 2,
+        },
         format: {
           comments: false,
         },
@@ -110,6 +113,9 @@ export default [
     },
     plugins: [
       terser({
+        compress: {
+          passes: 2,
+        },
         format: {
           comments: false,
         },
@@ -124,6 +130,26 @@ export default [
     },
     plugins: [
       terser({
+        compress: {
+          passes: 2,
+        },
+        format: {
+          comments: false,
+        },
+      }),
+    ],
+  },
+  {
+    input: './src/Scripts/prune-runtime-deps.js',
+    output: {
+      file: './prettier.novaextension/Scripts/prune-runtime-deps.js',
+      format: 'cjs',
+    },
+    plugins: [
+      terser({
+        compress: {
+          passes: 2,
+        },
         format: {
           comments: false,
         },

@@ -30,7 +30,7 @@ const {
   describeFailure,
   withReason,
 } = require('./notifications.js')
-const { Formatter } = require('./formatter.js')
+const { Formatter, findMissingBundledPlugins } = require('./formatter.js')
 const pluginPaths = require('./prettier-plugins.js')
 
 /**
@@ -756,10 +756,16 @@ class PrettierExtension {
     ])
     lines.push(`Node: ${nodeVersion} — npm: ${npmVersion}`)
 
+    const missingPluginPaths = new Set(
+      findMissingBundledPlugins().map((missing) => missing.path),
+    )
     const pluginVersions = Object.entries(pluginPaths).map(
       ([name, pluginPath]) => {
-        const packagePath = pluginPackageDir(pluginPath)
-          ? nova.path.join(pluginPackageDir(pluginPath), 'package.json')
+        if (missingPluginPaths.has(pluginPath)) return `${name} (missing)`
+
+        const packageDir = pluginPackageDir(pluginPath)
+        const packagePath = packageDir
+          ? nova.path.join(packageDir, 'package.json')
           : null
         const pkg = packagePath && readJsonFile(packagePath)
         return pkg?.version ? `${name} (${pkg.version})` : name

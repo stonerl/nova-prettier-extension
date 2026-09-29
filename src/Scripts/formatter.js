@@ -44,6 +44,23 @@ const {
 
 const { detectSyntax } = require('./syntax.js')
 
+// Paths already warned about this session — service restarts must not
+// re-spam the console for the same missing plugin.
+const warnedMissingPluginPaths = new Set()
+
+/**
+ * Bundled plugins whose registry entry file is missing from the
+ * installed bundle — usually a plugin update that reshuffled its file
+ * layout while prettier-plugins.js still points at the old path.
+ *
+ * @returns {{ key: string, path: string }[]}
+ */
+function findMissingBundledPlugins() {
+  return Object.entries(pluginPaths)
+    .filter(([, pluginPath]) => !nova.fs.stat(pluginPath))
+    .map(([key, pluginPath]) => ({ key, path: pluginPath }))
+}
+
 /**
  * Count the UTF-8 byte length of a string without relying on Node's
  * Buffer (unavailable in Nova's extension runtime).
@@ -267,6 +284,17 @@ class Formatter {
 
     if (this.prettierService) return
     log.info('Starting Prettier service…')
+
+    // Plugins always load from the bundle, no matter which Prettier
+    // module runs — a missing entry file fails its syntaxes at format
+    // time with no visible cause, so surface it here.
+    for (const { key, path } of findMissingBundledPlugins()) {
+      if (warnedMissingPluginPaths.has(path)) continue
+      warnedMissingPluginPaths.add(path)
+      log.warn(
+        `Bundled plugin "${key}" is missing its entry file — check prettier-plugins.js against the installed package: ${path}`,
+      )
+    }
 
     // Await the didStart handshake so callers can detect service-side
     // load failures, not just Process construction errors.
@@ -1309,4 +1337,5 @@ class Formatter {
 
 module.exports = {
   Formatter,
+  findMissingBundledPlugins,
 }
