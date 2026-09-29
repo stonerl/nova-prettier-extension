@@ -26,8 +26,6 @@ const extractConfig = (unifiedConfig, type) => {
 
     if (type === 'config' && item.config) {
       Object.assign(extracted, item.config)
-    } else if (type === 'configWorkspace' && item.configWorkspace) {
-      Object.assign(extracted, item.configWorkspace)
     }
 
     if (item.children) {
@@ -41,15 +39,10 @@ const extractConfig = (unifiedConfig, type) => {
 }
 
 const globalConfig = extractConfig(unifiedConfig, 'config')
-const workspaceConfig = extractConfig(unifiedConfig, 'configWorkspace')
 
 fs.writeFileSync(
   './prettier.novaextension/config.json',
   JSON.stringify(globalConfig, null, 2),
-)
-fs.writeFileSync(
-  './prettier.novaextension/configWorkspace.json',
-  JSON.stringify(workspaceConfig, null, 2),
 )
 
 const minifyConfigFile = (filePath) => {
