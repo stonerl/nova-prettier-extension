@@ -5,9 +5,6 @@ JSON, CSS, HTML, Markdown, and more in Nova, with built-in support for Astro, EJ
 Java, Laravel Blade, Liquid, PHP, Shell, SQL, Tailwind CSS, TOML, Twig, and XML
 — no extra setup required.
 
-> ⚠️ **Prettier⁺** is a drop-in replacement for the original [Prettier Extension](https://extensions.panic.com/extensions/alexanderweiss/alexanderweiss.prettier/).
-> To avoid conflicts, make sure to disable the original before installing or activating Prettier⁺.
-
 ![GitHub Release](https://img.shields.io/github/v/release/stonerl/nova-prettier-extension)
 [![Install in Nova](https://img.shields.io/badge/install%20in-nova-blueviolet?style=flat)](https://extensions.panic.com/extensions/stonerl/stonerl.prettier)
 [![Translate on Weblate](https://img.shields.io/badge/translate-weblate-brightgreen?logo=weblate&logoColor=white)](https://hosted.weblate.org/projects/prettier-for-nova/)
