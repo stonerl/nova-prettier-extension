@@ -13,9 +13,10 @@
   },
   "homepage": "https://github.com/stonerl/nova-prettier-extension#readme",
   "scripts": {
-    "build": "npm run strings:copy-translations && rollup -c",
+    "build": "npm run generate:workspace-choices && npm run strings:copy-translations && rollup -c",
     "clean": "rm -f prettier.novaextension/config.json prettier.novaextension/configWorkspace.json && rm -rf prettier.novaextension/de.lproj prettier.novaextension/en.lproj prettier.novaextension/node_modules prettier.novaextension/Scripts",
     "prepare:bump-version": "node scripts/bump-version.js",
+    "generate:workspace-choices": "node scripts/generate-workspace-choices.js",
     "prepare:submission": "npm run build && rm -rf prettier.novaextension/node_modules",
     "prepare:testfiles": "node scripts/scramble-testfiles.js",
     "strings:copy-translations": "node scripts/copy-translated-strings.js",
@@ -44,6 +45,7 @@
     "@rollup/plugin-terser": "^1.0.0",
     "eslint": "^10.11.0",
     "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.9.9",
     "rollup": "^4.63.5"
   },
   "allowScripts": {

@@ -3,7 +3,7 @@ const prettierFlat = require('eslint-config-prettier/flat')
 
 module.exports = defineConfig([
   {
-    ignores: ['tests/**'],
+    ignores: ['tests/**', 'prettier.novaextension/**'],
   },
 
   {
