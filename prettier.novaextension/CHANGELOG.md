@@ -1,3 +1,16 @@
+## 3.9.16 - 2026-09-29
+
+### Added
+
+- **Project Settings show what "Global Setting" inherits**
+  - Workspace pop-up settings now recompute when Project Settings is
+    shown, so the fallback option names the global preference's current
+    value, e.g. "Global Setting (Enabled)" — or plain "Global Setting"
+    when the global preference is unset. Text fields (paths, numbers,
+    strings) can't carry a dynamic placeholder and keep showing
+    "Global Setting" as before. Requires a newer Nova; older versions
+    keep the static fallback labels.
+
 ## 3.9.15 - 2026-09-29
 
 ### Performance
