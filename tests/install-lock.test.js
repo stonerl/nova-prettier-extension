@@ -153,7 +153,10 @@ function makeNovaShim({ withTempdir = true } = {}) {
     onNotify() {}
 
     start() {
-      const [tool, ...args] = this.options.args
+      // runTool spawns the absolute tool binary with the tool name
+      // stripped from args — derive the tool from the command path.
+      const tool = this.command.split('/').pop()
+      const args = this.options.args
       const target = args[tool === 'rm' ? 1 : 0] // rm starts with '-rf'
       let status = 0
 
@@ -240,6 +243,15 @@ async function acquisitionAndMutualExclusion() {
   check(
     'acquire succeeds when no lock exists',
     (await windowA.acquire()) === true,
+  )
+
+  check(
+    'lock tools spawn from absolute system paths',
+    shim._processStub.created.length > 0 &&
+      shim._processStub.created
+        .map((p) => p.command)
+        .every((c) => c.startsWith('/bin/') || c === '/usr/bin/touch'),
+    shim._processStub.created.map((p) => p.command),
   )
 
   check('lock is fresh after acquiring', windowA.isHeld() === true)
@@ -444,6 +456,14 @@ async function tempdirFallback() {
   check(
     'acquire succeeds (storage dir auto-created)',
     (await windowA.acquire()) === true,
+  )
+
+  check(
+    'fallback pre-creates only the storage parent via mkdir -p',
+    shim._processStub.created
+      .filter((p) => p.command === '/bin/mkdir' && p.options.args[0] === '-p')
+      .every((p) => p.options.args[1] === shim.globalStoragePath),
+    shim._processStub.created.map((p) => [p.command, p.options.args]),
   )
 
   check(

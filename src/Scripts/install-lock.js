@@ -26,6 +26,11 @@
  * The lock lives in `nova.fs.tempdir()` (Nova 10+), documented as
  * shared between instances of the same extension running in different
  * workspaces; older versions fall back to the global storage path.
+ *
+ * Tool writes spawn absolute system binaries (/bin/mkdir, …) rather
+ * than resolving them through `/usr/bin/env`: some users' shell setups
+ * leave Nova's environment PATH without /bin, where `env` itself runs
+ * but "env: mkdir: No such file or directory" kills every lookup.
  */
 
 const { handleProcessResult, log } = require('./helpers.js')
@@ -51,6 +56,10 @@ function installLockLocation() {
     }
   }
 
+  log.warn(
+    'nova.fs.tempdir is unavailable — install lock falls back to the ' +
+      'extension global storage path.',
+  )
   return {
     path: nova.path.join(nova.extension.globalStoragePath, LOCK_FILE_NAME),
     usesFallback: true,
@@ -58,9 +67,25 @@ function installLockLocation() {
 }
 
 /**
+ * Absolute paths for the coreutils tools the lock runs. Invoking them
+ * directly (not via `/usr/bin/env <tool>`) keeps lock writes
+ * independent of the PATH Nova's environment provides — some users'
+ * broken shell setups omit /bin and /usr/bin, where `env` starts fine
+ * but fails to resolve `mkdir` ("env: mkdir: No such file or
+ * directory").
+ */
+const TOOL_PATHS = {
+  mkdir: '/bin/mkdir',
+  touch: '/usr/bin/touch',
+  rmdir: '/bin/rmdir',
+  rm: '/bin/rm',
+}
+
+/**
  * Runs a coreutils tool (`mkdir`, `touch`, `rmdir`, `rm`) in a
  * subprocess and resolves on exit 0, rejecting with the exit status
- * otherwise.
+ * otherwise. `args` is the tool invocation without the binary name,
+ * e.g. ["mkdir", "-p", path].
  *
  * @param {string[]} args
  * @param {number} [timeoutMs]
@@ -73,7 +98,7 @@ function runTool(args, timeoutMs = 15000) {
     reject = _reject
   })
 
-  const process = new Process('/usr/bin/env', { args })
+  const process = new Process(TOOL_PATHS[args[0]], { args: args.slice(1) })
 
   handleProcessResult(process, reject, resolve, timeoutMs)
   process.start()

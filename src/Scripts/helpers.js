@@ -192,6 +192,16 @@ async function sanitizePrettierConfig() {
   try {
     const configPath = nova.workspace.path + '/.nova/Configuration.json'
 
+    // nova.fs.open throws on a missing file — most workspaces never
+    // create one, so check first and stay quiet instead of warn-logging
+    // on every activation.
+    if (!nova.fs.stat(configPath)) {
+      log.debug(
+        'No .nova/Configuration.json — skipping Prettier config sanitation.',
+      )
+      return
+    }
+
     const file = nova.fs.open(configPath)
     if (!file) {
       log.debug('Could not open .nova/Configuration.json')
@@ -523,6 +533,21 @@ async function probeNodeRuntime() {
   log.info(
     `Using Nova-managed Node.js ${managedVersion} at ${managed.nodePath}`,
   )
+
+  // Doctor note for the "env: mkdir: No such file or directory" /
+  // "spawn sh ENOENT" class: a Nova environment PATH without the
+  // standard system dirs. managedProcessEnv works around it; knowing
+  // the user's PATH made reports actionable without asking for more
+  // logs.
+  const environmentPATH = nova.environment && nova.environment.PATH
+  if (environmentPATH && !environmentPATH.split(':').includes('/bin')) {
+    log.warn(
+      `Nova's environment PATH lacks the standard /bin directory — ` +
+        `spawning system tools may be limited. PATH as seen by Nova: ` +
+        `${environmentPATH}`,
+    )
+  }
+
   return {
     mode: 'managed',
     nodePath: managed.nodePath,
@@ -554,10 +579,14 @@ function resolveNodeRuntime() {
 /**
  * Composes the environment for a managed-mode subprocess. npm runs
  * package lifecycle scripts (e.g. postinstall) through `sh -c`, which
- * resolves `node` on the child’s PATH — without the managed install’s
- * directory prepended, installs fail with exit code 127 even though
- * npm itself runs. The parent environment’s PATH is preserved so other
- * binaries (git, …) keep resolving.
+ * resolves `sh` on the child's PATH — /bin and /usr/bin are therefore
+ * guaranteed present: some users' shell setups leave Nova's environment
+ * PATH without the standard system directories, where the plain
+ * fallback below never applies (PATH is set, just incomplete). The
+ * parent environment's PATH is preserved in its original order — only
+ * missing system directories are appended, so healthy setups resolve
+ * exactly as before, with the managed install's directory first so
+ * `node`/`npm` resolve to the managed tools.
  *
  * @param {string} nodePath  – absolute path to the managed node binary
  * @param {object} [extraEnv] – caller-provided environment overrides
@@ -569,9 +598,14 @@ function managedProcessEnv(nodePath, extraEnv) {
     (nova.environment && nova.environment.PATH) ||
     '/usr/bin:/bin:/usr/sbin:/sbin'
 
+  const directories = basePATH.split(':').filter(Boolean)
+  for (const directory of ['/usr/bin', '/bin']) {
+    if (!directories.includes(directory)) directories.push(directory)
+  }
+
   return {
     ...(extraEnv || {}),
-    PATH: `${nodeDirectory}:${basePATH}`,
+    PATH: `${nodeDirectory}:${directories.join(':')}`,
   }
 }
 

@@ -192,6 +192,10 @@ function makeNovaShim({
       let stdout = ''
       let status = 0
 
+      // The install-lock runTool spawns absolute tool binaries with the
+      // tool name stripped from args — derive the tool from the command.
+      const tool = (this.command || '').split('/').pop()
+
       if (args[0] === 'node' && args[1] === '--version') {
         stdout = 'v26.10.0'
       } else if (args[0] === 'npm' && args[1] === '--version') {
@@ -220,17 +224,25 @@ function makeNovaShim({
         // The degraded-install fallback: resolves without touching the
         // file model — the caller only cares that it doesn't throw.
         status = 0
-      } else if (args[0] === 'mkdir') {
+      } else if (tool === 'mkdir') {
         // Install-lock acquisition: exclusive create, fails on EEXIST.
-        const target = args[1]
-        if (dirs.has(target) || files.has(target)) status = 1
-        else dirs.add(target)
-      } else if (args[0] === 'touch') {
+        // args is ['-p', target] (fallback storage pre-create) or
+        // [target] (the lock directory itself).
+        const force = args[0] === '-p'
+        const target = force ? args[1] : args[0]
+        if (force) {
+          dirs.add(target)
+        } else if (dirs.has(target) || files.has(target)) {
+          status = 1
+        } else {
+          dirs.add(target)
+        }
+      } else if (tool === 'touch') {
         status = 0
-      } else if (args[0] === 'rmdir') {
-        dirs.delete(args[1])
+      } else if (tool === 'rmdir') {
+        dirs.delete(args[0])
         status = 0
-      } else if (args[0] === 'rm') {
+      } else if (tool === 'rm') {
         dirs.delete(args[1])
         files.delete(args[1])
         status = 0

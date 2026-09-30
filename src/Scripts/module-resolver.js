@@ -241,8 +241,12 @@ async function verifyBundledPackages(directory, packageNames) {
 }
 
 async function installPackages(directory) {
+  // Pin npm's script shell: npm resolves the bare `sh` for lifecycle
+  // scripts through PATH, and environments with a broken PATH spawn
+  // nothing ("spawn sh ENOENT"). /bin/sh exists on every macOS.
   const process = await spawnNpm(['install', '--omit=dev'], {
     cwd: directory,
+    env: { npm_config_script_shell: '/bin/sh' },
   })
 
   let resolve, reject
@@ -427,15 +431,17 @@ async function removeTree(path) {
 
   // The extension only holds a read-only filesystem entitlement, so
   // deletion must happen in a subprocess (plain process entitlement).
-  // `rm -rf` recurses on its own, avoiding npm's .bin symlinks.
+  // `rm -rf` recurses on its own, avoiding npm's .bin symlinks. The
+  // absolute binary keeps the call PATH-independent — some users'
+  // broken shell setups leave `/usr/bin/env` unable to resolve `rm`.
   let resolve, reject
   const promise = new Promise((_resolve, _reject) => {
     resolve = _resolve
     reject = _reject
   })
 
-  const process = new Process('/usr/bin/env', {
-    args: ['rm', '-rf', path],
+  const process = new Process('/bin/rm', {
+    args: ['-rf', path],
   })
 
   handleProcessResult(process, reject, resolve, 30000)

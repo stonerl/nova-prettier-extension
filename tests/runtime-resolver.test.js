@@ -15,7 +15,12 @@
  *     PATH has no node, and
  *   • runs npm through the managed node binary (npm's entry script
  *     relies on a `#!/usr/bin/env node` shebang that fails when node
- *     is not on PATH).
+ *     is not on PATH), and
+ *   • repairs child environments when Nova's environment PATH lacks
+ *     the standard /usr/bin:/bin directories (broken shell setups) by
+ *     appending only the missing ones — healthy PATH order is
+ *     untouched — so managed subprocesses can still spawn `sh` for
+ *     npm lifecycle scripts.
  *
  * Stubs global.nova and the Process class, and busts the require cache
  * between scenarios so each gets a fresh resolver with empty caches.
@@ -88,7 +93,13 @@ const TOOLS = `${HOME}/Library/Application Support/Nova/Tools`
  * absolute paths to file contents (undefined content = binary present),
  * `dirs` lists existing directories.
  */
-function makeNovaShim({ home, extensionPath, files = {}, dirs = [] }) {
+function makeNovaShim({
+  home,
+  extensionPath,
+  files = {},
+  dirs = [],
+  environmentPATH,
+}) {
   return {
     inDevMode: () => false,
     version: [14, 0, 0],
@@ -96,7 +107,10 @@ function makeNovaShim({ home, extensionPath, files = {}, dirs = [] }) {
     environment:
       home === undefined
         ? {}
-        : { HOME: home, PATH: '/usr/local/bin:/usr/bin:/bin' },
+        : {
+            HOME: home,
+            PATH: environmentPATH || '/usr/local/bin:/usr/bin:/bin',
+          },
     config: { get: () => null },
     workspace: { config: { get: () => null }, path: null },
     notifications: { cancel: () => {}, post: () => {} },
@@ -425,6 +439,59 @@ async function brokenManagedNodeIsRejectedAndReprobed() {
   )
 }
 
+async function brokenEnvironmentPathIsRepaired() {
+  console.log('\n== A Nova environment PATH without /bin is repaired ==')
+
+  const nodeBin = `${TOOLS}/bin/node`
+  const npmBin = `${TOOLS}/bin/npm`
+
+  const { FakeProcess } = makeProcessStub((command) => ({
+    stdout: command === '/usr/bin/env' ? '' : 'v25.9.0\n',
+    status: command === '/usr/bin/env' ? 127 : 0,
+  }))
+  const helpers = loadHelpers(
+    makeNovaShim({
+      home: HOME,
+      extensionPath: '/dev/prettier.novaextension',
+      environmentPATH: '/opt/custom/bin',
+      files: { [nodeBin]: undefined, [npmBin]: undefined },
+    }),
+    FakeProcess,
+  )
+
+  const runtime = await helpers.resolveNodeRuntime()
+  check(
+    'managed runtime detected despite broken environment PATH',
+    runtime && runtime.mode === 'managed' && runtime.nodePath === nodeBin,
+    runtime,
+  )
+
+  const npmProc = await helpers.spawnNpm(['install', '--omit=dev'])
+  check(
+    'child PATH gains /usr/bin:/bin so lifecycle sh resolves',
+    npmProc.options.env.PATH === `${TOOLS}/bin:/opt/custom/bin:/usr/bin:/bin`,
+    npmProc.options.env,
+  )
+  check(
+    'managed node directory stays first for node/npm resolution',
+    npmProc.options.env.PATH.startsWith(`${TOOLS}/bin:`),
+    npmProc.options.env.PATH,
+  )
+  check(
+    'user PATH order is preserved ahead of the appended dirs',
+    npmProc.options.env.PATH.indexOf('/opt/custom/bin') <
+      npmProc.options.env.PATH.indexOf('/usr/bin'),
+    npmProc.options.env.PATH,
+  )
+
+  const nodeProc = await helpers.spawnNode(['--version'])
+  check(
+    'node subprocess env carries the repaired PATH too',
+    nodeProc.options.env.PATH === `${TOOLS}/bin:/opt/custom/bin:/usr/bin:/bin`,
+    nodeProc.options.env,
+  )
+}
+
 async function homeIsDerivedWithoutEnvironment() {
   console.log('\n== Home falls back to the released extension path ==')
 
@@ -461,6 +528,7 @@ async function main() {
   await managedViaReceipt()
   await managedViaDirectoryScan()
   await brokenManagedNodeIsRejectedAndReprobed()
+  await brokenEnvironmentPathIsRepaired()
   await homeIsDerivedWithoutEnvironment()
 
   console.log(
