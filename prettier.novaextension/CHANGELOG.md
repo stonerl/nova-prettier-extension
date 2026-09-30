@@ -1,3 +1,24 @@
+## 3.9.20 - 2026-09-30
+
+### Fixed
+
+- **The bundled-install lock now uses Nova's documented tempdir
+  property**
+  - `nova.fs.tempdir` is documented as a string property, but the lock
+    only accepted a function call — the check never matched real
+    Nova, so every Nova 10+ install silently locked in the extension's
+    global storage folder and logged "nova.fs.tempdir is
+    unavailable" instead. The lock now reads the property (the
+    function shape stays supported defensively) and only falls back
+    to global storage when the API is genuinely absent. Healthy
+    installs stop logging the fallback warning.
+
+### Development
+
+- Test coverage for all tempdir exposure shapes: the documented
+  property (locks in tempdir without any `mkdir -p`), the defensive
+  function shape, and the global-storage fallback.
+
 ## 3.9.19 - 2026-09-30
 
 ### Fixed
