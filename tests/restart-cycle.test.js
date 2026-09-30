@@ -28,7 +28,9 @@ const SRC_DIR = fs.realpathSync(
 )
 const MAIN = path.join(SRC_DIR, 'main.js')
 
-global.IssueCollection = class IssueCollection {}
+global.IssueCollection = class IssueCollection {
+  clear() {}
+}
 
 // Minimal Nova shims — helpers.js reads config through these during the
 // restart cycle. Everything returns null/undefined (default settings).

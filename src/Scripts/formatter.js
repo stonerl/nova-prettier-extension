@@ -232,6 +232,8 @@ class Formatter {
     this._lastDisabledPlugins = []
     /** 5s force-stop timer from stop() */
     this._forceStopTimer = null
+    /** true after dispose() — no more starts, crash restarts, or notices */
+    this._disposed = false
 
     this.setupIsReadyPromise()
   }
@@ -270,7 +272,12 @@ class Formatter {
     return this._isReadyPromise
   }
 
+  get disposed() {
+    return this._disposed === true
+  }
+
   async start(modulePath) {
+    if (this.disposed) return
     if (modulePath) this.modulePath = modulePath
 
     if (!this.modulePath) {
@@ -360,7 +367,20 @@ class Formatter {
     proc.onNotify('didCrash', (params) => {
       if (isCurrent()) this.prettierServiceDidCrash(params)
     })
-    proc.start()
+
+    // start() raises if the executable can't be launched — settle the
+    // handshake and readiness so no awaiter dangles, then surface the
+    // failure to the retry loop.
+    try {
+      proc.start()
+    } catch (err) {
+      this._startHandshake = null
+      this._rejectStartHandshake(err)
+      if (this._resolveIsReadyPromise) this._resolveIsReadyPromise(false)
+      this._isReadyPromise = null
+      this.prettierService = null
+      throw err
+    }
 
     // If the service neither signals didStart nor exits, tear it down so
     // start() rejects and a retry begins from a clean slate. Detach the
@@ -425,11 +445,16 @@ class Formatter {
 
     proc.terminate()
 
-    // force stop if it hasn't exited in 5s
+    // escalate to SIGKILL if it hasn't exited in 5s
     this._forceStopTimer = setTimeout(() => {
       this._forceStopTimer = null
       if (this._isStoppedPromise) {
         log.error('Prettier did NOT exit in 5000ms, forcing stop.')
+        try {
+          proc.kill()
+        } catch {
+          // already exited
+        }
         this._resolveIsStoppedPromise()
       }
     }, 5000)
@@ -511,6 +536,9 @@ class Formatter {
     this.prettierServiceCrashedRecently = true
     setTimeout(() => (this.prettierServiceCrashedRecently = false), 5000)
 
+    // Disposed extension — never respawn the service.
+    if (this.disposed) return
+
     log.debug('Restarting Prettier…')
     this.start().catch(() => {
       // startDidFail already surfaced the reason via notification
@@ -541,6 +569,10 @@ class Formatter {
       this._startHandshake = null
       this._rejectStartHandshake(new Error(`${error.name}: ${error.message}`))
     }
+
+    // Disposed extension — the handshake is settled, don't throw a
+    // notification at the user during teardown.
+    if (this.disposed) return
 
     showNotification({
       id: 'prettier-not-running',
@@ -579,6 +611,9 @@ class Formatter {
   }
 
   showServiceNotRunningError() {
+    // Disposed extension — no stray "stopped running" notices on teardown.
+    if (this.disposed) return
+
     showNotification({
       id: 'prettier-not-running',
       title: nova.localize(
@@ -622,6 +657,9 @@ class Formatter {
    */
   async formatEditor(editor, saving, selectionOnly, flags = {}) {
     const { document } = editor
+
+    // Disposed extension — no format requests after deactivation.
+    if (this._disposed) return []
 
     // Skip files larger than 32 MiB — stays within the IPC payload limit.
     const MAX_FILE_SIZE = 32 * 1024 * 1024 // 32 MiB

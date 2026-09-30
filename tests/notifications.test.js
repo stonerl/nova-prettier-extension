@@ -80,7 +80,9 @@ function makeNovaShim() {
 
 function loadNotifications(novaShim) {
   global.nova = novaShim
-  global.IssueCollection = class IssueCollection {}
+  global.IssueCollection = class IssueCollection {
+    clear() {}
+  }
   global.NotificationRequest = class NotificationRequest {
     constructor(id) {
       this.id = id

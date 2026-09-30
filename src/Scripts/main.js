@@ -106,6 +106,8 @@ class PrettierExtension {
 
     this.formatter = new Formatter()
     this.hasStarted = false
+    /** true after dispose() — all async work must bail */
+    this._disposed = false
 
     // Module-path resolution cache: findPrettier() shells out to npm and
     // can take many seconds. Config-file changes restart the service but
@@ -397,7 +399,7 @@ class PrettierExtension {
     const readyPromise = Promise.resolve(this.formatter.isReady)
 
     readyPromise.then((didStart) => {
-      if (!didStart) return
+      if (!didStart || this._disposed) return
 
       this.hasStarted = true
 
@@ -576,6 +578,8 @@ class PrettierExtension {
    * @returns {Promise<void>}
    */
   _runRestartCycle() {
+    if (this._disposed) return Promise.resolve()
+
     if (this._restartCycle) {
       // Trigger arrived while a cycle was already running — remember it
       // so a fresh cycle runs after this one finishes, otherwise it
@@ -586,6 +590,8 @@ class PrettierExtension {
     }
 
     this._restartCycle = (async () => {
+      if (this._disposed) return
+
       // Resolution: the service stays up, so formatting keeps working
       // while npm ls runs. Only resolution-affecting triggers set
       // _needsResolution; an explicit module path makes it pointless.
@@ -935,15 +941,32 @@ class PrettierExtension {
     }
   }
 
-  dispose() {
+  async dispose() {
     // cancel deferred config setup so it never registers anything
     // on a disposed instance
     if (this.configSetupTimer) {
       clearTimeout(this.configSetupTimer)
       this.configSetupTimer = null
     }
+    this._disposed = true
+    // Suppresses crash-restarts, notifications, and format attempts on
+    // the formatter while the restart cycle drains below.
+    this.formatter._disposed = true
 
-    this.formatter.stop()
+    // In-flight stop/start cycle: let it settle so it never spawns a
+    // fresh service after deactivation.
+    if (this._restartCycle) {
+      try {
+        await this._restartCycle
+      } catch {
+        // failures already surfaced via showNotification
+      }
+    }
+
+    // Synchronous first stop would race the cycle's tail end — call
+    // stop() after the cycle settles so terminate is not skipped while
+    // a start() is still holding its handshake.
+    await this.formatter.stop()
 
     for (const watcher of this.fsWatchers) {
       watcher.dispose()
@@ -969,6 +992,8 @@ class PrettierExtension {
 
     for (const d of this.configDisposables) d.dispose()
     this.configDisposables = []
+
+    this.issueCollection?.clear?.()
   }
 }
 
@@ -998,9 +1023,9 @@ exports.activate = async function () {
   }
 }
 
-exports.deactivate = function () {
+exports.deactivate = async function () {
   if (prettierExtensionInstance) {
-    prettierExtensionInstance.dispose()
+    await prettierExtensionInstance.dispose()
     prettierExtensionInstance = null
   }
 }

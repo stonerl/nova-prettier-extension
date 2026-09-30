@@ -161,10 +161,13 @@ function makeNovaShim() {
       this._exitHandlers.forEach((fn) => fn(status))
     }
     terminate() {}
+    kill() {}
   }
 
   global.Process = FakeProcess
-  global.IssueCollection = class IssueCollection {}
+  global.IssueCollection = class IssueCollection {
+    clear() {}
+  }
   global.NotificationRequest = class NotificationRequest {
     constructor(id) {
       this.id = id

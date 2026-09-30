@@ -214,6 +214,7 @@ function makeNovaShim({ withTempdir = true } = {}) {
     }
 
     terminate() {}
+    kill() {}
   }
 
   shim._processStub = { FakeProcess, created }

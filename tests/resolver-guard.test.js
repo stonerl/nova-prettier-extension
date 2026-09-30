@@ -254,6 +254,7 @@ function makeNovaShim({
       this._exitHandlers.forEach((fn) => fn(status))
     }
     terminate() {}
+    kill() {}
   }
 
   shim._processStub = { FakeProcess, created }
@@ -267,7 +268,9 @@ function makeNovaShim({
 function loadResolver(novaShim, captured) {
   global.nova = novaShim
   global.Process = novaShim._processStub.FakeProcess
-  global.IssueCollection = class IssueCollection {}
+  global.IssueCollection = class IssueCollection {
+    clear() {}
+  }
 
   const original = {
     info: console.info,
