@@ -1,3 +1,18 @@
+## 3.9.21 - 2026-09-30
+
+### Fixed
+
+- **Saving a new untitled file now formats without error**
+
+  Saving a brand-new file (no location on disk yet) in a window
+  without an open workspace passed no path into the
+  `.prettierignore` lookup: `nova.path.dirname` threw "Path
+  argument must be a string" and the save-time format was
+  dropped. The ignore-file check is now skipped when neither the
+  workspace nor the document provides a directory, so the first
+  save formats normally. Once the file sits on disk, behavior is
+  unchanged.
+
 ## 3.9.20 - 2026-09-30
 
 ### Fixed
