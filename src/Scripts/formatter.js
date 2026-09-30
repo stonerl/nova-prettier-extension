@@ -1046,6 +1046,9 @@ class Formatter {
   }
 
   getIgnorePath(path) {
+    // Untitled document outside a workspace: no directory to anchor
+    // `.prettierignore` against — skip the ignore check entirely.
+    if (!nova.workspace.path && !path) return null
     const expectedIgnoreDir = nova.workspace.path || nova.path.dirname(path)
     return nova.path.join(expectedIgnoreDir, '.prettierignore')
   }
