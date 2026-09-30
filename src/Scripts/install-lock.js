@@ -23,7 +23,7 @@
  * silently failed); subprocesses run with the plain process
  * entitlement and may write.
  *
- * The lock lives in `nova.fs.tempdir()` (Nova 10+), documented as
+ * The lock lives in `nova.fs.tempdir` (Nova 10+), documented as
  * shared between instances of the same extension running in different
  * workspaces; older versions fall back to the global storage path.
  *
@@ -39,19 +39,27 @@ const LOCK_FILE_NAME = 'prettier-bundled-install.lock'
 
 /**
  * Absolute path of the lock directory, stable across all workspace
- * windows. Returns an object so callers can tell whether the pre-Nova-10
- * fallback is in use (its parent needs a one-time mkdir -p).
+ * windows. Returns an object so callers can tell whether the fallback
+ * is in use (its parent needs a one-time mkdir -p).
+ *
+ * `nova.fs.tempdir` is documented as a string *property* (added in
+ * Nova 10) — the function-call shape is accepted defensively. Only
+ * when neither yields a path does the lock fall back to the extension
+ * global storage path.
  *
  * @returns {{ path: string, usesFallback: boolean }}
  */
 function installLockLocation() {
-  // tempdir() is added in Nova 10 — guard for older versions.
-  const directory =
-    typeof nova.fs.tempdir === 'function' ? nova.fs.tempdir() : null
+  const tempdir =
+    typeof nova.fs.tempdir === 'function'
+      ? nova.fs.tempdir()
+      : typeof nova.fs.tempdir === 'string'
+        ? nova.fs.tempdir
+        : null
 
-  if (directory) {
+  if (tempdir) {
     return {
-      path: nova.path.join(directory, LOCK_FILE_NAME),
+      path: nova.path.join(tempdir, LOCK_FILE_NAME),
       usesFallback: false,
     }
   }

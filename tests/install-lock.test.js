@@ -16,9 +16,11 @@
  *   • refreshes its staleness window via the touch heartbeat,
  *   • makes waitForBundledInstall return when the lock is released and
  *     keep waiting through a mid-install Prettier appearing on disk,
- *     and bail out at the TTL deadline, and
+ *     and bail out at the TTL deadline,
+ *   • works with nova.fs.tempdir exposed as the documented string
+ *     property (no mkdir -p needed) as well as the function shape, and
  *   • falls back to the extension's global storage when nova.fs has no
- *     tempdir (pre-Nova 10).
+ *     usable tempdir at all.
  *
  * The tests simulate two racing extension processes ("windows") by
  * creating two lock instances over the same shared file model. The Nova
@@ -51,8 +53,10 @@ function check(name, ok, detail) {
  * (nova.fs.stat) reads this model directly; the write side runs through
  * a stubbed Process class that emulates the coreutils the lock spawns.
  *
- * `withTempdir` toggles nova.fs.tempdir (Nova 10+ feature) so the
- * fallback path can be exercised too.
+ * `withTempdir` toggles nova.fs.tempdir so all exposure shapes can be
+ * exercised: `true` = function (defensive), `'property'` = string
+ * property (what real Nova exposes, docs list tempdir under
+ * Properties), `false` = unavailable (fallback path).
  */
 function makeNovaShim({ withTempdir = true } = {}) {
   const files = new Map() // path → { content, mtimeMs }
@@ -80,7 +84,12 @@ function makeNovaShim({ withTempdir = true } = {}) {
     },
 
     fs: {
-      tempdir: withTempdir ? () => TEMPDIR : undefined,
+      tempdir:
+        withTempdir === 'property'
+          ? TEMPDIR
+          : withTempdir
+            ? () => TEMPDIR
+            : undefined,
 
       stat(p) {
         if (files.has(p)) {
@@ -438,8 +447,43 @@ async function waitForBundledInstallExits() {
   }
 }
 
+async function tempdirStringProperty() {
+  console.log('\n== nova.fs.tempdir as a string property ==')
+
+  // Real Nova exposes nova.fs.tempdir as a string property (docs list
+  // it under Properties, "Added in Nova 10") — the lock must use it
+  // without a mkdir -p and without falling back to global storage.
+  const shim = makeNovaShim({ withTempdir: 'property' })
+  const { createInstallLock } = loadInstallLock(shim)
+
+  const windowA = createInstallLock()
+  const windowB = createInstallLock()
+
+  check(
+    'property-form tempdir is used for the lock directory',
+    windowA.path.startsWith(`${shim.tempdirPath}/`),
+    windowA.path,
+  )
+
+  check(
+    'acquire succeeds without any mkdir -p',
+    (await windowA.acquire()) === true &&
+      !shim._processStub.created.some(
+        (p) => p.command === '/bin/mkdir' && p.options.args[0] === '-p',
+      ),
+    shim._processStub.created.map((p) => [p.command, p.options.args]),
+  )
+
+  check(
+    'second window is excluded while fresh',
+    (await windowB.acquire()) === false,
+  )
+
+  await windowA.release()
+}
+
 async function tempdirFallback() {
-  console.log('\n== pre-Nova-10 fallback to global storage ==')
+  console.log('\n== fallback to global storage ==')
 
   const shim = makeNovaShim({ withTempdir: false })
   const { createInstallLock } = loadInstallLock(shim)
@@ -477,6 +521,7 @@ async function main() {
   await staleTakeover()
   await heartbeatRefreshesStaleness()
   await waitForBundledInstallExits()
+  await tempdirStringProperty()
   await tempdirFallback()
 
   console.log(
