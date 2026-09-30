@@ -1,3 +1,31 @@
+## 3.9.19 - 2026-09-30
+
+### Fixed
+
+- **Formatting setup no longer breaks when the shell PATH lacks the
+  standard system directories**
+  - Some users' shell setups leave Nova's environment PATH without
+    `/usr/bin:/bin`. Every subprocess PATH lookup then failed: the
+    bundled-install lock died with "env: mkdir: No such file or
+    directory" and fell back to unlocked installs, and npm's package
+    lifecycle scripts failed with "spawn sh ENOENT", killing the
+    bundled install and leaving the service unable to start. Lock
+    tools (`mkdir`, `touch`, `rmdir`, `rm`) and stale `.bin` cleanup
+    now spawn from absolute system paths, managed subprocess
+    environments gain any missing `/usr/bin:/bin` (healthy PATH order
+    is untouched), and bundled installs pin npm's script shell to
+    `/bin/sh`. A new warning prints the PATH Nova sees when `/bin` is
+    missing, so affected setups are identifiable from the Extension
+    Console.
+
+### Development
+
+- `.nova/Configuration.json` sanitation now checks the file exists
+  before opening it, removing a warning printed on every activation
+  in workspaces without that file.
+- Test coverage for the new behavior: child-environment PATH repair,
+  absolute lock tool spawning, and fallback `mkdir -p` targeting.
+
 ## 3.9.18 - 2026-09-29
 
 - README.md cleanup
