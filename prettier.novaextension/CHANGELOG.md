@@ -1,3 +1,34 @@
+## 3.9.22 - 2026-09-30
+
+### Fixed
+
+- **Reloading or disabling the extension can no longer leak a
+  Prettier service process**
+
+  Deactivation is now fully awaited: the in-flight restart cycle
+  settles first, then the service is stopped and all watchers,
+  commands, save listeners, config observers, and debounce timers
+  are disposed. A disposed formatter never restarts, formats, or
+  shows teardown notifications, and format-on-save listeners are
+  no longer registered by a late startup.
+
+- **A wedged service subprocess can no longer linger**
+
+  The force-stop timer now escalates SIGTERM to SIGKILL instead
+  of abandoning the subprocess after five seconds, and a failed
+  launch settles the startup handshake and readiness flag instead
+  of leaving awaits dangling forever.
+
+- **Syntax-error markers are cleared on deactivate**
+
+  Issue markers from failed formats used to persist after the
+  extension was reloaded or disabled; the issue collection is now
+  cleared on disposal.
+
+### Development
+
+- The four `IssueCollection` test stubs implement `clear()`.
+
 ## 3.9.21 - 2026-09-30
 
 ### Fixed
