@@ -540,7 +540,6 @@ async function ensureBundledModules() {
         'Another extension process is already installing the bundled packages — waiting for it to finish…',
       )
       await waitForBundledInstall(
-        prettierPath,
         installLock,
         INSTALL_LOCK_TTL_MS,
         INSTALL_POLL_INTERVAL_MS,
@@ -567,7 +566,6 @@ async function ensureBundledModules() {
           'Another extension process is already installing the bundled packages — waiting for it to finish…',
         )
         await waitForBundledInstall(
-          prettierPath,
           installLock,
           INSTALL_LOCK_TTL_MS,
           INSTALL_POLL_INTERVAL_MS,

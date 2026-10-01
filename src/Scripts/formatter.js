@@ -210,7 +210,6 @@ class Formatter {
       this.prettierServiceStartDidFail.bind(this)
     this.prettierServiceDidCrash = this.prettierServiceDidCrash.bind(this)
 
-    this.emitter = new Emitter()
     /** @type {Map<string,number>} latest in-flight request IDs per file URI */
     this._latestRequestIds = new Map()
     /** @type {Set<Promise>} format requests currently in flight */

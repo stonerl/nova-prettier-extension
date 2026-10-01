@@ -377,7 +377,7 @@ async function waitForBundledInstallExits() {
     }, 150)
 
     const start = Date.now()
-    await waitForBundledInstall(prettierPath, holder, 5000, 20)
+    await waitForBundledInstall(holder, 5000, 20)
     check(
       'waiter keeps waiting while the lock is held (even with prettier present)',
       shim.fs.stat(pkgPath) !== null &&
@@ -399,7 +399,7 @@ async function waitForBundledInstallExits() {
     }, 50)
 
     const start = Date.now()
-    await waitForBundledInstall(prettierPath, holder, 5000, 20)
+    await waitForBundledInstall(holder, 5000, 20)
     check(
       'waiter returns when the lock is released',
       Date.now() - start < 5000 && shim._pathExists(holder.path) === false,
@@ -417,7 +417,7 @@ async function waitForBundledInstallExits() {
     setTimeout(() => shim._agePath(holder.path, 31), 50)
 
     const start = Date.now()
-    await waitForBundledInstall(prettierPath, holder, 5000, 20)
+    await waitForBundledInstall(holder, 5000, 20)
     check(
       'waiter returns when the holder stops heartbeating',
       Date.now() - start < 5000,
@@ -437,12 +437,7 @@ async function waitForBundledInstallExits() {
     }, 30)
 
     const start = Date.now()
-    await waitForBundledInstall(
-      '/tmp/nova-shared/never-installed/prettier',
-      holder,
-      150,
-      20,
-    )
+    await waitForBundledInstall(holder, 150, 20)
     clearInterval(beat)
     check('waiter bails out at the TTL deadline', Date.now() - start >= 150)
   }

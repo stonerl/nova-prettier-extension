@@ -23,42 +23,24 @@ const center = nova.notifications
  * @param {string}   opts.id                      Unique identifier (will cancel any existing notification with this id).
  * @param {string}   opts.title                   Notification title.
  * @param {string}   opts.body                    Notification body text.
- * @param {string}   [opts.type]                  "input" or "secure-input" to show a text field. Defaults to basic.
- * @param {string}   [opts.textInputPlaceholder]  Placeholder text for input notifications.
- * @param {string}   [opts.textInputValue]        Default value for input notifications.
  * @param {string[]} [opts.actions]               Array of button labels.
- * @param {Function} [opts.callback]              Callback invoked with (actionIdx, textInputValue) after user interaction.
+ * @param {Function} [opts.callback]              Callback invoked with (actionIdx) after user interaction.
  * @returns {Promise<NotificationResponse|undefined>}
  *   Resolves with the NotificationResponse on success,
  *   or resolves to `undefined` if posting the notification fails (errors are logged).
  */
-async function showNotification({
-  id,
-  title,
-  body,
-  type,
-  textInputPlaceholder,
-  textInputValue,
-  actions,
-  callback,
-}) {
+async function showNotification({ id, title, body, actions, callback }) {
   center.cancel(id)
 
   const req = new NotificationRequest(id)
   req.title = title
   req.body = body
 
-  if (type !== undefined) req.type = type
-  if (textInputPlaceholder !== undefined)
-    req.textInputPlaceholder = textInputPlaceholder
-  if (typeof textInputValue !== 'undefined') req.textInputValue = textInputValue
-
   if (actions !== undefined) req.actions = actions
 
   try {
     const resp = await center.add(req)
-    if (typeof callback === 'function')
-      callback(resp?.actionIdx, resp?.textInputValue)
+    if (typeof callback === 'function') callback(resp?.actionIdx)
     return resp
   } catch (err) {
     console.error(err, err.stack)

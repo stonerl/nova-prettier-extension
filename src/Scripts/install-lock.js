@@ -223,13 +223,11 @@ function createInstallLock({ staleMs = 30000 } = {}) {
  * mean the tree is complete — readiness is decided by the caller's
  * verification after this wait.
  *
- * @param {string} prettierPath – path of the bundled prettier module
- *                              (unused today, kept for call-site clarity)
  * @param {object} lock         – lock instance from createInstallLock()
  * @param {number} ttlMs        – overall wait deadline
  * @param {number} pollMs       – polling interval
  */
-async function waitForBundledInstall(prettierPath, lock, ttlMs, pollMs = 250) {
+async function waitForBundledInstall(lock, ttlMs, pollMs = 250) {
   const deadline = Date.now() + ttlMs
 
   while (Date.now() < deadline) {

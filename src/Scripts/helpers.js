@@ -717,7 +717,6 @@ module.exports = {
   log,
   observeConfigWithWorkspaceOverride,
   observeEmptyArrayCleanup,
-  ProcessError,
   readJsonFile,
   resolveNodeRuntime,
   sanitizePrettierConfig,
