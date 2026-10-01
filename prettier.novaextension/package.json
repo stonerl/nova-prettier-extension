@@ -30,6 +30,11 @@
     "prettier-plugin-tailwindcss": "0.8.1",
     "prettier-plugin-toml": "3.0.2"
   },
+  "overrides": {
+    "js-beautify": {
+      "glob": "^13.0.6"
+    }
+  },
   "allowScripts": {
     "core-js-pure": false,
     "fsevents": false
