@@ -1939,7 +1939,7 @@
             }
           },
           {
-            "key": "prettier.plugins.prettier-plugin-xml.continuationIndent",
+            "key": "prettier.plugins.prettier-plugin-nginx.continuationIndent",
             "title": "Continuation Indent",
             "description": "Additional indentation for wrapped lines.",
             "type": "number",
