@@ -735,7 +735,7 @@ class PrettierExtension {
 
     const explicit = this.modulePath
     const preferBundled = this.preferBundled
-    const module = this.formatter._runningModulePath ?? this._resolvedModulePath
+    const module = this._runningModulePath ?? this._resolvedModulePath
 
     let source
     if (explicit) {
