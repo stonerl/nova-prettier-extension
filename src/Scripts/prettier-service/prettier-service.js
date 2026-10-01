@@ -15,48 +15,7 @@ const url = require('url')
 
 const JsonRpcService = require('./json-rpc.js')
 
-class FormattingService {
-  constructor(jsonRpc) {
-    this.format = this.format.bind(this)
-    this.hasConfig = this.hasConfig.bind(this)
-
-    this.jsonRpc = jsonRpc
-
-    this.jsonRpc.onRequest('format', this.format)
-    this.jsonRpc.onRequest('hasConfig', this.hasConfig)
-  }
-
-  /**
-   * Abstract method. Must be implemented by subclass.
-   * @param {object} params
-   * @param {string} params.original
-   * @param {string} params.pathForConfig
-   * @param {string|null} params.ignorePath
-   * @param {object} params.options
-   * @throws {Error} Always throws unless overridden
-   */
-
-  async format() {
-    throw new Error(
-      'FormattingService.format() must be implemented by subclass',
-    )
-  }
-
-  /**
-   * Abstract method. Must be implemented by subclass.
-   * @param {object} params
-   * @param {string} params.pathForConfig
-   * @throws {Error} Always throws unless overridden
-   */
-
-  async hasConfig() {
-    throw new Error(
-      'FormattingService.hasConfig() must be implemented by subclass',
-    )
-  }
-}
-
-class PrettierService extends FormattingService {
+class PrettierService {
   static isCorrectModule(module) {
     return (
       typeof module.format === 'function' &&
@@ -66,7 +25,14 @@ class PrettierService extends FormattingService {
   }
 
   constructor(jsonRpc, prettier) {
-    super(jsonRpc)
+    this.format = this.format.bind(this)
+    this.hasConfig = this.hasConfig.bind(this)
+
+    this.jsonRpc = jsonRpc
+
+    this.jsonRpc.onRequest('format', this.format)
+    this.jsonRpc.onRequest('hasConfig', this.hasConfig)
+
     this.prettier = prettier
     this._configCache = new Map()
     this._fileInfoCache = new Map()
