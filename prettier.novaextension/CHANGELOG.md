@@ -1,3 +1,24 @@
+## 3.9.23 - 2026-10-01
+
+### Fixed
+
+- **The bundled Blade formatter no longer ships the deprecated
+  `glob` copy**
+
+  `blade-formatter` → `js-beautify` resolved to an old `glob`
+  (10.5.0) that is deprecated upstream and flagged for known
+  security vulnerabilities. An npm override now forces that
+  transitive dependency to `glob@13.0.6` — the same major version
+  the bundle already uses — and the nested `10.5.0` subtree is gone
+  from the lockfile. Formatting behavior is unchanged: `js-beautify`
+  only touches `glob` in its CLI, and js-beautify 2.x itself ships
+  `glob` 13 as well. The override will be dropped once
+  `blade-formatter` upgrades `js-beautify` to 2.x.
+
+### Changed
+
+- Updated `@shopify/prettier-plugin-liquid` to version `1.11.2`.
+
 ## 3.9.22 - 2026-09-30
 
 ### Fixed
