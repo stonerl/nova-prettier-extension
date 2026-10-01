@@ -335,40 +335,6 @@ function detectBasenameSyntax(path) {
   return null
 }
 
-// Nova's built-in syntax keys we explicitly support
-const knownSyntaxKeys = new Set([
-  'astro',
-  'blade',
-  'css',
-  'dockerfile',
-  'flow',
-  'graphql',
-  'html',
-  'html+ejs',
-  'html+erb',
-  'java-properties',
-  'java',
-  'javascript',
-  'json',
-  'jsx',
-  'less',
-  'liquid-html',
-  'liquid-md',
-  'markdown',
-  'nginx',
-  'php',
-  'scss',
-  'sh',
-  'shell',
-  'sql',
-  'toml',
-  'tsx',
-  'typescript',
-  'vue',
-  'xml',
-  'yaml',
-])
-
 /**
  * Determine the true syntax key for a document.
  *
@@ -424,10 +390,6 @@ function detectSyntax({ syntax, uri }) {
   }
 
   // Nova's syntax matches one we support — use it
-  if (knownSyntaxKeys.has(syntax)) {
-    return syntax
-  }
-
   return syntax
 }
 
