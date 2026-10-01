@@ -1,3 +1,48 @@
+## 3.9.24 - 2026-10-01
+
+### Fixed
+
+- **The "Continuation Indent" setting now applies to nginx files**
+
+  The setting has been displayed under prettier-plugin-xml since
+  the unified settings were introduced, but the option belongs to
+  prettier-plugin-nginx — changing it had no effect on any file. It
+  now lives in the nginx section and is read into format requests
+  for nginx files.
+
+- **Prettier Info now reports the module that is actually running**
+
+  The command read the running module path from the formatter,
+  which never records it. With an explicit "Prettier module" path
+  configured, Prettier Info showed "Module: not resolved yet" and
+  "Version: unknown" even while the service ran from that path. It
+  now reads the extension's own record of the running module, so
+  path and version are always accurate.
+
+- **Saving with a relative custom config path and no open
+  workspace no longer errors**
+
+  A relative `prettier.config.file` without an open workspace
+  reached a logging typo (`log.warning` instead of `log.warn`) that
+  threw and dropped the save-time format with a generic "Error
+  While Formatting" notice. The branch now logs the intended
+  warning and treats the path as unset, formatting with the
+  extension's settings as designed.
+
+### Development
+
+- Removed dead code: an unused `Emitter` instance, a no-op syntax
+  allowlist guard in `detectSyntax` that returned the same value on
+  both branches, unused notification text-input parameters, the
+  unused `ProcessError` export, the unused `prettierPath` argument
+  of `waitForBundledInstall`, and the `FormattingService` base
+  class (its only subclass now carries the constructor wiring).
+- The options-coverage test now guards the plugin option lists in
+  both directions: every `prettier.plugins.*` UI key must be
+  declared in the matching `PRETTIER_*_PLUGIN_OPTIONS` list, and
+  every declared option must have a settings UI key — so the
+  misplaced-setting class above can't recur silently.
+
 ## 3.9.23 - 2026-10-01
 
 ### Fixed
