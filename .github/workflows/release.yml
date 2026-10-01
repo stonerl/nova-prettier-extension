@@ -1,0 +1,76 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compute versions
+        id: vars
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          version="${tag#v}"
+          prev="$(git ls-remote --tags origin 'v*' \
+            | awk -F/ '{gsub(/\^\{\}$/, "", $NF); print $NF}' \
+            | grep "^v" | grep -vx "$tag" \
+            | sed 's/^v//' | sort -V | tail -1 || true)"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if [ -n "$prev" ]; then
+            echo "prev=v$prev" >> "$GITHUB_OUTPUT"
+          else
+            echo "prev=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Extract changelog section
+        run: node -e '
+          const fs = require("fs");
+          const version = process.env.VERSION;
+          const tag = process.env.TAG;
+          const prev = process.env.PREV;
+          const source = fs.readFileSync(
+            "prettier.novaextension/CHANGELOG.md",
+            "utf8",
+          );
+          const escaped = version.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+          const header = new RegExp(
+            `^## ${escaped} - \\d{4}-\\d{2}-\\d{2}\\r?\\n`,
+            "m",
+          );
+          const start = source.match(header);
+          if (!start) {
+            console.error(`No changelog entry found for version ${version}`);
+            process.exit(1);
+          }
+          const rest = source.slice(start.index + start[0].length);
+          const next = rest.search(/^## /m);
+          const section = (
+            next === -1 ? rest : rest.slice(0, next)
+          ).replace(/[\r\n\s]+$/, "");
+          if (!section) {
+            console.error(`Changelog entry for version ${version} is empty`);
+            process.exit(1);
+          }
+          const notes = prev
+            ? `${section}\n\n**Full Changelog**: https://github.com/stonerl/nova-prettier-extension/compare/${prev}...${tag}`
+            : section;
+          fs.writeFileSync("/tmp/notes.md", notes);
+        '
+        env:
+          VERSION: ${{ steps.vars.outputs.version }}
+          TAG: ${{ steps.vars.outputs.tag }}
+          PREV: ${{ steps.vars.outputs.prev }}
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.vars.outputs.tag }}
+        run: gh release create "$TAG" --title "$TAG" --notes-file /tmp/notes.md
