@@ -689,7 +689,7 @@ class Formatter {
       } else {
         // No workspace to anchor the path against — the service would
         // resolve it against its own extension-dir cwd. Treat as unset.
-        log.warning(
+        log.warn(
           `prettier.config.file is relative but no workspace is open — ignoring "${customConfigFile}"`,
         )
         customConfigFile = null
