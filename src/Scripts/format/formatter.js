@@ -22,6 +22,8 @@ const {
 
 const { spawnNode } = require('../env/runtime.js')
 
+const { rehydrateError } = require('../env/processes.js')
+
 const {
   showNotification,
   cancelNotification,
@@ -455,9 +457,7 @@ class Formatter {
     // — prettierServiceDidExit restarts and notifies. Without this the
     // crash reason is lost, leaving only an opaque IPC rejection.
     const { name, message, stack } = parameters ?? {}
-    this._lastFailure = new Error(
-      `${name ?? 'Error'}: ${message ?? 'no message'}`,
-    )
+    this._lastFailure = rehydrateError(parameters)
     this._lastFailureIsSpecific = true
     log.error(
       `Prettier service crashed: ${name ?? 'Unknown'}: ${message ?? 'no message'}${stack ? `\n${stack}` : ''}`,
@@ -466,13 +466,13 @@ class Formatter {
 
   prettierServiceStartDidFail({ parameters: error }) {
     if (this._resolveIsReadyPromise) this._resolveIsReadyPromise(false)
-    this._lastFailure = new Error(`${error.name}: ${error.message}`)
+    this._lastFailure = rehydrateError(error)
     this._lastFailureIsSpecific = true
 
     // Wake the awaiting start() caller with the actual failure reason.
     if (this._startHandshake) {
       this._startHandshake = null
-      this._rejectStartHandshake(new Error(`${error.name}: ${error.message}`))
+      this._rejectStartHandshake(rehydrateError(error))
     }
 
     // Disposed extension — the handshake is settled, don't throw a
@@ -780,10 +780,7 @@ class Formatter {
       return prettierErrorToIssues(
         // The service serializes thrown errors as plain objects over
         // JSON-RPC — rehydrate a real Error so message shows in logs.
-        Object.assign(
-          new Error(error.message ?? 'Unknown Prettier error'),
-          error,
-        ),
+        rehydrateError(error),
         missingParser,
         saving,
         document.path,

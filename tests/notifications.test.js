@@ -212,7 +212,8 @@ function lastFailureLifecycle() {
   })
   check(
     'didCrash records name + message',
-    crashFmt._lastFailure?.message === 'TypeError: boom at line 4',
+    crashFmt._lastFailure?.name === 'TypeError' &&
+      crashFmt._lastFailure?.message === 'boom at line 4',
     crashFmt._lastFailure,
   )
 
@@ -238,7 +239,8 @@ function lastFailureLifecycle() {
   preserveFmt.prettierServiceDidExit(2)
   check(
     'specific reason survives an unexpected exit',
-    preserveFmt._lastFailure?.message === 'TypeError: boom at line 4',
+    preserveFmt._lastFailure?.name === 'TypeError' &&
+      preserveFmt._lastFailure?.message === 'boom at line 4',
     preserveFmt._lastFailure,
   )
 

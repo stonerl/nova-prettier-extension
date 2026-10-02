@@ -119,9 +119,13 @@ function describeFailure(err) {
   }
 
   const firstLine = message.split('\n')[0].replace(/^Error:\s*/, '')
-  return firstLine.length > MAX_REASON_LENGTH
-    ? `${firstLine.slice(0, MAX_REASON_LENGTH - 1)}…`
-    : firstLine
+  // Specific error names (TypeError, SyntaxError, …) are diagnostic —
+  // prefix them for display. Generic 'Error' names carry no signal.
+  const namePrefix = err?.name && err.name !== 'Error' ? `${err.name}: ` : ''
+  const reason = `${namePrefix}${firstLine}`
+  return reason.length > MAX_REASON_LENGTH
+    ? `${reason.slice(0, MAX_REASON_LENGTH - 1)}…`
+    : reason
 }
 
 /**

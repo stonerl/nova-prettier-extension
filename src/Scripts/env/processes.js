@@ -17,6 +17,20 @@ class ProcessError extends Error {
 }
 
 /**
+ * Rebuild a real Error from a serialized error payload received over
+ * the wire — the service sends { name, message, stack? } envelopes for
+ * handler-level errors, crash and startup failures alike.
+ *
+ * @param {{ name?: string, message?: string, stack?: string }} payload
+ * @returns {Error}
+ */
+function rehydrateError(payload) {
+  const error = new Error(payload?.message ?? 'Unknown error')
+  if (payload) Object.assign(error, payload)
+  return error
+}
+
+/**
  * Wire up rejection/resolution for a Nova Process based on its stderr
  * and exit status, with an optional inactivity-free timeout so a hung
  * child process can't block the caller forever.
@@ -65,4 +79,4 @@ function handleProcessResult(process, reject, resolve, timeoutMs = 30000) {
   }
 }
 
-module.exports = { ProcessError, handleProcessResult }
+module.exports = { ProcessError, handleProcessResult, rehydrateError }
