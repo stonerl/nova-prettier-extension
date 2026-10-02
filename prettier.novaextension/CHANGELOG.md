@@ -1,3 +1,36 @@
+## 3.9.28 - 2026-10-03
+
+### Added
+
+- **Added plugin: `prettier-plugin-nunjucks`**
+  Formats Nunjucks templates (`.njk`, `.nunjucks`, `.nunj`) — statement
+  tags, variables, comments and raw/verbatim blocks stay in Nunjucks
+  syntax. Settings cover class attribute layout and custom
+  block/inline/fork tags.
+
+- **Added plugin: `prettier-plugin-go-template`**
+  Formats Go and Hugo template files (`.gohtml`, `.gotmpl`,
+  `.go.tmpl`, `.html.tmpl`, `.html.tpl`, `.go.html`, `.tmpl`). Bare
+  `.tpl` files format as Smarty. Adds a bracket-spacing setting.
+
+- **Added plugin: `prettier-plugin-smarty`**
+  Formats Smarty templates (`.tpl`) with configurable delimiters
+  (default `<{ ... }>`). Smarty tags are treated as opaque tokens;
+  the surrounding markup formats with Prettier's HTML rules.
+
+- **Added plugin: `prettier-plugin-hugo-post` (optional)**
+  Formats Hugo content files: front matter (YAML, TOML, JSON), the
+  Markdown body and shortcodes. Disabled by default — when enabled,
+  all Markdown files route through it, which rewrites front matter
+  the plain Markdown parser leaves alone.
+
+### Development
+
+- New `template-plugins.test.js` service smoke suite formats one
+  sample per template plugin end to end; `tests/format-samples` gains
+  the four sample files and scramble injectors, and `npm test` runs
+  the suite as `test:template-plugins`.
+
 ## 3.9.27 - 2026-10-02
 
 ### Fixed
