@@ -232,6 +232,10 @@ function notifySqlDialectMismatch(dialect, selected) {
  * @returns {Array<Issue>}
  */
 function prettierErrorToIssues(error, missingParser, saving, filePath) {
+  // The service guarantees a string message in its envelopes, but guard
+  // before touching it — a non-string message means nothing to map.
+  if (typeof error?.message !== 'string') return []
+
   const isParserError = error.message.includes("Couldn't resolve parser")
 
   if (isParserError || missingParser) {
