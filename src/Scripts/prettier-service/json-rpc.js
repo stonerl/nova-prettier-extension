@@ -21,6 +21,10 @@ const PARSE_ERROR = { code: -32700, message: 'Parse error' }
 const INVALID_REQUEST = { code: -32600, message: 'Invalid Request' }
 const METHOD_NOT_FOUND = { code: -32601, message: 'Method not found' }
 const INTERNAL_ERROR = { code: -32603, message: 'Internal error' }
+const RESULT_TOO_LARGE = {
+  code: -32000,
+  message: 'Formatted result too large to transmit',
+}
 
 /**
  * Maximum allowed JSON-RPC frame body in bytes.
@@ -49,6 +53,17 @@ class JsonRpcParser extends Transform {
     this.bytesBuffered = 0
 
     /**
+     * Remaining body bytes of an oversize frame to drop. Frames whose
+     * declared Content-Length exceeds MAX_CONTENT_LENGTH are skipped
+     * (no response possible — the body is never parsed) instead of
+     * erroring the stream, so the service keeps reading subsequent
+     * frames. The client-side transport guard makes this path
+     * unreachable for our own requests; it exists as damage control.
+     * @private
+     */
+    this._skipRemaining = 0
+
+    /**
      * Always-up-to-date concatenation of `this.buffers`
      * (pruned after each parse).
      * @private
@@ -67,6 +82,15 @@ class JsonRpcParser extends Transform {
    * @private
    */
   _transform(chunk, encoding, callback) {
+    // Drop the tail of an oversize frame before accumulating anything —
+    // skipped bytes must never reach the buffer machinery.
+    if (this._skipRemaining > 0) {
+      const drop = Math.min(chunk.length, this._skipRemaining)
+      this._skipRemaining -= drop
+      chunk = chunk.slice(drop)
+      if (chunk.length === 0) return callback()
+    }
+
     this.buffers.push(chunk)
     this.bytesBuffered += chunk.length
 
@@ -109,10 +133,25 @@ class JsonRpcParser extends Transform {
       )
 
       const len = parseInt(headers.get('content-length'), 10)
-      if (isNaN(len) || len > MAX_CONTENT_LENGTH) {
-        const err = new Error(`Frame too large: ${len} bytes`)
+      if (isNaN(len)) {
+        // Malformed header — no trusted length, so the frame can't be
+        // skipped deterministically. Error the stream (same as before).
+        const err = new Error('Missing or malformed Content-Length header')
         this.push({ error: PARSE_ERROR, id: null })
         return callback(err)
+      }
+      if (len > MAX_CONTENT_LENGTH) {
+        const bodyStart = sep + delimLen
+        const available = this.buffer.length - bodyStart
+        if (available >= len) {
+          // Whole body already buffered — drop it and keep parsing.
+          this.buffer = this.buffer.slice(bodyStart + len)
+          continue
+        }
+        // Partial body here: drop it, wait for the rest in skip mode.
+        this._skipRemaining = len - available
+        this.buffer = this.buffer.slice(0, 0)
+        break
       }
 
       if (this.buffer.length < sep + delimLen + len) break
@@ -290,11 +329,11 @@ class JsonRpcService {
 
     try {
       const result = await handler(params)
-      return {
+      return this._limitResponse({
         jsonrpc: '2.0',
         result,
         id,
-      }
+      })
     } catch (err) {
       // a JSON-RPC error object passes through as-is
       const errObj =
@@ -312,11 +351,38 @@ class JsonRpcService {
                 ...(err?.stack ? { data: err.stack } : {}),
               }
 
-      return {
+      return this._limitResponse({
         jsonrpc: '2.0',
         error: errObj,
         id,
-      }
+      })
+    }
+  }
+
+  /**
+   * Cap an outgoing response frame. A result that would serialize past
+   * MAX_CONTENT_LENGTH can never reach the client (the client-side
+   * parser has the same cap), so answer with a proper error instead of
+   * writing an untransmittable frame. The byte count goes into `data`
+   * for the Extension Console; the message stays a stable literal so
+   * the client can detect this error by phrase.
+   *
+   * @param {{ jsonrpc: '2.0', result?: any, error?: any, id: any }} resp
+   * @returns {object} the original response, or an error response
+   * @private
+   */
+  _limitResponse(resp) {
+    const body = JSON.stringify(resp)
+    const size = Buffer.byteLength(body, 'utf8')
+    if (size <= MAX_CONTENT_LENGTH) return resp
+    return {
+      jsonrpc: '2.0',
+      error: {
+        code: RESULT_TOO_LARGE.code,
+        message: RESULT_TOO_LARGE.message,
+        data: size,
+      },
+      id: resp.id,
     }
   }
 
@@ -395,4 +461,4 @@ class JsonRpcService {
   }
 }
 
-module.exports = JsonRpcService
+module.exports = { JsonRpcService, JsonRpcParser, MAX_CONTENT_LENGTH }

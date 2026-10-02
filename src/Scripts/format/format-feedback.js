@@ -135,16 +135,17 @@ function showDisabledPluginsNotice(disabledPlugins) {
 }
 
 /**
- * Show the "Document Too Large" notification for the given size estimate.
+ * Show the "Document Too Large" notification.
  *
- * Callers pass either a UTF-16 char count (early document.length check,
- * before the text is read) or a UTF-8 byte count (after reading). Both
- * are compared against the 32 MiB limit and rendered as "MiB"; the char
- * variant is an approximation that avoids materializing huge text.
+ * Deliberately number-free: the limit is a rough landmark (~32 MiB, see
+ * HELP.md) and precise figures invite misleading rounding (a file one
+ * byte over the limit used to display as "32.0 MiB exceeds the 32 MiB
+ * limit"). Exact sizes go to the debug log instead.
  *
- * @param {number} size  size estimate in chars or bytes
+ * @param {number} size  size estimate in chars or bytes — log-only
  */
 function notifyFileTooLarge(size) {
+  log.debug(`Document too large for formatting (${size})`)
   showNotification({
     id: 'prettier-file-too-large',
     title: nova.localize(
@@ -158,13 +159,37 @@ function notifyFileTooLarge(size) {
         'Cannot format this document:',
         'notification',
       ),
-      ` ${(size / 2 ** 20).toFixed(1)} MiB `,
+      ' ',
       nova.localize(
         'prettier.notification.fileTooLarge.body.suffix',
-        'exceeds the 32 MiB limit.',
+        'exceeds the size limit.',
         'notification',
       ),
     ].join(''),
+  })
+}
+
+/**
+ * The service formatted the document but the result exceeds the
+ * transport limit and can't be applied. The document itself was within
+ * the size limit — no numbers in the copy; the size goes to the log.
+ *
+ * @param {number} [size]  measured result size in bytes — log-only
+ */
+function notifyResultTooLarge(size) {
+  if (size !== undefined) log.debug(`Formatted result too large (${size})`)
+  showNotification({
+    id: 'prettier-result-too-large',
+    title: nova.localize(
+      'prettier.notification.resultTooLarge.title',
+      'Result Too Large',
+      'notification',
+    ),
+    body: nova.localize(
+      'prettier.notification.resultTooLarge.body',
+      'Prettier⁺ formatted the document, but the result is too large to apply. The document itself is within the size limit.',
+      'notification',
+    ),
   })
 }
 
@@ -298,6 +323,7 @@ function issuesFromPrettierError(error) {
 module.exports = {
   clearCustomConfigErrorNotice,
   notifyFileTooLarge,
+  notifyResultTooLarge,
   notifySqlDialectMismatch,
   prettierErrorToIssues,
   showConfigPluginsNotice,

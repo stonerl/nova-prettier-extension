@@ -233,8 +233,13 @@ project settings take precedence for remote files.
 - Check for Prettier config files in your project, that might override your settings.
 - Check **Prettier Info** (menu: `Extensions → Prettier⁺ → Prettier Info`)
   for the module actually in use, its version, and the plugin state.
-- Very large documents (over 32 MiB) are skipped — Prettier⁺ shows a
-  "Document Too Large" notification instead of attempting them.
+- Very large documents (roughly 32 MiB and above) are skipped —
+  Prettier⁺ shows a "Document Too Large" notification instead of
+  attempting them. The limit applies to the document _after_ JSON
+  escaping, so quote-dense minified files can hit it a bit earlier.
+- Files Nova itself won't parse (it stops syntax highlighting somewhere
+  around 10 MiB) can still be formatted — the two limits are
+  independent.
 - Enable logging and check the **Extension Console** for any errors reported by Prettier⁺.
 - Try restarting the **Prettier Service** from the menu:
   `Extensions → Prettier⁺ → Restart Prettier Service` (**⌘⌃⇧R**)

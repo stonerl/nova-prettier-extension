@@ -29,6 +29,8 @@
     "test:watcher-filter": "node tests/watcher-filter.test.js",
     "test:resolver-guard": "node tests/resolver-guard.test.js",
     "test:notifications": "node tests/notifications.test.js",
+    "test:json-rpc": "node tests/json-rpc.test.js",
+    "test:too-large": "node tests/too-large.test.js",
     "test:format-pipeline": "node tests/format-pipeline.test.js",
     "test:options-coverage": "node tests/options-coverage.test.js",
     "test:workspace-choices": "node tests/workspace-choices.test.js",
@@ -36,7 +38,7 @@
     "test:service": "node tests/service-smoke.test.js",
     "test:service-api": "node tests/service-api.test.js",
     "test:external-plugins": "node tests/external-plugins.test.js",
-    "test": "npm run test:setup && npm run test:workspace-choices && npm run test:sql && npm run test:install-lock && npm run test:watcher-filter && npm run test:resolver-guard && npm run test:notifications && npm run test:format-pipeline && npm run test:options-coverage && npm run test:restart-cycle && npm run test:runtime && npm run test:prettier-info && npm run test:service-api && npm run test:service && npm run test:external-plugins"
+    "test": "npm run test:setup && npm run test:workspace-choices && npm run test:sql && npm run test:install-lock && npm run test:watcher-filter && npm run test:resolver-guard && npm run test:notifications && npm run test:json-rpc && npm run test:too-large && npm run test:format-pipeline && npm run test:options-coverage && npm run test:restart-cycle && npm run test:runtime && npm run test:prettier-info && npm run test:service-api && npm run test:service && npm run test:external-plugins"
   },
   "devDependencies": {
     "@babel/parser": "^7.29.9",

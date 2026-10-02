@@ -13,7 +13,7 @@ const path = require('path')
 const fs = require('fs')
 const url = require('url')
 
-const JsonRpcService = require('./json-rpc.js')
+const { JsonRpcService } = require('./json-rpc.js')
 
 class PrettierService {
   static isCorrectModule(module) {

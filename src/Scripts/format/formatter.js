@@ -38,6 +38,7 @@ const { composeFormatRequest } = require('./format-request.js')
 const {
   clearCustomConfigErrorNotice,
   notifyFileTooLarge,
+  notifyResultTooLarge,
   notifySqlDialectMismatch,
   prettierErrorToIssues,
   showConfigPluginsNotice,
@@ -79,6 +80,30 @@ function utf8ByteLength(str) {
   return bytes
 }
 
+/**
+ * Largest serialized format-request body the service accepts, in
+ * bytes. Must stay in sync with MAX_CONTENT_LENGTH in
+ * prettier-service/json-rpc.js (the service's frame cap) minus
+ * headroom for the JSON-RPC envelope (method, id, protocol fields),
+ * which isn't part of the measured params serialization.
+ * @type {number}
+ */
+const MAX_REQUEST_BODY = 41 * 1024 * 1024
+
+/**
+ * Serialize a JSON-RPC request body exactly as the transport will and
+ * measure its UTF-8 size. Measuring the real stringification is exact
+ * — it captures JSON escaping (quotes, backslashes, control chars),
+ * which can expand the payload well beyond the raw text size.
+ *
+ * @param {object} params
+ * @returns {{ body: string, bytes: number }}
+ */
+function measureRequestBody(params) {
+  const body = JSON.stringify(params)
+  return { body, bytes: utf8ByteLength(body) }
+}
+
 class Formatter {
   constructor() {
     this.prettierServiceDidExit = this.prettierServiceDidExit.bind(this)
@@ -90,6 +115,13 @@ class Formatter {
     this._latestRequestIds = new Map()
     /** @type {Set<Promise>} format requests currently in flight */
     this._pendingFormats = new Set()
+    /**
+     * Reject functions of in-flight format requests, fired when the
+     * service exits so in-flight requests settle instead of dangling
+     * on a dead transport.
+     * @type {Set<(err: Error) => void>}
+     */
+    this._exitRejectors = new Set()
     /** true while a planned stop/restart cycle is in progress */
     this._restarting = false
     /** most recent failure since the service last started, for notifications */
@@ -350,6 +382,11 @@ class Formatter {
 
     proc.terminate()
 
+    // The terminate above triggers onDidExit, which fires the rejectors;
+    // fire them here too so a wedged transport that never reports exit
+    // can't leave in-flight requests dangling.
+    this.rejectInFlightRequests()
+
     // escalate to SIGKILL if it hasn't exited in 5s
     this._forceStopTimer = setTimeout(() => {
       this._forceStopTimer = null
@@ -375,6 +412,19 @@ class Formatter {
   }
 
   /**
+   * Reject every in-flight format request. Fired when the service exits
+   * or a stop is underway: the transport behind the requests is (or was)
+   * going away, and an unanswered request would otherwise dangle
+   * forever. No timer involved — purely event-driven.
+   */
+  rejectInFlightRequests() {
+    if (!this._exitRejectors) return
+    for (const reject of this._exitRejectors) {
+      reject(new Error('Prettier service exited during format'))
+    }
+  }
+
+  /**
    * Waits until all in-flight format requests have settled (or the given
    * timeout elapses). Used before a planned restart so a save-triggered
    * format isn't cut short by stopping the service mid-request.
@@ -391,6 +441,10 @@ class Formatter {
   }
 
   prettierServiceDidExit(exitCode) {
+    // In-flight format requests must settle — the transport behind
+    // them died. Fire before any early return below.
+    this.rejectInFlightRequests()
+
     // Reject pending start handshakes — the process exited before
     // completing the didStart handshake.
     if (this._startHandshake) {
@@ -672,29 +726,60 @@ class Formatter {
 
     const uri = editor.document.uri.toString()
 
+    const formatParams = {
+      original,
+      pathForConfig,
+      ignorePath: flags.force ? null : this.getIgnorePath(pathForConfig),
+      options: {
+        ...options,
+        cursorOffset: editor.selectedRange.start,
+      },
+      withCursor: true,
+    }
+
+    // Serialize the request exactly as the transport will and measure
+    // it. The raw-byte guard above can't see JSON escaping (quotes,
+    // backslashes, control chars) which can expand the payload well
+    // past the service's frame cap — an oversized frame would be
+    // dropped silently at the other end. Reject here instead.
+    const measured = measureRequestBody(formatParams)
+    if (measured.bytes > MAX_REQUEST_BODY) {
+      notifyFileTooLarge(measured.bytes)
+      return []
+    }
+
     const last = this._latestRequestIds.get(uri) || 0
     const requestId = last + 1
     this._latestRequestIds.set(uri, requestId)
 
     // Track as in-flight so a pending restart can wait for it to
     // settle before stopping the service.
+    let rejectOnExit
+    const exitPromise = new Promise((_, reject) => {
+      rejectOnExit = reject
+    })
+    this._exitRejectors.add(rejectOnExit)
     const pending = (async () => {
       try {
-        return await this.prettierService.request('format', {
-          original,
-          pathForConfig,
-          ignorePath: flags.force ? null : this.getIgnorePath(pathForConfig),
-          options: {
-            ...options,
-            cursorOffset: editor.selectedRange.start,
-          },
-          withCursor: true,
-        })
+        return await Promise.race([
+          this.prettierService.request('format', formatParams),
+          exitPromise,
+        ])
       } catch (err) {
+        if (
+          err &&
+          typeof err.message === 'string' &&
+          err.message.includes('too large to transmit')
+        ) {
+          notifyResultTooLarge(err.data)
+          return null
+        }
         log.error(
           `Prettier IPC error in format: ${err.name}: ${err.message}\n${err.stack}`,
         )
         return null
+      } finally {
+        this._exitRejectors.delete(rejectOnExit)
       }
     })()
     this._pendingFormats.add(pending)
@@ -904,4 +989,7 @@ class Formatter {
 
 module.exports = {
   Formatter,
+  MAX_REQUEST_BODY,
+  measureRequestBody,
+  utf8ByteLength,
 }

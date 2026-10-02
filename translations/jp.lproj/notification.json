@@ -11,6 +11,8 @@
   "prettier.notification.fileTooLarge.title": "",
   "prettier.notification.fileTooLarge.body.prefix": "",
   "prettier.notification.fileTooLarge.body.suffix": "",
+  "prettier.notification.resultTooLarge.title": "",
+  "prettier.notification.resultTooLarge.body": "",
   "prettier.notification.sqlDialectMismatch.title": "",
   "prettier.notification.sqlDialectMismatch.body.prefix": "",
   "prettier.notification.sqlDialectMismatch.body.middle": "",
