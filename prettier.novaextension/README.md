@@ -91,57 +91,11 @@ aligned with official Prettier releases. Versions are formatted as `a.b.c`, wher
 
 For example, `3.5.4` uses Prettier `v3.5.x` and is the fourth extension build.
 
-## Testing
+## Contributing
 
-The service’s plugin handling is covered by smoke tests that spawn the built
-Prettier service and talk to it over JSON-RPC.
-
-```bash
-npm test
-```
-
-`npm test` builds the extension, installs the bundled runtime dependencies
-(`npm install --omit=dev --prefix prettier.novaextension`), and runs the smoke
-tests. The individual suites can also be run directly after `npm run test:setup`:
-
-```bash
-node tests/restart-cycle.test.js       # trailing-trigger coalescing regression
-node tests/runtime-resolver.test.js    # Node.js/npm runtime detection + fallbacks
-node tests/service-smoke.test.js       # bundled merge + native passthrough modes
-node tests/external-plugins.test.js    # disabled bundled plugin → project copy used
-```
-
-> npm ≥ 11 skips postinstall scripts, so a plain install leaves the bundled
-> plugins unpatched. The test helper applies the bundled patches
-> automatically; to apply them manually: `node
-prettier.novaextension/node_modules/patch-package/dist/index.js` (run
-> from `prettier.novaextension/`). At runtime the extension does this
-> itself after every bundled install.
-
-The first run of `external-plugins.test.js` installs the test fixture’s
-dependencies (`@prettier/plugin-xml`, `prettier-plugin-properties`) into
-`tests/fixtures/external-plugin-project/` — network access is required once.
-
-To verify the fallback manually in Nova: open
-`tests/fixtures/external-plugin-project/` as a project, disable a bundled
-plugin (XML or Properties) in the extension settings, and format the
-matching fixture file (`test.xml` / `test.properties`). The Extension
-Console then logs that the plugin was loaded from your project.
-
-### Formatting Samples
-
-`tests/format-samples/` holds one deliberately formatted file per supported
-language. They aren't consumed by any test suite — they exist for the manual
-formatter check:
-
-1. Scramble the samples: `npm run prepare:testfiles`
-2. Open the folder in Nova and format each file (Editor → Prettier⁺ → Format)
-3. Eyeball the result — the scrambled mistakes should disappear
-
-The samples are committed formatted (they're deliberately excluded from
-`prettier --check`), so re-run the scramble step whenever you want to test
-again. To add a sample for a new language, drop a `*.sample.*` file into
-that folder — the scramble script picks formats up by extension.
+Development setup, the test suite, and the manual formatting samples are
+documented in
+[CONTRIBUTING.md](https://github.com/stonerl/nova-prettier-extension/blob/main/CONTRIBUTING.md).
 
 ## Contributing Translations
 
