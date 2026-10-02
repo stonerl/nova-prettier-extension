@@ -1,3 +1,14 @@
+## 3.9.25 - 2026-10-02
+
+### Development
+
+- Internal maintenance release: module structure and ownership. The
+  formatter engine now lives in focused modules (request composition,
+  plugin registry, user feedback), Node.js runtime and subprocess
+  handling are their own modules, and service error payloads rebuild
+  through one documented contract — crash and startup failures now
+  keep their stack traces for diagnostics. No behavior change.
+
 ## 3.9.24 - 2026-10-01
 
 ### Fixed
