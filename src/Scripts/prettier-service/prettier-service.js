@@ -716,4 +716,4 @@ if (require.main === module) {
   bootstrap().catch(() => {})
 }
 
-module.exports = { PrettierService, bootstrap }
+module.exports = { PrettierService }
