@@ -1,3 +1,41 @@
+## 3.9.27 - 2026-10-02
+
+### Fixed
+
+- **"Document Too Large" notices are accurate and no longer contradict
+  themselves**
+
+  A document one byte over the limit was announced as "32.0 MiB
+  exceeds the 32 MiB limit" — rounding made the message look
+  contradictory. Size figures are gone from the notification copy;
+  exact numbers go to the Extension Console's debug log, and HELP.md
+  keeps ~32 MiB as the landmark.
+
+- **Quote-dense documents are measured by what is actually sent**
+
+  The size checks now measure the real JSON-RPC request payload.
+  JSON escaping (quotes, backslashes, control characters) can expand
+  minified or quote-heavy files well past their raw byte count, and
+  such requests could previously slip through the document checks and
+  crash the service stream mid-request. They are now rejected with
+  the usual "Document Too Large" notice instead.
+
+- **The Prettier service survives oversized traffic**
+
+  Incoming frames above the transport cap are skipped instead of
+  killing the service stream, and oversized results are answered with
+  a proper error instead of an untransmittable frame. If a formatted
+  result is too large to send back, a new "Result Too Large"
+  notification explains that the document itself is within the size
+  limit. In-flight format requests settle when the service exits
+  instead of dangling forever.
+
+### Development
+
+- New test suites `json-rpc.test.js` (transport guards) and
+  `too-large.test.js` (size limits and user feedback) are wired into
+  `npm test`; CONTRIBUTING.md lists them in the test overview.
+
 ## 3.9.26 - 2026-10-02
 
 ### Development
