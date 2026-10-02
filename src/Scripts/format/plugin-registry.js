@@ -16,11 +16,15 @@ const { getConfigWithWorkspaceOverride, log } = require('../helpers.js')
 const {
   getAstroConfig,
   getBladeConfig,
+  getGoTemplateConfig,
+  getHugoPostConfig,
   getLiquidConfig,
   getNginxConfig,
+  getNunjucksConfig,
   getPhpConfig,
   getPropertiesConfig,
   getShConfig,
+  getSmartyConfig,
   getTailwindConfig,
   getTomlConfig,
   getTwigConfig,
@@ -49,6 +53,22 @@ const pluginPaths = {
     'prettier-plugin-ejs',
     'index.js',
   ),
+  goTemplate: nova.path.join(
+    nova.extension.path,
+    'node_modules',
+    '@htnabe',
+    'prettier-plugin-go-template',
+    'dist',
+    'index.mjs',
+  ),
+  hugoPost: nova.path.join(
+    nova.extension.path,
+    'node_modules',
+    '@htnabe',
+    'prettier-plugin-hugo-post',
+    'dist',
+    'index.mjs',
+  ),
   java: nova.path.join(
     nova.extension.path,
     'node_modules',
@@ -72,6 +92,13 @@ const pluginPaths = {
     'cjs',
     'index.js',
   ),
+  nunjucks: nova.path.join(
+    nova.extension.path,
+    'node_modules',
+    'prettier-plugin-nunjucks',
+    'dist',
+    'plugin.js',
+  ),
   php: nova.path.join(
     nova.extension.path,
     'node_modules',
@@ -92,6 +119,13 @@ const pluginPaths = {
     'prettier-plugin-sh',
     'lib',
     'index.cjs',
+  ),
+  smarty: nova.path.join(
+    nova.extension.path,
+    'node_modules',
+    'prettier-plugin-smarty',
+    'src',
+    'index.js',
   ),
   sql: nova.path.join(
     nova.extension.path,
@@ -152,6 +186,16 @@ const PLUGIN_DESCRIPTORS = {
     pluginPath: pluginPaths.ejs,
     optionsConfig: null,
   },
+  'go-template': {
+    configKey: 'prettier-plugin-go-template',
+    pluginPath: pluginPaths.goTemplate,
+    optionsConfig: getGoTemplateConfig,
+  },
+  'hugo-post': {
+    configKey: 'prettier-plugin-hugo-post',
+    pluginPath: pluginPaths.hugoPost,
+    optionsConfig: getHugoPostConfig,
+  },
   java: {
     configKey: 'prettier-plugin-java',
     pluginPath: pluginPaths.java,
@@ -177,6 +221,11 @@ const PLUGIN_DESCRIPTORS = {
     pluginPath: pluginPaths.nginx,
     optionsConfig: getNginxConfig,
   },
+  nunjucks: {
+    configKey: 'prettier-plugin-nunjucks',
+    pluginPath: pluginPaths.nunjucks,
+    optionsConfig: getNunjucksConfig,
+  },
   php: {
     configKey: 'prettier-plugin-php',
     pluginPath: pluginPaths.php,
@@ -191,6 +240,11 @@ const PLUGIN_DESCRIPTORS = {
     configKey: 'prettier-plugin-sh',
     pluginPath: pluginPaths.sh,
     optionsConfig: getShConfig,
+  },
+  smarty: {
+    configKey: 'prettier-plugin-smarty',
+    pluginPath: pluginPaths.smarty,
+    optionsConfig: getSmartyConfig,
   },
   sql: {
     configKey: 'prettier-plugin-sql',

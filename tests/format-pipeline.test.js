@@ -344,6 +344,36 @@ function composePluginChecks() {
     liquidMd.plugins?.[0] === m.pluginRegistry.pluginPaths.liquid,
     liquidMd.plugins,
   )
+
+  const nunjucks = compose(
+    loadModules(makeNovaShim({ configValues: enabledSyntax('nunjucks') })),
+    { syntaxKey: 'nunjucks', editor: makeEditor({ path: '/doc.njk' }) },
+  )
+  check(
+    'nunjucks maps to the nunjucks plugin',
+    nunjucks.plugins?.[0] === m.pluginRegistry.pluginPaths.nunjucks,
+    nunjucks.plugins,
+  )
+
+  const goTemplate = compose(
+    loadModules(makeNovaShim({ configValues: enabledSyntax('go-template') })),
+    { syntaxKey: 'go-template', editor: makeEditor({ path: '/doc.gohtml' }) },
+  )
+  check(
+    'go-template maps to the go-template plugin',
+    goTemplate.plugins?.[0] === m.pluginRegistry.pluginPaths.goTemplate,
+    goTemplate.plugins,
+  )
+
+  const smarty = compose(
+    loadModules(makeNovaShim({ configValues: enabledSyntax('smarty') })),
+    { syntaxKey: 'smarty', editor: makeEditor({ path: '/doc.tpl' }) },
+  )
+  check(
+    'smarty maps to the smarty plugin',
+    smarty.plugins?.[0] === m.pluginRegistry.pluginPaths.smarty,
+    smarty.plugins,
+  )
 }
 
 function composeOptionChecks() {
@@ -603,6 +633,72 @@ function composeOptionChecks() {
     mismatchNode.mismatch?.dialect === 'spark' &&
       mismatchNode.mismatch?.selected === 'node-sql-parser',
     mismatchNode,
+  )
+}
+
+function composeHugoMarkdownRoutingChecks() {
+  console.log('\n== composeFormatRequest: markdown → hugo-post routing ==')
+
+  const m = loadModules(makeNovaShim())
+  const hugoOn = { 'prettier.plugins.prettier-plugin-hugo-post.enabled': true }
+
+  const enabled = compose(loadModules(makeNovaShim({ configValues: hugoOn })), {
+    syntaxKey: 'markdown',
+    editor: makeEditor({ path: '/post.md' }),
+  })
+  check(
+    'markdown + hugo enabled: routes to the hugo-post plugin',
+    enabled.plugins?.[0] === m.pluginRegistry.pluginPaths.hugoPost &&
+      enabled.options?.parser === 'hugo-post',
+    enabled,
+  )
+
+  const disabled = compose(loadModules(makeNovaShim()), {
+    syntaxKey: 'markdown',
+    editor: makeEditor({ path: '/post.md' }),
+  })
+  check(
+    'markdown + hugo disabled: stays markdown',
+    disabled.plugins?.length === 0 && disabled.options?.parser === 'markdown',
+    disabled,
+  )
+
+  const customConfig = compose(
+    loadModules(makeNovaShim({ configValues: hugoOn })),
+    {
+      syntaxKey: 'markdown',
+      customConfigFile: '/p/.prettierrc',
+      editor: makeEditor({ path: '/post.md' }),
+    },
+  )
+  check(
+    'markdown + custom config file: no hugo routing',
+    customConfig.plugins?.length === 0 &&
+      customConfig.options?.parser === 'markdown',
+    customConfig,
+  )
+
+  const native = compose(loadModules(makeNovaShim({ configValues: hugoOn })), {
+    syntaxKey: 'markdown',
+    runningPath: NATIVE_RUNNING,
+  })
+  check(
+    'markdown native mode: no hugo routing',
+    native.plugins?.length === 0 && native.options?.parser === 'markdown',
+    native,
+  )
+
+  const hugoSyntax = compose(
+    loadModules(makeNovaShim({ configValues: hugoOn })),
+    {
+      syntaxKey: 'hugo-post',
+      editor: makeEditor({ path: '/post.hugo' }),
+    },
+  )
+  check(
+    '.hugo syntax formats through the hugo-post plugin',
+    hugoSyntax.plugins?.[0] === m.pluginRegistry.pluginPaths.hugoPost,
+    hugoSyntax.plugins,
   )
 }
 
@@ -1144,6 +1240,26 @@ function detectSyntaxChecks() {
   )
   check('.bash → sh', detect('shell', '/p/x.bash') === 'sh')
 
+  // Template plugins
+  check('.njk → nunjucks', detect('html', '/p/x.njk') === 'nunjucks')
+  check('.nunjucks → nunjucks', detect('html', '/p/x.nunjucks') === 'nunjucks')
+  check(
+    '.gohtml → go-template',
+    detect('html', '/p/x.gohtml') === 'go-template',
+  )
+  check(
+    '.html.tmpl → go-template',
+    detect('html', '/p/x.html.tmpl') === 'go-template',
+  )
+  check('.tmpl → go-template', detect('html', '/p/x.tmpl') === 'go-template')
+  check('.tpl → smarty', detect('html', '/p/x.tpl') === 'smarty')
+  check(
+    '.html.tpl → go-template (not smarty)',
+    detect('html', '/p/x.html.tpl') === 'go-template',
+  )
+  check('.hugo → hugo-post', detect('markdown', '/p/x.hugo') === 'hugo-post')
+  check('.md → markdown', detect('markdown', '/p/x.md') === 'markdown')
+
   // Bare filenames and rc twins
   check(
     'prettier.config.js → javascript',
@@ -1194,6 +1310,7 @@ function detectSyntaxChecks() {
 async function main() {
   composePluginChecks()
   composeOptionChecks()
+  composeHugoMarkdownRoutingChecks()
   prettierErrorChecks()
   prettierErrorNoticeChecks()
   issueMappingChecks()

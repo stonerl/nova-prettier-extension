@@ -153,6 +153,19 @@ function composeFormatRequest({
   applyDefaultConfig,
   selectionOnly,
 }) {
+  // Bundled-mode markdown routing: with the Hugo plugin enabled, plain
+  // markdown files format through hugo-post (front matter + Hugo
+  // shortcodes). The plugin formats the body via the markdown parser,
+  // so plain markdown output stays identical.
+  if (
+    runningPath?.includes(nova.extension.path) &&
+    syntaxKey === 'markdown' &&
+    !customConfigFile &&
+    isPluginEnabled(PLUGIN_DESCRIPTORS['hugo-post'].configKey)
+  ) {
+    syntaxKey = 'hugo-post'
+  }
+
   // Check if plugins are enabled — Tailwind is driven by both a master
   // flag and a per-syntax flag.
   const tailwindPluginEnabled = isPluginEnabled(

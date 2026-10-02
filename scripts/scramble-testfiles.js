@@ -110,6 +110,19 @@ const injectors = {
   '.sql': simulateSqlMistakes,
   '.sh': simulateShMistakes,
   '.json': simulateJsonMistakes,
+
+  '.go.html': simulateGoTemplateMistakes,
+  '.html.tpl': simulateGoTemplateMistakes,
+  '.html.tmpl': simulateGoTemplateMistakes,
+  '.go.tmpl': simulateGoTemplateMistakes,
+  '.gohtml': simulateGoTemplateMistakes,
+  '.gotmpl': simulateGoTemplateMistakes,
+  '.tmpl': simulateGoTemplateMistakes,
+  '.tpl': simulateSmartyMistakes,
+  '.njk': simulateTwigMistakes,
+  '.nunjucks': simulateTwigMistakes,
+  '.nunj': simulateTwigMistakes,
+  '.hugo': simulateMarkdownMistakes,
 }
 
 const suffixes = Object.keys(injectors).sort((a, b) => b.length - a.length)
@@ -896,6 +909,42 @@ function simulateTwigMistakes(content, rng) {
       scrambled = scrambled.replace(/\s*%\}/g, '%}')
       scrambled = scrambled.replace(/\{\{\s*/g, rng() < 0.5 ? '{{' : '{{ ')
       scrambled = scrambled.replace(/\s*\}\}/g, '}}')
+      return scrambled
+    })
+    .join('\n')
+}
+
+function simulateGoTemplateMistakes(content, rng) {
+  return content
+    .split('\n')
+    .map((line) => {
+      const trimmed = line.trim()
+
+      if (trimmed === '') return line
+
+      let scrambled = jitterIndent(rng, line, '  ')
+      scrambled = scrambled.replace(/\s{2,}/g, ' ')
+      // template spacing: {{ expr }} / {{expr}}
+      scrambled = scrambled.replace(/\{\{\s*/g, rng() < 0.5 ? '{{' : '{{ ')
+      scrambled = scrambled.replace(/\s*\}\}/g, '}}')
+      return scrambled
+    })
+    .join('\n')
+}
+
+function simulateSmartyMistakes(content, rng) {
+  return content
+    .split('\n')
+    .map((line) => {
+      const trimmed = line.trim()
+
+      if (trimmed === '') return line
+
+      let scrambled = jitterIndent(rng, line, '  ')
+      scrambled = scrambled.replace(/\s{2,}/g, ' ')
+      // tag spacing: <{ tag }> / <{tag}>
+      scrambled = scrambled.replace(/<\{\s*/g, rng() < 0.5 ? '<{' : '<{ ')
+      scrambled = scrambled.replace(/\s*\}>/g, '}>')
       return scrambled
     })
     .join('\n')

@@ -150,6 +150,17 @@ If the selected implementation can't handle the file's dialect,
 formatting is skipped and Prettier⁺ shows a notification pointing at the
 implementation that supports it.
 
+### Markdown and Hugo
+
+With the bundled `prettier-plugin-hugo-post` plugin enabled, Markdown
+files format through the Hugo plugin, which also handles front matter
+(YAML, TOML, JSON) and Hugo shortcodes like `{{< note >}}`. The plugin formats
+the body with the regular Markdown parser, so plain Markdown output is
+unchanged. The plugin is disabled by default — enable it under
+`Prettier⁺ → Plugins → prettier-plugin-hugo-post` if you work with
+Hugo. With it disabled, or with a custom Prettier configuration file set,
+Markdown files always format with Prettier's plain Markdown parser.
+
 ## Plugins from Your Project
 
 Plugins declared in your Prettier config file’s `plugins` array are supported

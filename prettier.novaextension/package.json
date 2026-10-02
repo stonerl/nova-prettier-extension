@@ -13,6 +13,8 @@
   },
   "homepage": "https://github.com/stonerl/nova-prettier-extension#readme",
   "dependencies": {
+    "@htnabe/prettier-plugin-go-template": "0.0.3",
+    "@htnabe/prettier-plugin-hugo-post": "0.0.2",
     "@prettier/plugin-php": "0.25.0",
     "@prettier/plugin-xml": "3.4.2",
     "@shopify/prettier-plugin-liquid": "1.11.2",
@@ -24,8 +26,10 @@
     "prettier-plugin-ejs": "1.0.3",
     "prettier-plugin-java": "2.11.0",
     "prettier-plugin-nginx": "2.0.0",
+    "prettier-plugin-nunjucks": "0.2.3",
     "prettier-plugin-properties": "0.3.1",
     "prettier-plugin-sh": "0.20.2",
+    "prettier-plugin-smarty": "0.1.0",
     "prettier-plugin-sql": "0.20.0",
     "prettier-plugin-tailwindcss": "0.8.1",
     "prettier-plugin-toml": "3.0.2"

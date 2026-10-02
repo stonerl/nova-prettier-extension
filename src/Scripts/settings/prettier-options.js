@@ -72,6 +72,10 @@ module.exports = {
     'indentSchema',
   ],
 
+  PRETTIER_GO_TEMPLATE_PLUGIN_OPTIONS: ['goTemplateBracketSpacing'],
+
+  PRETTIER_HUGO_POST_PLUGIN_OPTIONS: ['hugoTemplateBracketSpacing'],
+
   PRETTIER_NGINX_PLUGIN_OPTIONS: [
     'printWidth',
     'tabWidth',
@@ -80,6 +84,13 @@ module.exports = {
     'alignUniversally',
     'wrapParameters',
     'continuationIndent',
+  ],
+
+  PRETTIER_NUNJUCKS_PLUGIN_OPTIONS: [
+    'classAttributeLayout',
+    'blockTags',
+    'inlineTags',
+    'forkTags',
   ],
 
   PRETTIER_PHP_PLUGIN_OPTIONS: [
@@ -107,6 +118,11 @@ module.exports = {
     'singleLine',
     'simplify',
     'functionNextLine',
+  ],
+
+  PRETTIER_SMARTY_PLUGIN_OPTIONS: [
+    'smartyOpenDelimiter',
+    'smartyCloseDelimiter',
   ],
 
   PRETTIER_SQL_PLUGIN_SQL_FORMATTER_OPTIONS: [

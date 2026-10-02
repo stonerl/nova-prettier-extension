@@ -273,6 +273,22 @@ const WORKSPACE_CHOICES = {
     [true, 'Enabled'],
     [false, 'Disabled'],
   ],
+  'prettier.plugins.prettier-plugin-go-template.enabled': [
+    [true, 'Enabled'],
+    [false, 'Disabled'],
+  ],
+  'prettier.plugins.prettier-plugin-go-template.goTemplateBracketSpacing': [
+    [true, 'Enabled'],
+    [false, 'Disabled'],
+  ],
+  'prettier.plugins.prettier-plugin-hugo-post.enabled': [
+    [true, 'Enabled'],
+    [false, 'Disabled'],
+  ],
+  'prettier.plugins.prettier-plugin-hugo-post.hugoTemplateBracketSpacing': [
+    [true, 'Enabled'],
+    [false, 'Disabled'],
+  ],
   'prettier.plugins.prettier-plugin-java.enabled': [
     [true, 'Enabled'],
     [false, 'Disabled'],
@@ -338,6 +354,14 @@ const WORKSPACE_CHOICES = {
     [true, 'Enabled'],
     [false, 'Disabled'],
   ],
+  'prettier.plugins.prettier-plugin-nunjucks.enabled': [
+    [true, 'Enabled'],
+    [false, 'Disabled'],
+  ],
+  'prettier.plugins.prettier-plugin-nunjucks.classAttributeLayout': [
+    ['auto', 'Auto'],
+    ['single-line', 'Single Line'],
+  ],
   'prettier.plugins.prettier-plugin-properties.enabled': [
     [true, 'Enabled'],
     [false, 'Disabled'],
@@ -395,6 +419,10 @@ const WORKSPACE_CHOICES = {
     [false, 'Disabled'],
   ],
   'prettier.plugins.prettier-plugin-sh.functionNextLine': [
+    [true, 'Enabled'],
+    [false, 'Disabled'],
+  ],
+  'prettier.plugins.prettier-plugin-smarty.enabled': [
     [true, 'Enabled'],
     [false, 'Disabled'],
   ],
@@ -612,6 +640,10 @@ const WORKSPACE_CHOICES = {
     [false, 'Format on Save'],
     [true, 'Ignore'],
   ],
+  'prettier.format-on-save.ignored-syntaxes.go-template': [
+    [false, 'Format on Save'],
+    [true, 'Ignore'],
+  ],
   'prettier.format-on-save.ignored-syntaxes.graphql': [
     [false, 'Format on Save'],
     [true, 'Ignore'],
@@ -625,6 +657,10 @@ const WORKSPACE_CHOICES = {
     [true, 'Ignore'],
   ],
   'prettier.format-on-save.ignored-syntaxes.html+erb': [
+    [false, 'Format on Save'],
+    [true, 'Ignore'],
+  ],
+  'prettier.format-on-save.ignored-syntaxes.hugo-post': [
     [false, 'Format on Save'],
     [true, 'Ignore'],
   ],
@@ -668,11 +704,19 @@ const WORKSPACE_CHOICES = {
     [false, 'Format on Save'],
     [true, 'Ignore'],
   ],
+  'prettier.format-on-save.ignored-syntaxes.nunjucks': [
+    [false, 'Format on Save'],
+    [true, 'Ignore'],
+  ],
   'prettier.format-on-save.ignored-syntaxes.php': [
     [false, 'Format on Save'],
     [true, 'Ignore'],
   ],
   'prettier.format-on-save.ignored-syntaxes.scss': [
+    [false, 'Format on Save'],
+    [true, 'Ignore'],
+  ],
+  'prettier.format-on-save.ignored-syntaxes.smarty': [
     [false, 'Format on Save'],
     [true, 'Ignore'],
   ],

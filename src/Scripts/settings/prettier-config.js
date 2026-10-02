@@ -13,11 +13,15 @@ const {
   PRETTIER_OPTIONS,
   PRETTIER_ASTRO_PLUGIN_OPTIONS,
   PRETTIER_BLADE_PLUGIN_OPTIONS,
+  PRETTIER_GO_TEMPLATE_PLUGIN_OPTIONS,
+  PRETTIER_HUGO_POST_PLUGIN_OPTIONS,
   PRETTIER_LIQUID_PLUGIN_OPTIONS,
   PRETTIER_NGINX_PLUGIN_OPTIONS,
+  PRETTIER_NUNJUCKS_PLUGIN_OPTIONS,
   PRETTIER_PHP_PLUGIN_OPTIONS,
   PRETTIER_PROPERTIES_PLUGIN_OPTIONS,
   PRETTIER_SH_PLUGIN_OPTIONS,
+  PRETTIER_SMARTY_PLUGIN_OPTIONS,
   PRETTIER_SQL_PLUGIN_NODE_SQL_PARSER_OPTIONS,
   PRETTIER_SQL_PLUGIN_SQL_FORMATTER_OPTIONS,
   PRETTIER_TAILWIND_PLUGIN_OPTIONS,
@@ -60,6 +64,20 @@ function getBladeConfig() {
   )
 }
 
+function getGoTemplateConfig() {
+  return loadPluginConfig(
+    PRETTIER_GO_TEMPLATE_PLUGIN_OPTIONS,
+    'prettier.plugins.prettier-plugin-go-template',
+  )
+}
+
+function getHugoPostConfig() {
+  return loadPluginConfig(
+    PRETTIER_HUGO_POST_PLUGIN_OPTIONS,
+    'prettier.plugins.prettier-plugin-hugo-post',
+  )
+}
+
 function getLiquidConfig() {
   return loadPluginConfig(
     PRETTIER_LIQUID_PLUGIN_OPTIONS,
@@ -81,6 +99,13 @@ function getNodeSqlParserConfig() {
   )
 }
 
+function getNunjucksConfig() {
+  return loadPluginConfig(
+    PRETTIER_NUNJUCKS_PLUGIN_OPTIONS,
+    'prettier.plugins.prettier-plugin-nunjucks',
+  )
+}
+
 function getPhpConfig() {
   return loadPluginConfig(
     PRETTIER_PHP_PLUGIN_OPTIONS,
@@ -99,6 +124,13 @@ function getShConfig() {
   return loadPluginConfig(
     PRETTIER_SH_PLUGIN_OPTIONS,
     'prettier.plugins.prettier-plugin-sh',
+  )
+}
+
+function getSmartyConfig() {
+  return loadPluginConfig(
+    PRETTIER_SMARTY_PLUGIN_OPTIONS,
+    'prettier.plugins.prettier-plugin-smarty',
   )
 }
 
@@ -141,12 +173,16 @@ module.exports = {
   getDefaultConfig,
   getAstroConfig,
   getBladeConfig,
+  getGoTemplateConfig,
+  getHugoPostConfig,
   getLiquidConfig,
   getNginxConfig,
   getNodeSqlParserConfig,
+  getNunjucksConfig,
   getPhpConfig,
   getPropertiesConfig,
   getShConfig,
+  getSmartyConfig,
   getSqlFormatterConfig,
   getTailwindConfig,
   getTomlConfig,

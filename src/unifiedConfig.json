@@ -1519,6 +1519,104 @@
         ]
       },
       {
+        "key": "prettier.plugins.prettier-plugin-go-template.section",
+        "title": "prettier-plugin-go-template",
+        "description": "Go template formatter plugin for Prettier",
+        "link": "https://github.com/htnabe/prettier-plugin-go-template",
+        "type": "section",
+        "children": [
+          {
+            "key": "prettier.plugins.prettier-plugin-go-template.enabled",
+            "config": {
+              "title": "Plugin Enabled",
+              "type": "boolean",
+              "default": true
+            },
+            "configWorkspace": {
+              "title": "Plugin Status",
+              "description": "Select whether to use global settings, enable, or disable the plugin.",
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-go-template.goTemplateBracketSpacing",
+            "title": "Bracket Spacing",
+            "description": "Print spaces inside of '{{ }}' in Go template files.",
+            "link": "https://github.com/htnabe/prettier-plugin-go-template",
+            "config": {
+              "type": "boolean",
+              "default": true
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          }
+        ]
+      },
+      {
+        "key": "prettier.plugins.prettier-plugin-hugo-post.section",
+        "title": "prettier-plugin-hugo-post",
+        "description": "Hugo content file formatter plugin for Prettier (front matter, Markdown and Go template syntax) — optional, disabled by default",
+        "link": "https://github.com/htnabe/prettier-plugin-hugo-post",
+        "type": "section",
+        "children": [
+          {
+            "key": "prettier.plugins.prettier-plugin-hugo-post.enabled",
+            "config": {
+              "title": "Plugin Enabled",
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "title": "Plugin Status",
+              "description": "Select whether to use global settings, enable, or disable the plugin.",
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-hugo-post.hugoTemplateBracketSpacing",
+            "title": "Bracket Spacing",
+            "description": "Print spaces inside of '{{ }}' in Hugo content files.",
+            "link": "https://github.com/htnabe/prettier-plugin-hugo-post",
+            "config": {
+              "type": "boolean",
+              "default": true
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          }
+        ]
+      },
+      {
         "key": "prettier.plugins.prettier-plugin-java.section",
         "title": "prettier-plugin-java",
         "description": "Java formatter plugin for Prettier",
@@ -1956,6 +2054,85 @@
         ]
       },
       {
+        "key": "prettier.plugins.prettier-plugin-nunjucks.section",
+        "title": "prettier-plugin-nunjucks",
+        "description": "Nunjucks template formatter plugin for Prettier",
+        "link": "https://github.com/Poliklot/prettier-plugin-nunjucks",
+        "type": "section",
+        "children": [
+          {
+            "key": "prettier.plugins.prettier-plugin-nunjucks.enabled",
+            "config": {
+              "title": "Plugin Enabled",
+              "type": "boolean",
+              "default": true
+            },
+            "configWorkspace": {
+              "title": "Plugin Status",
+              "description": "Select whether to use global settings, enable, or disable the plugin.",
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-nunjucks.classAttributeLayout",
+            "title": "Class Attribute Layout",
+            "description": "Control whether 'class' attribute values may use multiple physical lines. The default 'auto' mode preserves the existing formatting rules. Use 'single-line' to keep static and conditional class values on one line; the surrounding HTML tag may still wrap.",
+            "link": "https://github.com/Poliklot/prettier-plugin-nunjucks",
+            "type": "enum",
+            "radio": false,
+            "config": {
+              "default": "auto",
+              "values": [
+                ["auto", "Auto"],
+                ["single-line", "Single Line"]
+              ]
+            },
+            "configWorkspace": {
+              "default": null,
+              "values": [
+                [null, "Global Setting"],
+                ["auto", "Auto"],
+                ["single-line", "Single Line"]
+              ]
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-nunjucks.blockTags",
+            "title": "Block Tags",
+            "description": "Custom extension tags that behave like block-level tags and wrap child content.",
+            "link": "https://github.com/Poliklot/prettier-plugin-nunjucks",
+            "type": "stringArray",
+            "config": {},
+            "configWorkspace": {}
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-nunjucks.inlineTags",
+            "title": "Inline Tags",
+            "description": "Custom extension tags that behave like inline elements and take part in text wrapping.",
+            "link": "https://github.com/Poliklot/prettier-plugin-nunjucks",
+            "type": "stringArray",
+            "config": {},
+            "configWorkspace": {}
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-nunjucks.forkTags",
+            "title": "Fork Tags",
+            "description": "Custom extension tags whose children may repeat, such as branch chains.",
+            "link": "https://github.com/Poliklot/prettier-plugin-nunjucks",
+            "type": "stringArray",
+            "config": {},
+            "configWorkspace": {}
+          }
+        ]
+      },
+      {
         "key": "prettier.plugins.prettier-plugin-properties.section",
         "title": "prettier-plugin-properties",
         "description": "Prettier plugin for .properties files",
@@ -2266,6 +2443,63 @@
                 [true, "Enabled"],
                 [false, "Disabled"]
               ],
+              "default": null
+            }
+          }
+        ]
+      },
+      {
+        "key": "prettier.plugins.prettier-plugin-smarty.section",
+        "title": "prettier-plugin-smarty",
+        "description": "Smarty template formatter plugin for Prettier",
+        "link": "https://github.com/dexbol/prettier-plugin-smarty",
+        "type": "section",
+        "children": [
+          {
+            "key": "prettier.plugins.prettier-plugin-smarty.enabled",
+            "config": {
+              "title": "Plugin Enabled",
+              "type": "boolean",
+              "default": true
+            },
+            "configWorkspace": {
+              "title": "Plugin Status",
+              "description": "Select whether to use global settings, enable, or disable the plugin.",
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [true, "Enabled"],
+                [false, "Disabled"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-smarty.smartyOpenDelimiter",
+            "title": "Open Delimiter",
+            "description": "Opening delimiter for Smarty tags.",
+            "link": "https://github.com/dexbol/prettier-plugin-smarty",
+            "type": "string",
+            "config": {
+              "placeholder": "<{"
+            },
+            "configWorkspace": {
+              "placeholder": "Global Setting",
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.plugins.prettier-plugin-smarty.smartyCloseDelimiter",
+            "title": "Close Delimiter",
+            "description": "Closing delimiter for Smarty tags.",
+            "link": "https://github.com/dexbol/prettier-plugin-smarty",
+            "type": "string",
+            "config": {
+              "placeholder": "}>"
+            },
+            "configWorkspace": {
+              "placeholder": "Global Setting",
               "default": null
             }
           }
@@ -3598,6 +3832,24 @@
             }
           },
           {
+            "key": "prettier.format-on-save.ignored-syntaxes.go-template",
+            "title": "Go Template",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [false, "Format on Save"],
+                [true, "Ignore"]
+              ],
+              "default": null
+            }
+          },
+          {
             "key": "prettier.format-on-save.ignored-syntaxes.graphql",
             "title": "GraphQL",
             "config": {
@@ -3654,6 +3906,24 @@
           {
             "key": "prettier.format-on-save.ignored-syntaxes.html+erb",
             "title": "HTML (ERB)",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [false, "Format on Save"],
+                [true, "Ignore"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.format-on-save.ignored-syntaxes.hugo-post",
+            "title": "Hugo Post",
             "config": {
               "type": "boolean",
               "default": false
@@ -3850,6 +4120,24 @@
             }
           },
           {
+            "key": "prettier.format-on-save.ignored-syntaxes.nunjucks",
+            "title": "Nunjucks",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [false, "Format on Save"],
+                [true, "Ignore"]
+              ],
+              "default": null
+            }
+          },
+          {
             "key": "prettier.format-on-save.ignored-syntaxes.php",
             "title": "PHP",
             "config": {
@@ -3870,6 +4158,24 @@
           {
             "key": "prettier.format-on-save.ignored-syntaxes.scss",
             "title": "SCSS",
+            "config": {
+              "type": "boolean",
+              "default": false
+            },
+            "configWorkspace": {
+              "type": "enum",
+              "radio": false,
+              "values": [
+                [null, "Global Setting"],
+                [false, "Format on Save"],
+                [true, "Ignore"]
+              ],
+              "default": null
+            }
+          },
+          {
+            "key": "prettier.format-on-save.ignored-syntaxes.smarty",
+            "title": "Smarty",
             "config": {
               "type": "boolean",
               "default": false

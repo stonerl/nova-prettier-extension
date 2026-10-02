@@ -1,0 +1,14 @@
+{% extends "base.njk" %}
+
+{% block content %}
+{% if posts %}
+<ul>
+{% for post in posts %}
+<li class="{{ post.class }}">
+{{ post.title }}
+{% else %}
+No posts yet.
+{% endfor %}
+</ul>
+{% endif %}
+{% endblock %}

@@ -120,12 +120,19 @@ function coverage() {
 const PLUGIN_BASES = {
   'prettier.plugins.prettier-plugin-astro': 'PRETTIER_ASTRO_PLUGIN_OPTIONS',
   'prettier.plugins.prettier-plugin-blade': 'PRETTIER_BLADE_PLUGIN_OPTIONS',
+  'prettier.plugins.prettier-plugin-go-template':
+    'PRETTIER_GO_TEMPLATE_PLUGIN_OPTIONS',
+  'prettier.plugins.prettier-plugin-hugo-post':
+    'PRETTIER_HUGO_POST_PLUGIN_OPTIONS',
   'prettier.plugins.prettier-plugin-liquid': 'PRETTIER_LIQUID_PLUGIN_OPTIONS',
   'prettier.plugins.prettier-plugin-nginx': 'PRETTIER_NGINX_PLUGIN_OPTIONS',
+  'prettier.plugins.prettier-plugin-nunjucks':
+    'PRETTIER_NUNJUCKS_PLUGIN_OPTIONS',
   'prettier.plugins.prettier-plugin-php': 'PRETTIER_PHP_PLUGIN_OPTIONS',
   'prettier.plugins.prettier-plugin-properties':
     'PRETTIER_PROPERTIES_PLUGIN_OPTIONS',
   'prettier.plugins.prettier-plugin-sh': 'PRETTIER_SH_PLUGIN_OPTIONS',
+  'prettier.plugins.prettier-plugin-smarty': 'PRETTIER_SMARTY_PLUGIN_OPTIONS',
   'prettier.plugins.prettier-plugin-sql.sql-formatter':
     'PRETTIER_SQL_PLUGIN_SQL_FORMATTER_OPTIONS',
   'prettier.plugins.prettier-plugin-sql.node-sql-parser':

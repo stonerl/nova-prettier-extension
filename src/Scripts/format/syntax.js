@@ -37,6 +37,26 @@ const extToSyntax = {
   '.html': 'html',
   '.htm': 'html',
 
+  // Go templates (prettier-plugin-go-template) — Smarty owns bare .tpl
+  '.go.html': 'go-template',
+  '.html.tpl': 'go-template',
+  '.html.tmpl': 'go-template',
+  '.go.tmpl': 'go-template',
+  '.gohtml': 'go-template',
+  '.gotmpl': 'go-template',
+  '.tmpl': 'go-template',
+
+  // Smarty templates (prettier-plugin-smarty)
+  '.tpl': 'smarty',
+
+  // Nunjucks templates (prettier-plugin-nunjucks)
+  '.njk': 'nunjucks',
+  '.nunjucks': 'nunjucks',
+  '.nunj': 'nunjucks',
+
+  // Hugo posts (prettier-plugin-hugo-post) — plain .md routes dynamically
+  '.hugo': 'hugo-post',
+
   // Flow (optional suffix cases)
   '.flow.js': 'flow',
   '.flow.jsx': 'flow',
