@@ -743,7 +743,7 @@ async function findPrettier() {
           'no package.json found (broken install?)',
         )
       } else if (fsResult) {
-        log.info(`Loading project prettier (fs) at ${fsResult}`)
+        log.info(`Loading project Prettier (filesystem) at ${fsResult}`)
         // The service runs the project Prettier; populate the bundled
         // tree in the background so a later bundled resolution (user
         // enables preferBundled, opens a project without Prettier, or
@@ -776,7 +776,7 @@ async function findPrettier() {
           'npm ls reports it as invalid or outdated',
         )
       } else if (npmResult) {
-        log.info(`Loading project prettier (npm) at ${npmResult.path}`)
+        log.info(`Loading project Prettier (npm) at ${npmResult.path}`)
         ensureBundledModulesInBackground()
         return npmResult.path
       }
