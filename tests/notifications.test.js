@@ -105,17 +105,17 @@ function loadFormatter(novaShim) {
 
   for (const file of [
     'helpers.js',
-    'processes.js',
-    'runtime.js',
+    'env/processes.js',
+    'env/runtime.js',
     'notifications.js',
-    'plugin-registry.js',
-    'format-request.js',
-    'format-feedback.js',
-    'formatter.js',
+    'format/plugin-registry.js',
+    'format/format-request.js',
+    'format/format-feedback.js',
+    'format/formatter.js',
   ]) {
     delete require.cache[path.join(SRC_DIR, file)]
   }
-  const { Formatter } = require(path.join(SRC_DIR, 'formatter.js'))
+  const { Formatter } = require(path.join(SRC_DIR, 'format/formatter.js'))
   return Formatter
 }
 

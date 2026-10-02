@@ -14,7 +14,7 @@
  * false, will simply return Nova’s `document.syntax` unchanged.
  */
 
-const { extractPath, getConfigWithWorkspaceOverride } = require('./helpers.js')
+const { extractPath, getConfigWithWorkspaceOverride } = require('../helpers.js')
 
 // Map file-name suffixes (longest first) to internal language keys
 const extToSyntax = {

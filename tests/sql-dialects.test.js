@@ -64,15 +64,15 @@ function loadModules() {
   for (const file of [
     'helpers.js',
     'notifications.js',
-    'sql.js',
-    'syntax.js',
+    'format/sql.js',
+    'format/syntax.js',
   ]) {
     delete require.cache[path.join(SRC_DIR, file)]
   }
 
   return {
-    syntax: require(path.join(SRC_DIR, 'syntax.js')),
-    sql: require(path.join(SRC_DIR, 'sql.js')),
+    syntax: require(path.join(SRC_DIR, 'format/syntax.js')),
+    sql: require(path.join(SRC_DIR, 'format/sql.js')),
   }
 }
 

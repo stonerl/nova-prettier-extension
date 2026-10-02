@@ -17,7 +17,7 @@
  *   - injects `resolve` into src/unifiedConfig.json's workspace pass and
  *     writes it into prettier.novaextension/configWorkspace.json
  *   - writes each setting's own choices (values minus the fallback) into
- *     src/Scripts/workspace-choices.js, formatted with the project's
+ *     src/Scripts/settings/workspace-choices.js, formatted with the project's
  *     .prettierrc so `prettier --check` (CI) passes after every build
  *
  * Run standalone via `npm run generate:workspace-choices`; npm run build
@@ -39,6 +39,7 @@ const CHOICES_OUT = path.join(
   PROJECT_ROOT,
   'src',
   'Scripts',
+  'settings',
   'workspace-choices.js',
 )
 

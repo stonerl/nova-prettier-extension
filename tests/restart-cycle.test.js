@@ -117,7 +117,7 @@ function resetStubs() {
 function makeInstance() {
   resetStubs()
 
-  stubModule('module-resolver.js', {
+  stubModule('env/module-resolver.js', {
     findPrettier: async () => {
       calls.resolve++
       return state.resolveResult
@@ -160,7 +160,7 @@ function makeInstance() {
     }
   }
 
-  stubModule('formatter.js', { Formatter: FakeFormatter })
+  stubModule('format/formatter.js', { Formatter: FakeFormatter })
 
   const { PrettierExtension } = require(MAIN)
   const { debouncePromise } = require(path.join(SRC_DIR, 'helpers.js'))

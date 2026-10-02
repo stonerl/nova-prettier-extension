@@ -166,11 +166,11 @@ function loadHelpers(novaShim, ProcessShim) {
   global.nova = novaShim
   global.Process = ProcessShim
 
-  for (const file of ['helpers.js', 'runtime.js', 'notifications.js']) {
+  for (const file of ['helpers.js', 'env/runtime.js', 'notifications.js']) {
     const resolved = path.join(SRC_DIR, file)
     delete require.cache[resolved]
   }
-  return require(path.join(SRC_DIR, 'runtime.js'))
+  return require(path.join(SRC_DIR, 'env/runtime.js'))
 }
 
 async function envPathWins() {

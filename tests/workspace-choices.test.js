@@ -34,7 +34,7 @@ function check(name, ok, detail) {
 }
 
 const settingsSrc = fs.readFileSync(
-  path.join(ROOT, 'src', 'Scripts', 'settings.js'),
+  path.join(ROOT, 'src', 'Scripts', 'settings', 'settings.js'),
   'utf8',
 )
 
@@ -43,7 +43,7 @@ const settingsSrc = fs.readFileSync(
 // workspace-choices.js first (npm run test:setup).
 function loadSettings(table) {
   const { WORKSPACE_CHOICES } = require(
-    path.join(ROOT, 'src', 'Scripts', 'workspace-choices.js'),
+    path.join(ROOT, 'src', 'Scripts', 'settings', 'workspace-choices.js'),
   )
   const module = { exports: {} }
   const factory = new Function(
@@ -157,7 +157,7 @@ const built = require(
   path.join(ROOT, 'prettier.novaextension', 'configWorkspace.json'),
 )
 const { WORKSPACE_CHOICES } = require(
-  path.join(ROOT, 'src', 'Scripts', 'workspace-choices.js'),
+  path.join(ROOT, 'src', 'Scripts', 'settings', 'workspace-choices.js'),
 )
 
 const flat = []

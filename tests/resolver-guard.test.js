@@ -283,15 +283,15 @@ function loadResolver(novaShim, captured) {
 
   for (const file of [
     'helpers.js',
-    'processes.js',
-    'runtime.js',
+    'env/processes.js',
+    'env/runtime.js',
     'notifications.js',
-    'module-resolver.js',
+    'env/module-resolver.js',
   ]) {
     delete require.cache[path.join(SRC_DIR, file)]
   }
 
-  const resolver = require(path.join(SRC_DIR, 'module-resolver.js'))
+  const resolver = require(path.join(SRC_DIR, 'env/module-resolver.js'))
 
   const restore = () => {
     console.info = original.info

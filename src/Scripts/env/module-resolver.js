@@ -12,7 +12,7 @@ const {
   getConfigWithWorkspaceOverride,
   log,
   readJsonFile,
-} = require('./helpers.js')
+} = require('../helpers.js')
 
 const {
   getNodeVersion,
@@ -23,7 +23,7 @@ const {
 
 const { handleProcessResult } = require('./processes.js')
 
-const { showNotification } = require('./notifications.js')
+const { showNotification } = require('../notifications.js')
 
 const {
   createInstallLock,

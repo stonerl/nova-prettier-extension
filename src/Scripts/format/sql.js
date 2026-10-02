@@ -12,7 +12,7 @@
  * to 'sql' when no specific dialect is detected.
  */
 
-const { extractPath, log } = require('./helpers.js')
+const { extractPath, log } = require('../helpers.js')
 
 // SQL dialect mapping for sql-formatter
 const extToSqlDialect = {

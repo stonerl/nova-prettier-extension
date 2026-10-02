@@ -11,14 +11,14 @@
  * node-sql-parser.
  */
 
-const { getConfigWithWorkspaceOverride, log } = require('./helpers.js')
+const { getConfigWithWorkspaceOverride, log } = require('../helpers.js')
 
 const {
   getDefaultConfig,
   getTailwindConfig,
   getSqlFormatterConfig,
   getNodeSqlParserConfig,
-} = require('./prettier-config.js')
+} = require('../settings/prettier-config.js')
 
 const { PLUGIN_DESCRIPTORS, isPluginEnabled } = require('./plugin-registry.js')
 

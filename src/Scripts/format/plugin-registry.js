@@ -11,7 +11,7 @@
  * the loaders producing them.
  */
 
-const { getConfigWithWorkspaceOverride, log } = require('./helpers.js')
+const { getConfigWithWorkspaceOverride, log } = require('../helpers.js')
 
 const {
   getAstroConfig,
@@ -25,7 +25,7 @@ const {
   getTomlConfig,
   getTwigConfig,
   getXmlConfig,
-} = require('./prettier-config.js')
+} = require('../settings/prettier-config.js')
 
 const pluginPaths = {
   astro: nova.path.join(

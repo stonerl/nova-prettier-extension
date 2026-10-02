@@ -231,13 +231,13 @@ function loadInstallLock(novaShim) {
 
   for (const file of [
     'helpers.js',
-    'processes.js',
+    'env/processes.js',
     'notifications.js',
-    'install-lock.js',
+    'env/install-lock.js',
   ]) {
     delete require.cache[path.join(SRC_DIR, file)]
   }
-  return require(path.join(SRC_DIR, 'install-lock.js'))
+  return require(path.join(SRC_DIR, 'env/install-lock.js'))
 }
 
 async function acquisitionAndMutualExclusion() {

@@ -11,7 +11,7 @@
  * Prettier Info dialog.
  */
 
-const { log, readJsonFile } = require('./helpers.js')
+const { log, readJsonFile } = require('../helpers.js')
 
 // ---------------------------------------------------------------------------
 // Node/npm runtime resolution

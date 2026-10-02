@@ -33,7 +33,7 @@
  * but "env: mkdir: No such file or directory" kills every lookup.
  */
 
-const { log } = require('./helpers.js')
+const { log } = require('../helpers.js')
 
 const { handleProcessResult } = require('./processes.js')
 

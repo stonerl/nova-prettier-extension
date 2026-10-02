@@ -10,9 +10,9 @@
  * session-scoped — notifications must not re-spam on every format.
  */
 
-const { showNotification } = require('./notifications.js')
+const { showNotification } = require('../notifications.js')
 
-const { log } = require('./helpers.js')
+const { log } = require('../helpers.js')
 
 // One-time-per-session notice that the user's own config file declares
 // plugins which Prettier⁺ doesn't bundle and couldn't find in the

@@ -10,7 +10,7 @@
 
 let prettierExtensionInstance = null
 
-const { findPrettier } = require('./module-resolver.js')
+const { findPrettier } = require('./env/module-resolver.js')
 
 const {
   debouncePromise,
@@ -23,20 +23,20 @@ const {
   sanitizePrettierConfig,
 } = require('./helpers.js')
 
-const { getCliVersion, getNpmVersion } = require('./runtime.js')
+const { getCliVersion, getNpmVersion } = require('./env/runtime.js')
 
 const {
   showNotification,
   describeFailure,
   withReason,
 } = require('./notifications.js')
-const { Formatter } = require('./formatter.js')
+const { Formatter } = require('./format/formatter.js')
 const {
   findMissingBundledPlugins,
   pluginPaths,
-} = require('./plugin-registry.js')
-const { projectChoices, resolveCommand } = require('./settings.js')
-const { WORKSPACE_CHOICES } = require('./workspace-choices.js')
+} = require('./format/plugin-registry.js')
+const { projectChoices, resolveCommand } = require('./settings/settings.js')
+const { WORKSPACE_CHOICES } = require('./settings/workspace-choices.js')
 
 /**
  * Finds a bundled plugin's package root from its registry entry path:

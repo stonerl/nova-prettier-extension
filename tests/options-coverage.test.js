@@ -73,7 +73,7 @@ function loadModules() {
   const unifiedConfig = JSON.parse(fs.readFileSync(UNIFIED_CONFIG, 'utf8'))
   // prettier-options.js is a plain data module — loads without nova.
   const { PRETTIER_OPTIONS } = require(
-    path.join(SRC_DIR, 'prettier-options.js'),
+    path.join(SRC_DIR, 'settings/prettier-options.js'),
   )
   return { unifiedConfig, prettierOptions: new Set(PRETTIER_OPTIONS) }
 }
@@ -187,7 +187,9 @@ function pluginCoverage() {
   console.log('\n== every plugin option is wired in both directions ==')
 
   const unifiedConfig = JSON.parse(fs.readFileSync(UNIFIED_CONFIG, 'utf8'))
-  const pluginOptions = require(path.join(SRC_DIR, 'prettier-options.js'))
+  const pluginOptions = require(
+    path.join(SRC_DIR, 'settings/prettier-options.js'),
+  )
 
   // The trap-closer: a new plugin option list must land in PLUGIN_BASES
   // too, or it would ship unguarded — how the continuationIndent drift

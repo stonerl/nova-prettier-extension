@@ -188,14 +188,14 @@ function makeNovaShim() {
 
   for (const file of [
     'helpers.js',
-    'processes.js',
-    'runtime.js',
+    'env/processes.js',
+    'env/runtime.js',
     'notifications.js',
-    'plugin-registry.js',
-    'format-request.js',
-    'format-feedback.js',
-    'formatter.js',
-    'module-resolver.js',
+    'format/plugin-registry.js',
+    'format/format-request.js',
+    'format/format-feedback.js',
+    'format/formatter.js',
+    'env/module-resolver.js',
     'main.js',
   ]) {
     delete require.cache[path.join(SRC_DIR, file)]
@@ -205,7 +205,9 @@ function makeNovaShim() {
   // every bundled plugin the registry reports. Roots are found the same
   // way main.js finds them: walk up until the parent is node_modules or
   // an @scope directory.
-  const { pluginPaths } = require(path.join(SRC_DIR, 'plugin-registry.js'))
+  const { pluginPaths } = require(
+    path.join(SRC_DIR, 'format/plugin-registry.js'),
+  )
   for (const [, pluginPath] of Object.entries(pluginPaths)) {
     let dir = path.dirname(pluginPath)
     for (let hops = 0; hops < 8; hops++) {
@@ -230,14 +232,14 @@ function makeInstance({ runningModulePath = null } = {}) {
   const { shim, files, config, shownMessages } = makeNovaShim()
   missingBundledPlugins = []
 
-  stubModule('plugin-registry.js', {
-    ...require(path.join(SRC_DIR, 'plugin-registry.js')),
+  stubModule('format/plugin-registry.js', {
+    ...require(path.join(SRC_DIR, 'format/plugin-registry.js')),
     findMissingBundledPlugins: () => missingBundledPlugins,
   })
-  stubModule('formatter.js', {
+  stubModule('format/formatter.js', {
     Formatter: FakeFormatter,
   })
-  stubModule('module-resolver.js', {
+  stubModule('env/module-resolver.js', {
     findPrettier: async () => BUNDLED_PRETTIER,
   })
 
@@ -306,7 +308,7 @@ async function bundledInfo() {
     .find((l) => l.startsWith('Bundled plugins:'))
     ?.slice('Bundled plugins: '.length)
   const pluginNames = Object.keys(
-    require(path.join(SRC_DIR, 'plugin-registry.js')).pluginPaths,
+    require(path.join(SRC_DIR, 'format/plugin-registry.js')).pluginPaths,
   )
   const missing = pluginNames.filter(
     (name) => !pluginLine?.includes(`${name} (1.0.0)`),
@@ -320,7 +322,9 @@ async function bundledInfo() {
   // A plugin whose registry entry file is missing (registry drift after
   // a plugin update) must show as "(missing)" instead of a version,
   // without disturbing the other plugins' lines.
-  const { pluginPaths } = require(path.join(SRC_DIR, 'plugin-registry.js'))
+  const { pluginPaths } = require(
+    path.join(SRC_DIR, 'format/plugin-registry.js'),
+  )
   missingBundledPlugins = [{ key: 'ejs', path: pluginPaths.ejs }]
 
   const withMissing = await ext._buildPrettierInfoLines()

@@ -8,7 +8,7 @@
  * Retrieves plugin-specific configuration options from Nova's settings system.
  */
 
-const { getConfigWithWorkspaceOverride } = require('./helpers.js')
+const { getConfigWithWorkspaceOverride } = require('../helpers.js')
 const {
   PRETTIER_OPTIONS,
   PRETTIER_ASTRO_PLUGIN_OPTIONS,

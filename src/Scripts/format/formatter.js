@@ -18,16 +18,16 @@ const {
   getConfigWithWorkspaceOverride,
   isDebugLoggingEnabled,
   log,
-} = require('./helpers.js')
+} = require('../helpers.js')
 
-const { spawnNode } = require('./runtime.js')
+const { spawnNode } = require('../env/runtime.js')
 
 const {
   showNotification,
   cancelNotification,
   describeFailure,
   withReason,
-} = require('./notifications.js')
+} = require('../notifications.js')
 
 const { reportMissingBundledPlugins } = require('./plugin-registry.js')
 
