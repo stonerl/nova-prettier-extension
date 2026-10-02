@@ -122,11 +122,6 @@ class PrettierExtension {
     // after it finishes instead of dropping it
     this._restartCycleQueued = false
 
-    // Path the running service was started with. Redundant triggers
-    // (observers re-firing with unchanged values during startup) resolve
-    // to the same effective path — the stop/start is skipped instead of
-    // bouncing a healthy service.
-    this._runningModulePath = null
     // config-file edits must restart the service even when the module
     // path is unchanged
     this._forceRestart = false
@@ -464,7 +459,6 @@ class PrettierExtension {
     for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
       try {
         await this.formatter.start(path)
-        this._runningModulePath = path
         return
       } catch (err) {
         if (attempt === MAX_ATTEMPTS) throw err
@@ -563,7 +557,7 @@ class PrettierExtension {
     if (!this.formatter.isRunning()) return false
 
     const effectivePath = this.modulePath ?? this._resolvedModulePath
-    return !!effectivePath && effectivePath === this._runningModulePath
+    return !!effectivePath && effectivePath === this.formatter.runningPath
   }
 
   /**
@@ -613,7 +607,7 @@ class PrettierExtension {
 
       // Mark the restart as planned so a momentarily missing service
       // doesn't surface the "Prettier Stopped Running" notification.
-      this.formatter._restarting = true
+      this.formatter.setPlannedRestart(true)
       try {
         await this.formatter.waitForPendingFormats()
         await this.formatter.stop()
@@ -622,7 +616,7 @@ class PrettierExtension {
       } finally {
         // Never leave the flag set — otherwise genuine failures would be
         // silently suppressed for the rest of the session.
-        this.formatter._restarting = false
+        this.formatter.setPlannedRestart(false)
       }
     })().finally(() => {
       this._restartCycle = null
@@ -644,7 +638,7 @@ class PrettierExtension {
         `forceRestart: ${this._forceRestart}, ` +
         `serviceRunning: ${this.formatter.isRunning()}, ` +
         `pathMatchesRunning: ${
-          !!effectivePath && effectivePath === this._runningModulePath
+          !!effectivePath && effectivePath === this.formatter.runningPath
         }`,
     )
     try {
@@ -735,7 +729,7 @@ class PrettierExtension {
 
     const explicit = this.modulePath
     const preferBundled = this.preferBundled
-    const module = this._runningModulePath ?? this._resolvedModulePath
+    const module = this.formatter.runningPath ?? this._resolvedModulePath
 
     let source
     if (explicit) {
@@ -769,7 +763,7 @@ class PrettierExtension {
     lines.push(
       `Service: ${this.formatter.isRunning() ? 'running' : 'not running'}`,
     )
-    const reason = describeFailure(this.formatter._lastFailure)
+    const reason = describeFailure(this.formatter.lastFailure)
     if (reason) lines.push(`Last failure: ${reason}`)
 
     const [nodeVersion, npmVersion] = await Promise.all([
@@ -795,21 +789,12 @@ class PrettierExtension {
     )
     lines.push(`Bundled plugins: ${pluginVersions.join(', ') || 'none'}`)
 
+    const { loaded, unresolved, disabled } = this.formatter.lastFormatReport
     lines.push(
-      `External plugins (last format): ${
-        this.formatter._lastLoadedPlugins.join(', ') || 'none seen this session'
-      }`,
+      `External plugins (last format): ${loaded.join(', ') || 'none seen this session'}`,
     )
-    lines.push(
-      `Unresolved plugins: ${
-        this.formatter._lastUnresolvedPlugins.join(', ') || 'none'
-      }`,
-    )
-    lines.push(
-      `Disabled plugins: ${
-        this.formatter._lastDisabledPlugins.join(', ') || 'none'
-      }`,
-    )
+    lines.push(`Unresolved plugins: ${unresolved.join(', ') || 'none'}`)
+    lines.push(`Disabled plugins: ${disabled.join(', ') || 'none'}`)
 
     return lines
   }
@@ -951,7 +936,7 @@ class PrettierExtension {
     this._disposed = true
     // Suppresses crash-restarts, notifications, and format attempts on
     // the formatter while the restart cycle drains below.
-    this.formatter._disposed = true
+    this.formatter.dispose()
 
     // In-flight stop/start cycle: let it settle so it never spawns a
     // fresh service after deactivation.

@@ -233,6 +233,13 @@ class Formatter {
     this._forceStopTimer = null
     /** true after dispose() — no more starts, crash restarts, or notices */
     this._disposed = false
+    /**
+     * Module path the running service was started with. Set only after a
+     * successful start() and never cleared — it is the single source of
+     * truth for "which Prettier module the service runs (or last ran)",
+     * used by the crash-restart and the bundled-plugin gates.
+     */
+    this.runningPath = null
 
     this.setupIsReadyPromise()
   }
@@ -275,11 +282,48 @@ class Formatter {
     return this._disposed === true
   }
 
+  /** Public read of the most recent failure reason since the last start. */
+  get lastFailure() {
+    return this._lastFailure
+  }
+
+  /**
+   * Public read of the external plugins seen in the most recent format,
+   * for the Prettier Info command.
+   */
+  get lastFormatReport() {
+    return {
+      loaded: this._lastLoadedPlugins,
+      unresolved: this._lastUnresolvedPlugins,
+      disabled: this._lastDisabledPlugins,
+    }
+  }
+
+  /**
+   * Mark the start of or return from a planned stop/restart cycle. While
+   * a planned restart is active, a momentarily missing service must not
+   * surface the "Prettier Stopped Running" notification, and format
+   * callers quietly skip instead of erroring.
+   *
+   * @param {boolean} active
+   */
+  setPlannedRestart(active) {
+    this._restarting = active
+  }
+
+  /**
+   * Stop all formatter activity for this instance. Must be called before
+   * the owning extension tears down — no starts, crash restarts, or
+   * notifications afterwards.
+   */
+  dispose() {
+    this._disposed = true
+  }
+
   async start(modulePath) {
     if (this.disposed) return
-    if (modulePath) this.modulePath = modulePath
 
-    if (!this.modulePath) {
+    if (!modulePath) {
       throw new Error('Prettier module path is required to start the service')
     }
 
@@ -297,7 +341,7 @@ class Formatter {
     // entry file there fails its syntaxes at format time with no visible
     // cause, so surface it here. In native modes the files are never
     // imported, so stay quiet at debug level.
-    const bundledMode = this.modulePath?.includes(nova.extension.path)
+    const bundledMode = modulePath?.includes(nova.extension.path)
     for (const { key, path } of findMissingBundledPlugins()) {
       const dedupeKey = `${bundledMode ? 'warn' : 'debug'}:${path}`
       if (warnedMissingPluginPaths.has(dedupeKey)) continue
@@ -331,7 +375,7 @@ class Formatter {
             'prettier-service',
             'prettier-service.js',
           ),
-          this.modulePath,
+          modulePath,
         ],
         { stdio: 'jsonrpc', cwd: nova.workspace.path },
       )
@@ -418,6 +462,11 @@ class Formatter {
       // have replaced it.
       if (this._startHandshake === handshake) this._startHandshake = null
     }
+
+    // The service is running this module — record it as the single
+    // source of truth for callers (restart redundancy, Prettier Info,
+    // bundled-plugin gating).
+    this.runningPath = modulePath
   }
 
   stop() {
@@ -539,7 +588,9 @@ class Formatter {
     if (this.disposed) return
 
     log.debug('Restarting Prettier…')
-    this.start().catch(() => {
+    // The service only crashes after a successful start, so runningPath
+    // always holds the path to restart with here.
+    this.start(this.runningPath).catch(() => {
       // startDidFail already surfaced the reason via notification
     })
   }
@@ -738,7 +789,7 @@ class Formatter {
 
     const plugins = []
 
-    if (this.modulePath?.includes(nova.extension.path)) {
+    if (this.runningPath?.includes(nova.extension.path)) {
       const primaryPlugin = PLUGIN_DESCRIPTORS[syntaxKey]
 
       if (primaryPlugin && isPluginEnabled(primaryPlugin.configKey)) {

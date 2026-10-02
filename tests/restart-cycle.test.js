@@ -132,6 +132,7 @@ function makeInstance() {
     constructor() {
       this._restarting = false
       this._service = null
+      this.runningPath = null
     }
     isRunning() {
       return !!this._service
@@ -144,9 +145,18 @@ function makeInstance() {
       this._service = null
       if (state.stopGate) await state.stopGate.promise
     }
-    async start() {
+    async start(path) {
       calls.start++
       this._service = {}
+      // mirror the real Formatter's contract: runningPath is recorded
+      // after a successful start
+      this.runningPath = path
+    }
+    setPlannedRestart(active) {
+      this._restarting = active
+    }
+    dispose() {
+      this._disposed = true
     }
   }
 
@@ -223,7 +233,7 @@ async function joinDuringRunningCycleSchedulesTrailingCycle() {
     calls.stop === 2 &&
       calls.start === 2 &&
       calls.resolve === 3 &&
-      ext._runningModulePath === '/fake/prettier-2',
+      ext.formatter.runningPath === '/fake/prettier-2',
     calls,
   )
 }
@@ -279,8 +289,8 @@ async function modulePathConfigChangeBouncesWithoutResolution() {
   )
   check(
     'service now runs the configured path',
-    ext._runningModulePath === '/fake/configured-prettier',
-    ext._runningModulePath,
+    ext.formatter.runningPath === '/fake/configured-prettier',
+    ext.formatter.runningPath,
   )
 }
 
@@ -309,8 +319,8 @@ async function redundantTriggerSkipsRestart() {
   check('initial cycle ran', calls.stop === 1 && calls.start === 1, calls)
   check(
     'running module path recorded',
-    ext._runningModulePath === '/fake/prettier',
-    ext._runningModulePath,
+    ext.formatter.runningPath === '/fake/prettier',
+    ext.formatter.runningPath,
   )
 
   // A trigger with no resolution request, healthy service and unchanged

@@ -55,6 +55,7 @@ function stubModule(file, exportsObj) {
 
 class FakeFormatter {
   constructor() {
+    this.runningPath = null
     this._lastFailure = null
     this._lastLoadedPlugins = []
     this._lastUnresolvedPlugins = []
@@ -63,6 +64,16 @@ class FakeFormatter {
   }
   isRunning() {
     return !!this._service
+  }
+  get lastFailure() {
+    return this._lastFailure
+  }
+  get lastFormatReport() {
+    return {
+      loaded: this._lastLoadedPlugins,
+      unresolved: this._lastUnresolvedPlugins,
+      disabled: this._lastDisabledPlugins,
+    }
   }
 }
 
@@ -226,9 +237,9 @@ function makeInstance({ runningModulePath = null } = {}) {
   const { PrettierExtension } = require(MAIN)
   const ext = new PrettierExtension()
   ext.formatter = new FakeFormatter()
-  // main.js reads the running module path from the extension instance
-  // itself (set by _startWithModulePath), not from the formatter.
-  ext._runningModulePath = runningModulePath
+  // main.js reads the running module path from the formatter — the
+  // real Formatter records it after a successful start().
+  ext.formatter.runningPath = runningModulePath
 
   return { ext, files, config, shownMessages, shim }
 }
