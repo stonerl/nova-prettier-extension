@@ -64,6 +64,8 @@ directly after `npm run test:setup`:
 | `tests/watcher-filter.test.js`    | Self-event filtering for the extension's own bundled-install writes           |
 | `tests/resolver-guard.test.js`    | Loadability guard and resolver failure paths                                  |
 | `tests/notifications.test.js`     | Notification wrapper and the failure-reason lifecycle                         |
+| `tests/json-rpc.test.js`          | JSON-RPC transport: oversize frame skip (Tier 0), response cap (-32000)       |
+| `tests/too-large.test.js`         | Size limits: number-free notices, guard-stack boundaries, service-exit race   |
 | `tests/format-pipeline.test.js`   | Format pipeline: request composition, error-to-issue mapping, save gates      |
 | `tests/options-coverage.test.js`  | Settings ↔ option wiring, checked in both directions                          |
 | `tests/restart-cycle.test.js`     | Restart coalescing: redundant triggers join, queued triggers re-run           |
