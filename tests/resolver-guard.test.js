@@ -281,7 +281,13 @@ function loadResolver(novaShim, captured) {
   console.warn = (...args) => captured.warn.push(args.join(' '))
   console.error = (...args) => captured.error.push(args.join(' '))
 
-  for (const file of ['helpers.js', 'notifications.js', 'module-resolver.js']) {
+  for (const file of [
+    'helpers.js',
+    'processes.js',
+    'runtime.js',
+    'notifications.js',
+    'module-resolver.js',
+  ]) {
     delete require.cache[path.join(SRC_DIR, file)]
   }
 

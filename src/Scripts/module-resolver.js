@@ -10,14 +10,18 @@
 
 const {
   getConfigWithWorkspaceOverride,
-  getNodeVersion,
-  getNpmVersion,
-  handleProcessResult,
   log,
   readJsonFile,
+} = require('./helpers.js')
+
+const {
+  getNodeVersion,
+  getNpmVersion,
   spawnNode,
   spawnNpm,
-} = require('./helpers.js')
+} = require('./runtime.js')
+
+const { handleProcessResult } = require('./processes.js')
 
 const { showNotification } = require('./notifications.js')
 

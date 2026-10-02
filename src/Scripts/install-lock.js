@@ -33,7 +33,9 @@
  * but "env: mkdir: No such file or directory" kills every lookup.
  */
 
-const { handleProcessResult, log } = require('./helpers.js')
+const { log } = require('./helpers.js')
+
+const { handleProcessResult } = require('./processes.js')
 
 const LOCK_FILE_NAME = 'prettier-bundled-install.lock'
 

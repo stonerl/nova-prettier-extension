@@ -1,6 +1,6 @@
 /**
  * runtime-resolver.test.js — Unit tests for the Node.js/npm runtime
- * resolution in helpers.js
+ * resolution in runtime.js
  *
  * @license MIT
  * @author Toni Förster
@@ -158,19 +158,19 @@ function makeNovaShim({
 }
 
 /**
- * Requires a fresh helpers.js with the given shims. The module holds
- * cache state (_nodeRuntimePromise, _cliVersionPromises), so both
- * helpers.js and notifications.js must be evicted between scenarios.
+ * Requires a fresh runtime.js with the given shims. The module holds
+ * cache state (_nodeRuntimePromise, _cliVersionPromises), so runtime.js
+ * (and its helpers.js dependency) must be evicted between scenarios.
  */
 function loadHelpers(novaShim, ProcessShim) {
   global.nova = novaShim
   global.Process = ProcessShim
 
-  for (const file of ['helpers.js', 'notifications.js']) {
+  for (const file of ['helpers.js', 'runtime.js', 'notifications.js']) {
     const resolved = path.join(SRC_DIR, file)
     delete require.cache[resolved]
   }
-  return require(path.join(SRC_DIR, 'helpers.js'))
+  return require(path.join(SRC_DIR, 'runtime.js'))
 }
 
 async function envPathWins() {

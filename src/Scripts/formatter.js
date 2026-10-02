@@ -13,8 +13,9 @@ const {
   getConfigWithWorkspaceOverride,
   isDebugLoggingEnabled,
   log,
-  spawnNode,
 } = require('./helpers.js')
+
+const { spawnNode } = require('./runtime.js')
 
 const {
   showNotification,

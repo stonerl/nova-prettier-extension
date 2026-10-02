@@ -229,7 +229,12 @@ function loadInstallLock(novaShim) {
   global.nova = novaShim
   global.Process = novaShim._processStub.FakeProcess
 
-  for (const file of ['helpers.js', 'notifications.js', 'install-lock.js']) {
+  for (const file of [
+    'helpers.js',
+    'processes.js',
+    'notifications.js',
+    'install-lock.js',
+  ]) {
     delete require.cache[path.join(SRC_DIR, file)]
   }
   return require(path.join(SRC_DIR, 'install-lock.js'))

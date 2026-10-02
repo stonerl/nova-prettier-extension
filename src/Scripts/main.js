@@ -14,9 +14,7 @@ const { findPrettier } = require('./module-resolver.js')
 
 const {
   debouncePromise,
-  getCliVersion,
   getConfigWithWorkspaceOverride,
-  getNpmVersion,
   isInsideExtensionBundle,
   log,
   observeConfigWithWorkspaceOverride,
@@ -24,6 +22,8 @@ const {
   readJsonFile,
   sanitizePrettierConfig,
 } = require('./helpers.js')
+
+const { getCliVersion, getNpmVersion } = require('./runtime.js')
 
 const {
   showNotification,

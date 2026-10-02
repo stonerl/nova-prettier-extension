@@ -188,6 +188,8 @@ function makeNovaShim() {
 
   for (const file of [
     'helpers.js',
+    'processes.js',
+    'runtime.js',
     'notifications.js',
     'prettier-plugins.js',
     'formatter.js',
