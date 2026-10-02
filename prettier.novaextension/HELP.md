@@ -8,8 +8,10 @@
 - Configuration
   - Configuration Methods
   - Configuration Precedence
+  - SQL Formatter Selection
 - Plugins from Your Project
 - Ignoring Files
+  - Save Without Formatting
 - Working with Remote Files
 - Troubleshooting
   - Formatting not Working
@@ -132,6 +134,22 @@ You can configure Prettier⁺ in three ways:
 > **always use the Nova UI options** — unless a custom config
 > file is set, which still takes priority.
 
+### SQL Formatter Selection
+
+For SQL files, the `prettier.plugins.prettier-plugin-sql.formatter` setting
+under _Extension_ or _Project Settings_ chooses the formatting
+implementation:
+
+- **Auto-Detect** (default) — the SQL dialect detected from the file
+  extension or syntax decides: `sql-formatter` covers most dialects,
+  `node-sql-parser` is used for the ones it doesn't (e.g. FlinkSQL).
+- **sql-formatter** — always uses sql-formatter.
+- **node-sql-parser** — always uses node-sql-parser.
+
+If the selected implementation can't handle the file's dialect,
+formatting is skipped and Prettier⁺ shows a notification pointing at the
+implementation that supports it.
+
 ## Plugins from Your Project
 
 Plugins declared in your Prettier config file’s `plugins` array are supported
@@ -184,21 +202,28 @@ You can also disable **Format on Save** for:
 
 via the “Ignore” toggles in the _Extension_ or _Project Settings_.
 
+### Save Without Formatting
+
+Need to save a single file as-is without turning off Format on Save
+globally? Use the editor menu command:
+
+**Editor → Prettier⁺ → Save Without Formatting** (**⌘⌃⇧S**)
+
+It disables Format on Save for that editor only. The editor menu also shows
+**Reset Syntax Warnings** when a dismissed warning can be shown again.
+
 ## Working with Remote Files
 
 Prettier⁺ fully supports formatting remote files by default when using Nova's
 built-in remote editing.
 
-However, **remote files do not support local configuration discovery**, including:
+However, **remote files have no local path for configuration discovery**:
+config files in subfolders and per-file `.prettierignore` rules are not
+applied — there is no local path to resolve them from. The extension or
+project settings take precedence for remote files.
 
-- `.prettierrc`, `prettier.config.js`, or other config files
-- `.prettierignore` files
-
-As a result, Prettier⁺ will use its default settings, made in the _Extensions Settings_,
-when formatting remote files, and all files are included regardless of ignore
-rules in `.prettierignore`.
-
-> ⚠️ Remote formatting works, but no config or ignore files are applied.
+> ⚠️ Remote formatting works, but configuration discovery is limited —
+> the Nova settings are what you can rely on.
 
 ## Troubleshooting
 
@@ -206,9 +231,13 @@ rules in `.prettierignore`.
 
 - Ensure the file type is supported and not ignored.
 - Check for Prettier config files in your project, that might override your settings.
+- Check **Prettier Info** (menu: `Extensions → Prettier⁺ → Prettier Info`)
+  for the module actually in use, its version, and the plugin state.
+- Very large documents (over 32 MiB) are skipped — Prettier⁺ shows a
+  "Document Too Large" notification instead of attempting them.
 - Enable logging and check the **Extension Console** for any errors reported by Prettier⁺.
 - Try restarting the **Prettier Service** from the menu:
-  `Extensions → Prettier⁺ → Restart Prettier Service`
+  `Extensions → Prettier⁺ → Restart Prettier Service` (**⌘⌃⇧R**)
 - Try using your project’s own Prettier version or reloading the workspace.
 - **Reset the extension** if dependencies appear broken.
 
@@ -223,7 +252,7 @@ dependencies are broken):
    ```sh
    cd "~/Library/Application Support/Nova/Extensions/stonerl.prettier"
    rm -rf node_modules
-   npm install
+   npm install --omit=dev
    ```
 
 ### Custom Prettier Forks
