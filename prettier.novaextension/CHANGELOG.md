@@ -1,3 +1,14 @@
+## 3.9.26 - 2026-10-02
+
+### Development
+
+- Documentation pass: the built-in help now documents Save Without
+  Formatting, Prettier Info, the 32 MiB document limit and the SQL
+  formatter selection with its mismatch notification; the
+  remote-files section describes its actual discovery limitations.
+  CONTRIBUTING.md gained project structure, style gates, commit
+  conventions and a bundled-plugin wiring guide. No behavior change.
+
 ## 3.9.25 - 2026-10-02
 
 ### Development
