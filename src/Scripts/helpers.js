@@ -5,7 +5,7 @@
  * @author Alexander Weiss, Toni Förster
  * @copyright © 2023 Alexander Weiss, © 2025 Toni Förster
  *
- * Contains shared functions for config observation, logging, error handling, and config sanitation.
+ * Contains shared functions for config observation, logging, and config sanitation.
  * Subprocess plumbing lives in processes.js, Node.js/npm runtime
  * resolution in runtime.js.
  */
