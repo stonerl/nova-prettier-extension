@@ -246,7 +246,7 @@ project settings take precedence for remote files.
 To reinstall the bundled Prettier version (e.g. if auto-installation failed or
 dependencies are broken):
 
-1. Open Nova’s built-in Terminal: **Extensions → Local Terminal**.
+1. Open Nova’s built-in Terminal: **File → New → Local Terminal**.
 2. Run the following commands:
 
    ```sh
