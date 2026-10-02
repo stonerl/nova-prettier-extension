@@ -7,6 +7,11 @@
  *
  * Provides the core formatting logic and manages communication
  * with the background Prettier service via JSON-RPC.
+ *
+ * Owns all service lifecycle state (running path, readiness, failure
+ * record) and the per-instance format bookkeeping. Request composition
+ * lives in format-request.js, bundled-plugin knowledge in
+ * plugin-registry.js, user-facing feedback in format-feedback.js.
  */
 
 const {
@@ -24,44 +29,21 @@ const {
   withReason,
 } = require('./notifications.js')
 
-const pluginPaths = require('./prettier-plugins.js')
+const { reportMissingBundledPlugins } = require('./plugin-registry.js')
+
+const { composeFormatRequest } = require('./format-request.js')
 
 const {
-  getDefaultConfig,
-  getAstroConfig,
-  getBladeConfig,
-  getLiquidConfig,
-  getNginxConfig,
-  getNodeSqlParserConfig,
-  getPhpConfig,
-  getPropertiesConfig,
-  getShConfig,
-  getSqlFormatterConfig,
-  getTailwindConfig,
-  getTomlConfig,
-  getTwigConfig,
-  getXmlConfig,
-} = require('./prettier-config.js')
+  clearCustomConfigErrorNotice,
+  notifyFileTooLarge,
+  notifySqlDialectMismatch,
+  prettierErrorToIssues,
+  showConfigPluginsNotice,
+  showCustomConfigErrorNotice,
+  showDisabledPluginsNotice,
+} = require('./format-feedback.js')
 
 const { detectSyntax } = require('./syntax.js')
-
-// Paths already reported this session, keyed by report level — service
-// restarts must not re-spam the console, and a mode switch (native →
-// bundled) must still escalate the report to a warning.
-const warnedMissingPluginPaths = new Set()
-
-/**
- * Bundled plugins whose registry entry file is missing from the
- * installed bundle — usually a plugin update that reshuffled its file
- * layout while prettier-plugins.js still points at the old path.
- *
- * @returns {{ key: string, path: string }[]}
- */
-function findMissingBundledPlugins() {
-  return Object.entries(pluginPaths)
-    .filter(([, pluginPath]) => !nova.fs.stat(pluginPath))
-    .map(([key, pluginPath]) => ({ key, path: pluginPath }))
-}
 
 /**
  * Count the UTF-8 byte length of a string without relying on Node's
@@ -95,115 +77,6 @@ function utf8ByteLength(str) {
   return bytes
 }
 
-const {
-  getSqlDialectFromUriOrSyntax,
-  getSqlParserDialect,
-  dialectSupportedBy,
-  resolveSqlFormatter,
-} = require('./sql.js')
-
-/**
- * Single source of truth for bundled plugins: config key under
- * `prettier.plugins.*`, bundled entry point, and — for plugins with
- * Nova-managed options — the loader producing them. Flag-only plugins
- * (ejs, tailwind) never act as the primary parser for a syntax; they
- * are selected by the ordering rules in formatEditor.
- */
-const PLUGIN_DESCRIPTORS = {
-  astro: {
-    configKey: 'prettier-plugin-astro',
-    pluginPath: pluginPaths.astro,
-    optionsConfig: getAstroConfig,
-  },
-  blade: {
-    configKey: 'prettier-plugin-blade',
-    pluginPath: pluginPaths.blade,
-    optionsConfig: getBladeConfig,
-  },
-  ejs: {
-    configKey: 'prettier-plugin-ejs',
-    pluginPath: pluginPaths.ejs,
-    optionsConfig: null,
-  },
-  java: {
-    configKey: 'prettier-plugin-java',
-    pluginPath: pluginPaths.java,
-    optionsConfig: null,
-  },
-  'java-properties': {
-    configKey: 'prettier-plugin-properties',
-    pluginPath: pluginPaths.properties,
-    optionsConfig: getPropertiesConfig,
-  },
-  'liquid-html': {
-    configKey: 'prettier-plugin-liquid',
-    pluginPath: pluginPaths.liquid,
-    optionsConfig: getLiquidConfig,
-  },
-  'liquid-md': {
-    configKey: 'prettier-plugin-liquid',
-    pluginPath: pluginPaths.liquid,
-    optionsConfig: getLiquidConfig,
-  },
-  nginx: {
-    configKey: 'prettier-plugin-nginx',
-    pluginPath: pluginPaths.nginx,
-    optionsConfig: getNginxConfig,
-  },
-  php: {
-    configKey: 'prettier-plugin-php',
-    pluginPath: pluginPaths.php,
-    optionsConfig: getPhpConfig,
-  },
-  sh: {
-    configKey: 'prettier-plugin-sh',
-    pluginPath: pluginPaths.sh,
-    optionsConfig: getShConfig,
-  },
-  dockerfile: {
-    configKey: 'prettier-plugin-sh',
-    pluginPath: pluginPaths.sh,
-    optionsConfig: getShConfig,
-  },
-  sql: {
-    configKey: 'prettier-plugin-sql',
-    pluginPath: pluginPaths.sql,
-    // SQL formatter config is handled separately — depends on the
-    // configured formatter type
-    optionsConfig: null,
-  },
-  tailwind: {
-    configKey: 'prettier-plugin-tailwind',
-    pluginPath: pluginPaths.tailwind,
-    optionsConfig: getTailwindConfig,
-  },
-  toml: {
-    configKey: 'prettier-plugin-toml',
-    pluginPath: pluginPaths.toml,
-    optionsConfig: getTomlConfig,
-  },
-  twig: {
-    configKey: 'prettier-plugin-twig',
-    pluginPath: pluginPaths.twig,
-    optionsConfig: getTwigConfig,
-  },
-  xml: {
-    configKey: 'prettier-plugin-xml',
-    pluginPath: pluginPaths.xml,
-    optionsConfig: getXmlConfig,
-  },
-}
-
-/**
- * Read a plugin's enabled flag from workspace-or-extension config.
- *
- * @param {string} configKey  the plugin's key under `prettier.plugins.*`
- * @returns {boolean|undefined}
- */
-function isPluginEnabled(configKey) {
-  return getConfigWithWorkspaceOverride(`prettier.plugins.${configKey}.enabled`)
-}
-
 class Formatter {
   constructor() {
     this.prettierServiceDidExit = this.prettierServiceDidExit.bind(this)
@@ -215,10 +88,6 @@ class Formatter {
     this._latestRequestIds = new Map()
     /** @type {Set<Promise>} format requests currently in flight */
     this._pendingFormats = new Set()
-    /** config-declared plugins already reported as crashed */
-    this._disabledPluginsNotified = new Set()
-    /** custom config path covered by the last load-failure notice */
-    this._lastCustomConfigErrorPath = null
     /** true while a planned stop/restart cycle is in progress */
     this._restarting = false
     /** most recent failure since the service last started, for notifications */
@@ -338,25 +207,10 @@ class Formatter {
     log.info('Starting Prettier service…')
 
     // Bundled plugins only load when the bundled Prettier module runs
-    // (see the options.plugins gate in the format request) — a missing
-    // entry file there fails its syntaxes at format time with no visible
-    // cause, so surface it here. In native modes the files are never
-    // imported, so stay quiet at debug level.
+    // (see the options.plugins gate in the format request) — surface
+    // missing entry files here.
     const bundledMode = modulePath?.includes(nova.extension.path)
-    for (const { key, path } of findMissingBundledPlugins()) {
-      const dedupeKey = `${bundledMode ? 'warn' : 'debug'}:${path}`
-      if (warnedMissingPluginPaths.has(dedupeKey)) continue
-      warnedMissingPluginPaths.add(dedupeKey)
-      if (bundledMode) {
-        log.warn(
-          `Bundled plugin "${key}" is missing its entry file — check prettier-plugins.js against the installed package: ${path}`,
-        )
-      } else {
-        log.debug(
-          `Bundled plugin "${key}" is not installed (bundled modules not populated): ${path}`,
-        )
-      }
-    }
+    reportMissingBundledPlugins(bundledMode)
 
     // Await the didStart handshake so callers can detect service-side
     // load failures, not just Process construction errors.
@@ -715,7 +569,7 @@ class Formatter {
     // Skip files larger than 32 MiB — stays within the IPC payload limit.
     const MAX_FILE_SIZE = 32 * 1024 * 1024 // 32 MiB
     if (document.length > MAX_FILE_SIZE) {
-      this.notifyFileTooLarge(document.length)
+      notifyFileTooLarge(document.length)
       return []
     }
 
@@ -775,150 +629,33 @@ class Formatter {
     // UTF-8 payload size too.
     const originalByteLength = utf8ByteLength(original)
     if (originalByteLength > MAX_FILE_SIZE) {
-      this.notifyFileTooLarge(originalByteLength)
+      notifyFileTooLarge(originalByteLength)
       return []
     }
 
-    // Check if plugins are enabled — Tailwind is driven by both a master
-    // flag and a per-syntax flag.
-    const tailwindPluginEnabled = isPluginEnabled(
-      PLUGIN_DESCRIPTORS.tailwind.configKey,
-    )
-    const tailwindSyntaxesEnabled = getConfigWithWorkspaceOverride(
-      `prettier.plugins.prettier-plugin-tailwind.syntaxes.${syntaxKey}`,
-    )
+    // Compose plugins and options: plugin gating/ordering, option
+    // merging and the SQL formatter routing (which can skip a format
+    // entirely for an unsupported dialect).
+    const composed = composeFormatRequest({
+      syntaxKey,
+      document,
+      editor,
+      runningPath: this.runningPath,
+      customConfigFile,
+      ignoreConfigFile,
+      applyDefaultConfig: shouldApplyDefaultConfig,
+      selectionOnly,
+    })
 
-    const plugins = []
-
-    if (this.runningPath?.includes(nova.extension.path)) {
-      const primaryPlugin = PLUGIN_DESCRIPTORS[syntaxKey]
-
-      if (primaryPlugin && isPluginEnabled(primaryPlugin.configKey)) {
-        plugins.push(primaryPlugin.pluginPath)
-      }
-
-      // For html/html+ejs the EJS plugin must load before tailwind
-      // (which must be last). The old ejs+tailwind combo plugin is gone:
-      // it crashes on Prettier 3.9's embedded-languages visitor keys and
-      // plain ejs + tailwind produces identical output.
-      if (syntaxKey === 'html+ejs' || syntaxKey === 'html') {
-        if (isPluginEnabled(PLUGIN_DESCRIPTORS.ejs.configKey)) {
-          plugins.push(PLUGIN_DESCRIPTORS.ejs.pluginPath)
-        }
-      }
-
-      // tailwind must be loaded last
-      // https://github.com/tailwindlabs/prettier-plugin-tailwindcss#compatibility-with-other-prettier-plugins
-      if (tailwindSyntaxesEnabled && tailwindPluginEnabled) {
-        plugins.push(PLUGIN_DESCRIPTORS.tailwind.pluginPath)
-      }
+    if (composed.mismatch) {
+      return notifySqlDialectMismatch(
+        composed.mismatch.dialect,
+        composed.mismatch.selected,
+      )
     }
+    if (composed.skip) return []
 
-    const options = {
-      parser: this.getParserForSyntax(syntaxKey),
-      ...(plugins.length > 0 ? { plugins } : {}),
-      ...(document.path ? { filepath: document.path } : {}),
-      // The custom config file is resolved by the service via Prettier's
-      // own config resolution — nothing to merge client-side.
-      ...(customConfigFile
-        ? {}
-        : ignoreConfigFile || shouldApplyDefaultConfig
-          ? getDefaultConfig()
-          : {}),
-      ...(selectionOnly
-        ? {
-            rangeStart: editor.selectedRange.start,
-            rangeEnd: editor.selectedRange.end,
-          }
-        : {}),
-      // the service reads these to decide how to resolve external config
-      _ignoreConfigFile: ignoreConfigFile,
-      _customConfigFile: customConfigFile,
-    }
-
-    // Plugin options apply only if no config is found or it's ignored.
-    if (!customConfigFile && (ignoreConfigFile || shouldApplyDefaultConfig)) {
-      // Options for the document's syntax — looked up by syntax key
-      // regardless of the plugin's enabled flag (previous behavior).
-      const optionsConfig = PLUGIN_DESCRIPTORS[syntaxKey]?.optionsConfig
-      if (optionsConfig) {
-        Object.assign(options, optionsConfig())
-      }
-
-      // Tailwind options apply to any supported syntax, not just the
-      // syntax the plugin itself parses
-      if (tailwindSyntaxesEnabled && tailwindPluginEnabled) {
-        Object.assign(options, getTailwindConfig())
-      }
-
-      // SQL plugin options depend on the configured formatter
-      if (syntaxKey === 'sql') {
-        let sqlFormatter = getConfigWithWorkspaceOverride(
-          'prettier.plugins.prettier-plugin-sql.formatter',
-        )
-        let autoDialect = null
-
-        // Anything not explicitly pinned ('auto', unset, unknown) routes
-        // by dialect: sql-formatter preferred, node-sql-parser fallback.
-        if (
-          sqlFormatter !== 'sql-formatter' &&
-          sqlFormatter !== 'node-sql-parser'
-        ) {
-          autoDialect = getSqlDialectFromUriOrSyntax(
-            document.uri,
-            document.syntax,
-          )
-          sqlFormatter = resolveSqlFormatter(autoDialect)
-
-          if (!sqlFormatter) {
-            log.info(
-              `SQL dialect "${autoDialect}" is not supported by any SQL formatter — formatting skipped`,
-            )
-            return []
-          }
-
-          log.debug(
-            `Auto-detected SQL dialect: ${autoDialect} → ${sqlFormatter}`,
-          )
-        }
-
-        if (sqlFormatter === 'sql-formatter') {
-          const config = { ...getSqlFormatterConfig() }
-
-          if (config.language === 'auto') {
-            const dialect =
-              autoDialect ??
-              getSqlDialectFromUriOrSyntax(document.uri, document.syntax)
-
-            if (!dialectSupportedBy('sql-formatter', dialect)) {
-              return this.notifySqlDialectMismatch(dialect, 'sql-formatter')
-            }
-
-            config.language = dialect
-            log.debug(`Auto-detected SQL dialect: ${dialect}`)
-          }
-
-          Object.assign(options, config)
-        } else if (sqlFormatter === 'node-sql-parser') {
-          const config = { ...getNodeSqlParserConfig() }
-
-          if (config.database === 'auto') {
-            config.database = getSqlParserDialect(document.uri, document.syntax)
-
-            if (config.database === null) {
-              return this.notifySqlDialectMismatch(
-                getSqlDialectFromUriOrSyntax(document.uri, document.syntax),
-                'node-sql-parser',
-              )
-            }
-
-            log.debug(`Using node-sql-parser dialect: ${config.database}`)
-          }
-
-          Object.assign(options, config)
-        }
-      }
-    }
+    const { options } = composed
 
     // Log the options being used
     if (isDebugLoggingEnabled()) {
@@ -1008,21 +745,21 @@ class Formatter {
       log.info(
         `Unresolved Prettier config plugins: ${unresolvedPlugins.join(', ')}`,
       )
-      this.showConfigPluginsNotice(unresolvedPlugins, configFile)
+      showConfigPluginsNotice(unresolvedPlugins, configFile)
     }
 
     if (disabledPlugins?.length) {
-      this.showDisabledPluginsNotice(disabledPlugins)
+      showDisabledPluginsNotice(disabledPlugins)
     }
 
     // The service couldn't load the user's custom config file — show it
     // instead of silently formatting without it. Cancelled once the
     // config loads again.
     if (configError) {
-      this.showCustomConfigErrorNotice(configError)
+      showCustomConfigErrorNotice(configError)
     } else {
       cancelNotification('prettier-custom-config-error')
-      this._lastCustomConfigErrorPath = null
+      clearCustomConfigErrorNotice()
     }
 
     // Prettier returns -1 when the cursor can't be mapped onto the
@@ -1040,7 +777,7 @@ class Formatter {
     }
 
     if (error) {
-      return this._handlePrettierError(
+      return prettierErrorToIssues(
         // The service serializes thrown errors as plain objects over
         // JSON-RPC — rehydrate a real Error so message shows in logs.
         Object.assign(
@@ -1142,216 +879,6 @@ class Formatter {
     return nova.path.join(expectedIgnoreDir, '.prettierignore')
   }
 
-  /**
-   * One-time-per-session notice that the user's own config file declares
-   * plugins which Prettier⁺ doesn't bundle and couldn't find in the
-   * project — formatting continues with the bundled equivalents.
-   */
-  showConfigPluginsNotice(unresolvedPlugins, configFile) {
-    if (this._configPluginsNoticeShown) return
-    this._configPluginsNoticeShown = true
-
-    const body =
-      nova.localize(
-        'prettier.notification.config-plugins.body',
-        'Your Prettier config file declares plugins that Prettier⁺ doesn’t bundle and couldn’t find in your project. Formatting continues with the bundled equivalents.',
-        'notification',
-      ) +
-      `\n\n${unresolvedPlugins.join('\n')}` +
-      (configFile
-        ? `\n\n${nova.localize(
-            'prettier.notification.config-plugins.file',
-            'Declared in:',
-            'notification',
-          )} ${configFile}`
-        : '')
-
-    showNotification({
-      id: 'prettier-config-plugins',
-      title: nova.localize(
-        'prettier.notification.config-plugins.title',
-        'Some Config Plugins Not Loaded',
-        'notification',
-      ),
-      body,
-    })
-  }
-
-  /**
-   * Notice that the user's custom config file (prettier.config.file)
-   * couldn't be read or parsed by the service — formatting continues
-   * without it. Shown once per failing path; cancelled when the config
-   * loads successfully again.
-   *
-   * @param {{ path: string, message: string }} configError – from the service
-   */
-  showCustomConfigErrorNotice(configError) {
-    log.error(
-      `Error loading custom config file at "${configError.path}": ${configError.message}`,
-    )
-
-    if (this._lastCustomConfigErrorPath === configError.path) return
-    this._lastCustomConfigErrorPath = configError.path
-
-    showNotification({
-      id: 'prettier-custom-config-error',
-      title: nova.localize(
-        'prettier.notification.custom-config-error.title',
-        'Custom Config File Failed to Load',
-        'notification',
-      ),
-      body:
-        nova.localize(
-          'prettier.notification.custom-config-error.body',
-          'Formatting continues without the custom Prettier config file. Fix the file or clear the setting, then format again.',
-          'notification',
-        ) + `\n\n${configError.path}\n${configError.message}`,
-    })
-  }
-
-  /**
-   * One-time-per-plugin notice that a project plugin crashed while
-   * formatting — the service retried without it.
-   *
-   * @param {string[]} disabledPlugins – declared specifiers of the plugins
-   */
-  showDisabledPluginsNotice(disabledPlugins) {
-    const pending = disabledPlugins.filter(
-      (name) => !this._disabledPluginsNotified.has(name),
-    )
-    if (pending.length === 0) return
-
-    for (const name of pending) this._disabledPluginsNotified.add(name)
-
-    log.error(
-      `Formatting without project plugin(s) after a load failure: ${pending.join(', ')}`,
-    )
-
-    showNotification({
-      id: 'prettier-disabled-plugins',
-      title: nova.localize(
-        'prettier.notification.disabled-plugins.title',
-        'Plugins Disabled For This Format',
-        'notification',
-      ),
-      body:
-        nova.localize(
-          'prettier.notification.disabled-plugins.body',
-          'Prettier⁺ couldn’t load the following plugins from your project — possibly because they’re incompatible with the bundled Prettier version — and formatted without them:',
-          'notification',
-        ) + `\n\n${pending.join('\n')}`,
-    })
-  }
-
-  /**
-   * Show the "Document Too Large" notification for the given size estimate.
-   *
-   * Callers pass either a UTF-16 char count (early document.length check,
-   * before the text is read) or a UTF-8 byte count (after reading). Both
-   * are compared against the 32 MiB limit and rendered as "MiB"; the char
-   * variant is an approximation that avoids materializing huge text.
-   *
-   * @param {number} size  size estimate in chars or bytes
-   */
-  notifyFileTooLarge(size) {
-    showNotification({
-      id: 'prettier-file-too-large',
-      title: nova.localize(
-        'prettier.notification.fileTooLarge.title',
-        'Document Too Large',
-        'notification',
-      ),
-      body: [
-        nova.localize(
-          'prettier.notification.fileTooLarge.body.prefix',
-          'Cannot format this document:',
-          'notification',
-        ),
-        ` ${(size / 2 ** 20).toFixed(1)} MiB `,
-        nova.localize(
-          'prettier.notification.fileTooLarge.body.suffix',
-          'exceeds the 32 MiB limit.',
-          'notification',
-        ),
-      ].join(''),
-    })
-  }
-
-  /**
-   * Auto-detected SQL dialect isn't supported by the selected formatter
-   * implementation. Skips formatting and points the user at the other
-   * formatter, which does support the dialect, or at the Auto-Detect
-   * setting, which picks a supporting formatter on its own.
-   *
-   * The notification also fires for save-triggered runs: unlike the
-   * unsupported-syntax pattern, this is a config-level problem and the
-   * skip would otherwise be invisible. The shared notification id makes
-   * repeated attempts replace each other instead of stacking up.
-   *
-   * @param {string} dialect  The detected SQL dialect (e.g. 'flinksql')
-   * @param {'sql-formatter'|'node-sql-parser'} selected  The configured formatter
-   * @returns {Array} Empty edit description — formatting was skipped
-   */
-  notifySqlDialectMismatch(dialect, selected) {
-    const other =
-      selected === 'sql-formatter' ? 'node-sql-parser' : 'sql-formatter'
-
-    log.info(
-      `SQL dialect "${dialect}" is not supported by ${selected} — formatting skipped`,
-    )
-
-    showNotification({
-      id: 'prettier-sql-dialect-mismatch',
-      title: nova.localize(
-        'prettier.notification.sqlDialectMismatch.title',
-        'Unsupported SQL Dialect',
-        'notification',
-      ),
-      body: [
-        nova.localize(
-          'prettier.notification.sqlDialectMismatch.body.prefix',
-          'The ',
-          'notification',
-        ),
-        `“${dialect}”`,
-        nova.localize(
-          'prettier.notification.sqlDialectMismatch.body.middle',
-          ' dialect isn’t supported by the selected SQL formatter. Switch the SQL formatter to ',
-          'notification',
-        ),
-        `“${other}”`,
-        nova.localize(
-          'prettier.notification.sqlDialectMismatch.body.suffix',
-          ' in the extension settings, or set it to Auto-Detect to pick the formatter that supports this dialect.',
-          'notification',
-        ),
-      ].join(''),
-    })
-    return []
-  }
-
-  getParserForSyntax(syntax) {
-    switch (syntax) {
-      case 'javascript':
-      case 'jsx':
-        return 'babel'
-      case 'tsx':
-        return 'typescript'
-      case 'flow':
-        return 'babel-flow'
-      case 'java-properties':
-        return 'dot-properties'
-      case 'liquid-html':
-      case 'liquid-md':
-        return 'liquid-html-ast'
-      case 'html+erb':
-      case 'html+ejs':
-        return 'html'
-      default:
-        return syntax
-    }
-  }
-
   async applyResult(editor, formatted, cursorOffset) {
     log.info(`Applying formatted changes to ${editor.document.path}`)
 
@@ -1376,69 +903,8 @@ class Formatter {
     editor.selectedRanges = [new Range(offset, offset)]
     editor.scrollToPosition(offset)
   }
-
-  _handlePrettierError(error, missingParser, saving, filePath) {
-    const isParserError = error.message.includes("Couldn't resolve parser")
-
-    if (isParserError || missingParser) {
-      if (!saving) {
-        showNotification({
-          id: 'prettier-unsupported-syntax',
-          title: nova.localize(
-            'prettier.notification.unsupportedSyntax.title',
-            'Unsupported Syntax',
-            'notification',
-          ),
-          body: nova.localize(
-            'prettier.notification.missingParser.body',
-            'Prettier can’t format this file — no parser is available for its type.',
-            'notification',
-          ),
-        })
-      }
-      log.info(`No parser for ${filePath}`)
-      return []
-    }
-
-    return this._issuesFromPrettierError(error)
-  }
-
-  _issuesFromPrettierError(error) {
-    if (typeof error.message !== 'string') return []
-
-    if (error.name === 'UndefinedParserError') throw error
-
-    // "line:column" form
-    let lineData = error.message.match(/\((\d+):(\d+)\)\n/m)
-    // "> N | code" form (code frame); column read from the caret line
-    if (!lineData) {
-      lineData = error.message.match(/^>\s*?(\d+)\s\|\s/m)
-      if (lineData) {
-        const columnData = error.message.match(/^\s+\|(\s+)\^+($|\n)/im)
-        lineData[2] = columnData ? columnData[1].length + 1 : 0
-      }
-    }
-
-    if (!lineData) {
-      throw error
-    }
-
-    const issue = new Issue()
-    if (error.stack) {
-      issue.message = error.message
-    } else {
-      // a bare message may have the stack appended — strip it
-      issue.message = error.message.split(/\n\s*?at\s+/i)[0]
-    }
-    issue.severity = IssueSeverity.Error
-    issue.line = Number(lineData[1])
-    issue.column = Number(lineData[2])
-
-    return [issue]
-  }
 }
 
 module.exports = {
   Formatter,
-  findMissingBundledPlugins,
 }

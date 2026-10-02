@@ -108,7 +108,9 @@ function loadFormatter(novaShim) {
     'processes.js',
     'runtime.js',
     'notifications.js',
-    'prettier-plugins.js',
+    'plugin-registry.js',
+    'format-request.js',
+    'format-feedback.js',
     'formatter.js',
   ]) {
     delete require.cache[path.join(SRC_DIR, file)]

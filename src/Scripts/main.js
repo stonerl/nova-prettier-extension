@@ -30,8 +30,11 @@ const {
   describeFailure,
   withReason,
 } = require('./notifications.js')
-const { Formatter, findMissingBundledPlugins } = require('./formatter.js')
-const pluginPaths = require('./prettier-plugins.js')
+const { Formatter } = require('./formatter.js')
+const {
+  findMissingBundledPlugins,
+  pluginPaths,
+} = require('./plugin-registry.js')
 const { projectChoices, resolveCommand } = require('./settings.js')
 const { WORKSPACE_CHOICES } = require('./workspace-choices.js')
 

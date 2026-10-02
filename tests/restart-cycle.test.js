@@ -40,7 +40,7 @@ global.nova = {
   versionString: '10.0',
   config: { get: () => null },
   workspace: { config: { get: () => null }, path: null },
-  // main.js now loads prettier-plugins.js at the top, which joins
+  // main.js now loads plugin-registry.js at the top, which joins
   // plugin paths onto nova.extension.path at module load.
   path: {
     join: (...parts) => parts.filter((p) => p != null).join('/'),
