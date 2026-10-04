@@ -1,3 +1,24 @@
+## 3.9.29 - 2026-10-04
+
+### Fixed
+
+- **The formatter service can no longer be crashed by deeply nested
+  glob patterns**
+
+  A security advisory (GHSA-vfj7-8cjw-p6xm) showed that deeply
+  nested brace patterns — for example in a project's Tailwind
+  content globs — exhaust the call stack of the `braces` library
+  and crash the Node process running the formatter. The bundled
+  copy is patched to reject nesting beyond a generous limit with a
+  clean, catchable error, so those patterns surface as ordinary
+  format errors instead. No upstream fix exists yet, so the patch
+  ships locally alongside the other bundled patches.
+
+### Development
+
+- Updated the repository's development dependencies. No extension
+  behavior change.
+
 ## 3.9.28 - 2026-10-03
 
 ### Added
