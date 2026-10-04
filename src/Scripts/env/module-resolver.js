@@ -274,6 +274,10 @@ async function installPackages(directory) {
  */
 const PATCH_SIGNATURES = [
   {
+    file: ['node_modules', 'braces', 'lib', 'parse.js'],
+    signature: 'MAX_NESTING_DEPTH',
+  },
+  {
     file: ['node_modules', 'prettier-plugin-sh', 'lib', 'index.cjs'],
     signature: 'node?.Pos?.Offset ?? 0',
   },
