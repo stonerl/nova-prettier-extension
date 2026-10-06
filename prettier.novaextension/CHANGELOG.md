@@ -1,3 +1,13 @@
+## 3.9.30 - 2026-10-06
+
+### Changed
+
+- Updated `source-map-js` to version `1.2.2`.
+- Removed the local `braces` patch introduced in 3.9.29. On further
+  evaluation the reported stack-exhaustion pattern is not considered
+  a security vulnerability for this extension. See this discussion:
+  https://github.com/github/advisory-database/pull/10132
+
 ## 3.9.29 - 2026-10-04
 
 ### Fixed
