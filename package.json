@@ -42,15 +42,15 @@
     "test": "npm run test:setup && npm run test:workspace-choices && npm run test:sql && npm run test:install-lock && npm run test:watcher-filter && npm run test:resolver-guard && npm run test:notifications && npm run test:json-rpc && npm run test:too-large && npm run test:template-plugins && npm run test:format-pipeline && npm run test:options-coverage && npm run test:restart-cycle && npm run test:runtime && npm run test:prettier-info && npm run test:service-api && npm run test:service && npm run test:external-plugins"
   },
   "devDependencies": {
-    "@babel/parser": "^7.29.9",
-    "@babel/traverse": "^8.0.6",
+    "@babel/parser": "^8.0.7",
+    "@babel/traverse": "^8.0.7",
     "@rollup/plugin-commonjs": "^29.0.3",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-terser": "^1.0.0",
     "eslint": "^10.12.0",
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.9.9",
-    "rollup": "^4.64.0"
+    "rollup": "^4.64.3"
   },
   "allowScripts": {
     "fsevents@2.3.3": true
