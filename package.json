@@ -49,8 +49,8 @@
     "@rollup/plugin-terser": "^1.0.0",
     "eslint": "^10.12.0",
     "eslint-config-prettier": "^10.1.8",
-    "prettier": "^3.9.9",
-    "rollup": "^4.64.3"
+    "prettier": "^3.9.10",
+    "rollup": "^4.64.5"
   },
   "allowScripts": {
     "fsevents@2.3.3": true
