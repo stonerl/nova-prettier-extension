@@ -1,3 +1,30 @@
+## 3.9.31 - 2026-10-12
+
+### Changed
+
+- Updated `prettier` to version `3.9.10`.
+- Updated `prettier-plugin-astro` to version `1.1.1`.
+
+### Fixed
+
+- **The shell Variant setting prevents formatting of shell scripts**
+
+  The Variant setting for `prettier-plugin-sh` stored the variant as
+  text ("bash", "posix", "zsh", …), but the bundled plugin only
+  accepts numeric LangVariant values (Bash=1, POSIX=2, mksh=4,
+  Bats=8, Zsh=16). Prettier's option validation rejected the string
+  with `Invalid variant value. Expected 1, 2, 4, 8, 16 or 32`, so
+  no file with a Variant selection formatted — the dropdown stored
+  strings since the plugin was first bundled in 3.9.2. The setting
+  now stores the numeric values directly. A stored text selection
+  must be re-selected once after updating (or removed — leaving the
+  setting unset uses the plugin default, Bash).
+
+### Development
+
+- Updated the repository's development dependencies. No extension
+  behavior change.
+
 ## 3.9.30 - 2026-10-06
 
 ### Changed
