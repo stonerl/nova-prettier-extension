@@ -2252,22 +2252,22 @@
               "default": null,
               "values": [
                 [null, "Default (Bash)"],
-                ["bash", "Bash"],
-                ["posix", "POSIX / sh"],
-                ["mksh", "mksh (Korn Shell)"],
-                ["bats", "Bats"],
-                ["zsh", "Zsh"]
+                [1, "Bash"],
+                [2, "POSIX / sh"],
+                [4, "mksh (Korn Shell)"],
+                [8, "Bats"],
+                [16, "Zsh"]
               ]
             },
             "configWorkspace": {
               "default": null,
               "values": [
                 [null, "Global Setting"],
-                ["bash", "Bash"],
-                ["posix", "POSIX / sh"],
-                ["mksh", "mksh (Korn Shell)"],
-                ["bats", "Bats"],
-                ["zsh", "Zsh"]
+                [1, "Bash"],
+                [2, "POSIX / sh"],
+                [4, "mksh (Korn Shell)"],
+                [8, "Bats"],
+                [16, "Zsh"]
               ]
             }
           },

@@ -96,7 +96,7 @@ const generate = async () => {
  * null-valued "Global Setting" fallback. Do not edit by hand.
  */
 
-/** @type {Record<string, Array<[string|boolean, string]>>} */
+/** @type {Record<string, Array<[string|boolean|number, string]>>} */
 const WORKSPACE_CHOICES = ${JSON.stringify(workspaceChoices)}
 
 module.exports = { WORKSPACE_CHOICES }

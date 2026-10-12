@@ -458,7 +458,7 @@ function composeOptionChecks() {
     loadModules(
       makeNovaShim({
         configValues: {
-          'prettier.plugins.prettier-plugin-sh.variant': 'posix',
+          'prettier.plugins.prettier-plugin-sh.variant': 2,
           'prettier.plugins.prettier-plugin-sh.enabled': true,
         },
       }),
@@ -466,9 +466,25 @@ function composeOptionChecks() {
     { syntaxKey: 'sh', applyDefaultConfig: true },
   )
   check(
-    'syntax option loader applied (sh variant)',
-    sh.options?.variant === 'posix',
+    'syntax option loader applied (sh variant: numeric LangPOSIX passthrough)',
+    sh.options?.variant === 2,
     sh.options,
+  )
+
+  const shZsh = compose(
+    loadModules(
+      makeNovaShim({
+        configValues: {
+          'prettier.plugins.prettier-plugin-sh.variant': 16,
+        },
+      }),
+    ),
+    { syntaxKey: 'sh', applyDefaultConfig: true },
+  )
+  check(
+    'syntax option loader applied (sh variant: numeric LangZsh passthrough)',
+    shZsh.options?.variant === 16,
+    shZsh.options,
   )
 
   const tailwindOpts = compose(

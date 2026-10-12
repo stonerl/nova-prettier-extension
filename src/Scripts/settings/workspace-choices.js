@@ -9,7 +9,7 @@
  * null-valued "Global Setting" fallback. Do not edit by hand.
  */
 
-/** @type {Record<string, Array<[string|boolean, string]>>} */
+/** @type {Record<string, Array<[string|boolean|number, string]>>} */
 const WORKSPACE_CHOICES = {
   'prettier.module.preferBundled': [
     [true, 'Enabled'],
@@ -384,11 +384,11 @@ const WORKSPACE_CHOICES = {
     [false, 'Disabled'],
   ],
   'prettier.plugins.prettier-plugin-sh.variant': [
-    ['bash', 'Bash'],
-    ['posix', 'POSIX / sh'],
-    ['mksh', 'mksh (Korn Shell)'],
-    ['bats', 'Bats'],
-    ['zsh', 'Zsh'],
+    [1, 'Bash'],
+    [2, 'POSIX / sh'],
+    [4, 'mksh (Korn Shell)'],
+    [8, 'Bats'],
+    [16, 'Zsh'],
   ],
   'prettier.plugins.prettier-plugin-sh.binaryNextLine': [
     [true, 'Enabled'],
