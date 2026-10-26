@@ -50,7 +50,7 @@
     "eslint": "^10.13.0",
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.9.10",
-    "rollup": "^4.65.0"
+    "rollup": "^4.65.1"
   },
   "allowScripts": {
     "fsevents@2.3.3": true
